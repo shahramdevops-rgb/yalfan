@@ -59,8 +59,9 @@ works alone; the workshop owner is his brother and is treated as a client.
   answers. Never invent a business rule; the workshop's real practice decides.
 - One roadmap task per session. Do not start the next task unless asked.
 - For any non-trivial task, present a plan first and wait for approval.
-- IMPORTANT: never commit or push unless the developer asks. By default he commits and pushes
-  from his own terminal; give him the commands.
+- Commit when a task is finished and its tests are green (allowed by the developer on
+  1405/08/28). IMPORTANT: never push; the developer pushes from his own terminal, so tell him
+  when there is something to push.
 - IMPORTANT: no `Co-Authored-By`, `Claude-Session` or any other Claude or Anthropic line in a
   commit message or a pull request. The developer does not want Claude listed as a contributor on
   his GitHub repositories.
