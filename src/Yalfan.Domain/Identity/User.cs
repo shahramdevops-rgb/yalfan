@@ -52,4 +52,13 @@ public sealed class User : Entity
 
         return new User(name, mobileNumber, role, createdAt);
     }
+
+    /// <summary>
+    /// The user can no longer log in or renew a session; his open access token dies within its
+    /// 15 minutes. The account and its history stay.
+    /// </summary>
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
 }

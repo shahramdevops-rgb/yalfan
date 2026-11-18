@@ -1,8 +1,8 @@
 # Yalfan — Architecture
 
 Status: **proposed** on 1405/08/24 (2026-11-15). Only the solution skeleton, the database wiring,
-the common building blocks, the request pipeline and staff login exist (tasks 0.1 to 0.5; ADRs
-0001, 0002, 0005, 0011, 0012). Every decision here becomes an ADR in `docs/adr/` when the phase that needs it
+the common building blocks, the request pipeline, staff login and the audit exist (tasks 0.1 to
+0.6; ADRs 0001, 0002, 0005, 0011, 0012, 0013). Every decision here becomes an ADR in `docs/adr/` when the phase that needs it
 starts; until then it can still change.
 
 ## 1. What the system is
@@ -354,7 +354,12 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   with their phases. Fine-grained permissions on top; `/panel/*` needs a staff role, and a
   contractor's token can reach only `/contractor/*` and only that contractor's rows.
 - **API enums** travel as camelCase names (`"operator"`), never numbers.
-- **Audit:** every create, change and reversal records user, time, old and new value.
+- **Audit (decided in task 0.6, ADR 0013):** every create, change and reversal records user,
+  time, trace id, old and new value. An EF interceptor writes the entry in the same save as the
+  change; the table is append-only (a trigger refuses UPDATE, DELETE, TRUNCATE). Security
+  records (login codes, session tokens) are excluded; secrets such as IBANs are recorded as
+  "changed" without values. `ExecuteUpdate`, `ExecuteDelete` and raw SQL writes are build errors
+  because they skip the audit.
 - **Time:** `IClock` everywhere; business "today" is Asia/Tehran. Instants are `DateTimeOffset`
   in UTC, calendar days are `DateOnly`; calling `DateTime.Now` and its relatives is a build
   error (ADR 0005).
@@ -429,3 +434,4 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 | 0010 | Payouts: provider port, chosen bank or provider, safety rules | 15.0 |
 | 0011 | Request pipeline: handlers, validation, error responses, logging | 0.4 (written) |
 | 0012 | Staff log in with an SMS code; JWT and rotating refresh cookie | 0.5 (written) |
+| 0013 | Audit: every change recorded in the same save, append-only | 0.6 (written) |

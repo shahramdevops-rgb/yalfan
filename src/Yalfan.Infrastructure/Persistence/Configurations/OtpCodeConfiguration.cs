@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Yalfan.Domain.Identity;
+using Yalfan.Infrastructure.Persistence.Auditing;
 
 namespace Yalfan.Infrastructure.Persistence.Configurations;
 
@@ -9,6 +10,9 @@ internal sealed class OtpCodeConfiguration : IEntityTypeConfiguration<OtpCode>
     public void Configure(EntityTypeBuilder<OtpCode> builder)
     {
         builder.ToTable("otp_codes");
+
+        // A security record of its own, written on every login; its hash must not be copied.
+        builder.ExcludeFromAudit();
         builder.HasKey(code => code.Id);
         builder.Property(code => code.Id).ValueGeneratedNever();
 

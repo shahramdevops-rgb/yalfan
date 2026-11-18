@@ -9,6 +9,7 @@ using Yalfan.Application.Common.Security;
 using Yalfan.Application.Common.Sms;
 using Yalfan.Infrastructure.Identity;
 using Yalfan.Infrastructure.Persistence;
+using Yalfan.Infrastructure.Persistence.Interceptors;
 using Yalfan.Infrastructure.Sms;
 using Yalfan.Infrastructure.Time;
 
@@ -42,10 +43,18 @@ public static class DependencyInjection
     {
         // The connection string is read when the first DbContext is created, not here, so that
         // tests can replace the configuration after the services are registered.
-        services.AddDbContext<AppDbContext>(options => options
+        services.AddDbContext<AppDbContext>((provider, options) => options
             .UseNpgsql(configuration.GetConnectionString(DatabaseOptions.ConnectionStringName))
-            .UseSnakeCaseNamingConvention());
+            .UseSnakeCaseNamingConvention()
+            .AddInterceptors(provider.GetRequiredService<AuditInterceptor>()));
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+
+        // One audit interceptor per DbContext: it holds the entries of the save in progress.
+        services.AddScoped<AuditInterceptor>();
+
+        // Outside an HTTP request (start-up, jobs) nobody is logged in: the audit says "system".
+        // The Api registers the real, token-based ICurrentUser after this.
+        services.TryAddScoped<ICurrentUser, NoCurrentUser>();
 
         services.AddOptions<DatabaseOptions>()
             .Bind(configuration.GetSection(DatabaseOptions.SectionName));

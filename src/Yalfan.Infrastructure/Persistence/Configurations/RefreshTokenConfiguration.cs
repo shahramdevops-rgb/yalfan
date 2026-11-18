@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Yalfan.Domain.Identity;
+using Yalfan.Infrastructure.Persistence.Auditing;
 
 namespace Yalfan.Infrastructure.Persistence.Configurations;
 
@@ -9,6 +10,9 @@ internal sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refre
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
         builder.ToTable("refresh_tokens");
+
+        // A security record of its own, written on every renewal; its hash must not be copied.
+        builder.ExcludeFromAudit();
         builder.HasKey(token => token.Id);
         builder.Property(token => token.Id).ValueGeneratedNever();
 

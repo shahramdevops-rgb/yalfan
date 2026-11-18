@@ -37,6 +37,19 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public CapturingSmsSender Sms { get; } = new();
 
+    /// <summary>This test class's own database, for checks that must go around EF.</summary>
+    public string ConnectionString => _connectionString;
+
+    /// <summary>A database of its own on the same server, for tests that build their own DbContext.</summary>
+    public static async Task<string> CreateDatabaseConnectionStringAsync()
+    {
+        var container = await PostgresServer.GetAsync();
+        return new NpgsqlConnectionStringBuilder(container.GetConnectionString())
+        {
+            Database = $"yalfan_test_{Guid.NewGuid():N}",
+        }.ConnectionString;
+    }
+
     public async ValueTask InitializeAsync()
     {
         var container = await PostgresServer.GetAsync();
@@ -65,7 +78,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.ExecuteSqlAsync($"update users set is_active = false where mobile_number = {mobile}");
+        var number = MobileNumber.Create(mobile).Value;
+        var user = await db.Users.SingleAsync(u => u.MobileNumber == number);
+        user.Deactivate();
+        await db.SaveChangesAsync();
     }
 
     /// <summary>A client on https, so the Secure refresh cookie is kept and sent like in a browser.</summary>

@@ -22,6 +22,66 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Yalfan.Domain.Audit.AuditEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("action");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("actor");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("changes");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("TraceId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("trace_id");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_audit_entries");
+
+                    b.HasIndex("UserId", "OccurredAt")
+                        .HasDatabaseName("ix_audit_entries_user_id_occurred_at");
+
+                    b.HasIndex("EntityType", "EntityId", "OccurredAt")
+                        .HasDatabaseName("ix_audit_entries_entity_type_entity_id_occurred_at");
+
+                    b.ToTable("audit_entries", (string)null);
+                });
+
             modelBuilder.Entity("Yalfan.Domain.Identity.OtpCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -67,6 +127,8 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_otp_codes_user_id_created_at");
 
                     b.ToTable("otp_codes", (string)null);
+
+                    b.HasAnnotation("Yalfan:Audit:Excluded", true);
                 });
 
             modelBuilder.Entity("Yalfan.Domain.Identity.RefreshToken", b =>
@@ -125,6 +187,8 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_refresh_tokens_user_id");
 
                     b.ToTable("refresh_tokens", (string)null);
+
+                    b.HasAnnotation("Yalfan:Audit:Excluded", true);
                 });
 
             modelBuilder.Entity("Yalfan.Domain.Identity.User", b =>

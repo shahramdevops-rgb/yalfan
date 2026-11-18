@@ -1,7 +1,8 @@
 # Yalfan — Roadmap
 
 Status: **Phase 0 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
-same day, 0.4 and 0.5 on 1405/08/27. Next task: 0.6. Read `docs/ARCHITECTURE.md` first.
+same day, 0.4 and 0.5 on 1405/08/27, 0.6 on 1405/08/28. Next task: 0.7. Read
+`docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -92,6 +93,10 @@ Goal: an empty but real system: solution, database, login, an empty Persian pane
   forward from 0.7.
 - **0.6 Audit.** Interceptor that records user, time, old and new values for every change.
   *Done when:* changing a record in a test produces a readable audit entry.
+  **Done 1405/08/28:** 191 tests pass, build has 0 warnings; ADR 0013. The entry is written in
+  the same save as the change; a database trigger keeps `audit_entries` append-only; login codes
+  and session tokens are excluded; a field can be recorded as "changed" without its values (for
+  IBANs in 1.3); `ExecuteUpdate`, `ExecuteDelete` and raw SQL writes are build errors.
 - **0.7 Integration test base.** Real PostgreSQL per test run, authenticated test clients per role.
   Also the day-boundary test of `SystemClock` (ADR 0005), which has no test project until now.
   *Done when:* the auth tests run on it in CI.
@@ -122,7 +127,8 @@ Open questions: O.2; how many models and colours; do colours change the material
   rate valid on a given date can be queried and old rates are never overwritten.
 - **1.6 Panel screens.** Products, stages, contractors, workers, rates; and the owner's users
   screen (list, add, deactivate, change a user's mobile when a phone is lost; added 1405/08/27
-  with ADR 0012). *Done when:* the operator can enter a real model with its route and rates
+  with ADR 0012); and, for the owner, the change history of a record from the audit (added
+  1405/08/28 with ADR 0013). *Done when:* the operator can enter a real model with its route and rates
   without help.
 
 ## Phase 2 — Contractor work and accounts
