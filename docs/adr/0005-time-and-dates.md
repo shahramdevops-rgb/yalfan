@@ -55,5 +55,8 @@ server move go wrong. Attendance and payroll depend on "which day was it" being 
   timestamp by its UTC date would put the hours between 00:00 and 03:30 Tehran time on the
   previous day.
 - The servers' time zone data must be kept up to date with the operating system.
-- `SystemClock` has no automated test yet, because the only test project so far covers the
-  Domain. Its day-boundary test is added with the integration test base (task 0.7).
+- `SystemClock`'s day boundary is tested since task 0.7
+  (`tests/Yalfan.Api.IntegrationTests/Time/SystemClockTests.cs`): winter, summer and a past
+  daylight-saving summer, which a fixed +03:30 offset fails. CI runs it on Linux in UTC and the
+  developer on Windows in Tehran time, so a clock that leaned on the machine's zone would fail
+  in one of the two.
