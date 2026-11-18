@@ -1,7 +1,7 @@
 # Yalfan — Roadmap
 
 Status: **Phase 0 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
-same day, 0.4 and 0.5 on 1405/08/27, 0.6 on 1405/08/28. Next task: 0.7. Read
+same day, 0.4 and 0.5 on 1405/08/27, 0.6 and 0.7 on 1405/08/28. Next task: 0.8. Read
 `docs/ARCHITECTURE.md` first.
 
 How to use this file:
@@ -103,11 +103,22 @@ Goal: an empty but real system: solution, database, login, an empty Persian pane
   Already done in 0.5: one Testcontainers PostgreSQL per run, one database per test class, a fake
   clock and SMS sender, `CreateClientAsAsync(role)`. Left for 0.7: data reset between tests if
   needed, the `SystemClock` test, and running it all in CI.
+  **Done 1405/08/28:** 200 tests pass locally (9 new), build has 0 warnings. CI runs build and
+  every test on each push (`.github/workflows/ci.yml`, GitHub Actions on Linux); its first run
+  is the developer's next push. **No data reset between tests**, decided in this task: tests are
+  already kept apart by one database per class and their own rows, and a reset tool would need
+  the audit trigger (ADR 0013) switched off, since it refuses `DELETE` and `TRUNCATE` on
+  `audit_entries`. The isolation rule is in docs/ARCHITECTURE.md section 12. The `SystemClock`
+  test checks the Tehran day boundary in winter, in summer and in a past daylight-saving summer;
+  a fixed +03:30 offset was tried and fails it.
 - **0.8 Panel shell.** `web/panel`: React, Vite, Tailwind, RTL, Persian font, login, sidebar,
   typed API client generated from OpenAPI, Jalali dates, money formatting. *Done when:* the Owner
   logs in and sees an empty dashboard.
 - **0.9 CI.** Build, tests, lint and format checks on every push. *Done when:* a failing test
   fails the pipeline.
+  Build and tests on every push exist since 0.7, brought forward because 0.7's own check was
+  "runs in CI". Left for 0.9: lint and format checks (.NET and the panel from 0.8), and proving
+  that a failing test turns the run red.
 
 ## Phase 1 — Master data
 

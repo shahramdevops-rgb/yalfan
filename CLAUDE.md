@@ -13,6 +13,7 @@ works alone; the workshop owner is his brother and is treated as a client.
 - Roadmap, task status, the owner's to-do list, open questions: docs/ROADMAP.md
 - Layers, modules, core models, attendance, languages: docs/ARCHITECTURE.md
 - Architecture decisions, once written: docs/adr/
+- CI (GitHub Actions; build and every test on each push): .github/workflows/ci.yml
 
 ## How to answer the developer
 - Reply in Persian.

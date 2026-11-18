@@ -4,8 +4,8 @@ Management panel and online store for the Yalfan bag workshop (Hamedan, Iran): a
 workers and about 40 outside contractors.
 
 **Status:** Phase 0 (foundation) in progress. The solution skeleton, the database wiring, the
-common building blocks, the request pipeline, staff login and the audit exist (tasks 0.1 to
-0.6); there are no business features yet.
+common building blocks, the request pipeline, staff login, the audit and the integration test
+base with CI exist (tasks 0.1 to 0.7); there are no business features yet.
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — layers, modules, core models, attendance, languages
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases 0–15, tasks, the owner's own to-do list, open questions
@@ -20,6 +20,9 @@ own PostgreSQL with Testcontainers):
 dotnet build Yalfan.slnx
 dotnet test --solution Yalfan.slnx
 ```
+
+CI (GitHub Actions, [.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the same build and
+tests on every push.
 
 Run the whole stack in Docker (PostgreSQL, the API and Seq):
 
@@ -58,4 +61,4 @@ dotnet tool restore             # once
 dotnet ef migrations add <Name> --project src/Yalfan.Infrastructure --startup-project src/Yalfan.Api --output-dir Persistence/Migrations
 ```
 
-Next step: task 0.7 (integration test base). The Phase 1 questions must be answered before Phase 1.
+Next step: task 0.8 (panel shell). The Phase 1 questions must be answered before Phase 1.

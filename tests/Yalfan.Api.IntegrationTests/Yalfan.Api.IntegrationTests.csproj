@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Runs the real API in memory (WebApplicationFactory) against a real PostgreSQL started by
-       Testcontainers, so Docker must be running. Task 0.7 adds per-role clients, data reset
-       and CI on top of this. -->
+       Testcontainers, so Docker must be running. Tests are kept apart by their own data, not
+       by wiping it between tests (docs/ARCHITECTURE.md, section 12). -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>

@@ -95,6 +95,7 @@ Yalfan/
 │   └── Yalfan.Api.IntegrationTests/  In-memory API on a real PostgreSQL (Testcontainers)
 ├── docs/                         ROADMAP, ARCHITECTURE, BUSINESS_RULES, adr/
 ├── deploy/
+├── .github/workflows/ci.yml      Build and every test on each push
 ├── docker-compose.yml
 ├── Yalfan.slnx
 ├── global.json
@@ -403,7 +404,16 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   (`http://localhost:5342`). One line per request; bodies and query strings are never logged
   (ADR 0011).
 - **Testing:** domain unit tests; integration tests against a real PostgreSQL; Vitest for
-  frontend logic; Playwright for the main flows.
+  frontend logic; Playwright for the main flows. CI (GitHub Actions, `.github/workflows/ci.yml`)
+  builds and runs every test on each push, on Linux like the production image.
+  - Integration tests are kept apart by their data, not by wiping it: one database per test
+    class, and each test makes its own rows (`ApiFactory.NextMobile()` for a unique mobile),
+    finds them by their own ids, and never assumes a table is empty (count only as a
+    before/after difference). Why no reset between tests: one database per class already keeps
+    classes apart, and the audit trigger (ADR 0013) refuses `DELETE` and `TRUNCATE` on
+    `audit_entries`, so a reset tool would have to switch off the guard the tests prove.
+  - The tests of one class share the fixture's fake clock, and it only moves forward. A test
+    that needs a fixed instant builds its own `FakeTimeProvider`.
 - **Backups:** nightly database dump, copied off the server, restore tested before go-live.
 
 ## 13. Deployment (to be settled in Phase 3)
