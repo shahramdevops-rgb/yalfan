@@ -1,0 +1,5 @@
+P:System.DateTime.Now;Inject IClock (ADR 0005).
+P:System.DateTime.UtcNow;Inject IClock (ADR 0005).
+P:System.DateTime.Today;Inject IClock and use Today, which is the Asia/Tehran day (ADR 0005).
+P:System.DateTimeOffset.Now;Inject IClock (ADR 0005).
+P:System.DateTimeOffset.UtcNow;Inject IClock (ADR 0005).

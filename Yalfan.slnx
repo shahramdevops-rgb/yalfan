@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Yalfan.Api/Yalfan.Api.csproj" />
+    <Project Path="src/Yalfan.Application/Yalfan.Application.csproj" />
+    <Project Path="src/Yalfan.Domain/Yalfan.Domain.csproj" />
+    <Project Path="src/Yalfan.Infrastructure/Yalfan.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Yalfan.Api.IntegrationTests/Yalfan.Api.IntegrationTests.csproj" />
+    <Project Path="tests/Yalfan.Domain.Tests/Yalfan.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

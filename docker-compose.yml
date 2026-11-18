@@ -1,0 +1,76 @@
+# Local development stack: PostgreSQL, the API and Seq (log viewer).
+# First time: copy `.env.example` to `.env`. Then: docker compose up --build
+# The production stack is a separate file, written in roadmap task 3.1.
+
+name: yalfan
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: yalfan
+      POSTGRES_USER: yalfan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env and set POSTGRES_PASSWORD}
+    ports:
+      # Bound to this machine only: the development database is never reachable from the network.
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      # PostgreSQL 18 images keep their data under /var/lib/postgresql, not /var/lib/postgresql/data.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=yalfan --dbname=yalfan"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Yalfan.Api/Dockerfile
+    environment:
+      # Development turns on Database:MigrateOnStartup (appsettings.Development.json).
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Database: Host=db;Port=5432;Database=yalfan;Username=yalfan;Password=${POSTGRES_PASSWORD}
+      # Inside the compose network Seq is reached by its service name, not localhost.
+      Serilog__WriteTo__Seq__Args__serverUrl: http://seq
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env (at least 32 characters)}
+      # The first owner, created at start when no owner exists. Optional.
+      Identity__SeedOwner__FullName: ${OWNER_FULL_NAME:-}
+      Identity__SeedOwner__MobileNumber: ${OWNER_MOBILE:-}
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # The .NET runtime image has no curl or wget, so bash opens the socket itself.
+      test:
+        - CMD
+        - bash
+        - -c
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          && printf 'GET /health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3
+          && grep -q '^HTTP/1.1 200' <&3
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  seq:
+    # Development log viewer: structured search over the API's logs. Not part of production.
+    image: datalust/seq:2025.2
+    environment:
+      ACCEPT_EULA: "Y"
+      # No login: the port is bound to this machine only, and these are development logs.
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      # One port for the web UI and for log ingestion. 5341 is often taken by another
+      # project's Seq, so Yalfan uses 5342.
+      - "127.0.0.1:${SEQ_PORT:-5342}:80"
+    volumes:
+      - seq-data:/data
+
+volumes:
+  db-data:
+  seq-data:

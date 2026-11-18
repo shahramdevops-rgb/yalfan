@@ -6,8 +6,8 @@ and about 40 outside contractors paid by the piece. Three front doors:
 - The contractor panel: each contractor sees only his own work and account, on a phone. Persian only.
 - The store: retail, wholesale and foreign buyers. Persian, Arabic, English.
 
-Status: planning only. No code yet. The developer works alone; the workshop owner is his brother
-and is treated as a client.
+Status: Phase 0 (foundation) in progress; see docs/ROADMAP.md for the next task. The developer
+works alone; the workshop owner is his brother and is treated as a client.
 
 ## Where things are
 - Roadmap, task status, the owner's to-do list, open questions: docs/ROADMAP.md
@@ -36,6 +36,8 @@ and is treated as a client.
 - Use logical CSS utilities (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`), never `left`/`right`
   ones, because fa and ar are right-to-left and en is left-to-right.
 - The backend stores Gregorian UTC only. Jalali, Hijri or Gregorian is a display choice.
+- Money is Rial everywhere: stored, in the API and on every screen (ADR 0002). Never Toman,
+  and every amount shown is labelled «ریال».
 - The office operator is not technical: few fields per screen, workshop words, safe defaults.
 
 ## Architecture rules (non-negotiable)
@@ -67,4 +69,22 @@ and is treated as a client.
 - Every task ends with passing tests, shown as evidence.
 
 ## Commands
-None yet. Fill this section in task 0.1 and keep it up to date when commands change.
+Run from the repository root. Keep this section up to date when commands change.
+- Build: `dotnet build Yalfan.slnx` (warnings are errors)
+- Test: `dotnet test --solution Yalfan.slnx` (Microsoft.Testing.Platform; the old
+  `dotnet test Yalfan.slnx` form fails). Docker must be running: the integration tests start
+  PostgreSQL with Testcontainers
+- Login in Development: no SMS is sent; the code is in the API log and Seq (ADR 0012).
+  `.env` needs `JWT_SIGNING_KEY`; from the host, `Jwt:SigningKey` comes from user-secrets
+- Run the stack in Docker: `docker compose up --build --wait` (needs `.env`, copied from
+  `.env.example`); health at `http://localhost:8080/health`; stop with `docker compose down`
+- Logs: console; in Development also Seq at `http://localhost:5342` (compose service `seq`)
+- Run the API from the host: `docker compose up db seq --wait`, then
+  `dotnet run --project src/Yalfan.Api` (`http://localhost:5080`; the connection string comes
+  from `dotnet user-secrets`, see README)
+- Add a migration: `dotnet ef migrations add <Name> --project src/Yalfan.Infrastructure
+  --startup-project src/Yalfan.Api --output-dir Persistence/Migrations` (`dotnet tool restore`
+  once). Development applies pending migrations when the API starts
+- Database: PostgreSQL on `127.0.0.1:5433`, database and user `yalfan`
+- Add a package: `dotnet add <project> package <name>`, then check `Directory.Packages.props`:
+  Microsoft packages must stay on `10.0.x` (the command offers 11.x by default)

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Local secrets (the database password) live in the developer's user profile, not in the
+       repository. The command is in the README. -->
+  <PropertyGroup>
+    <UserSecretsId>6cc28497-8838-42a1-bb0f-89ca00a3f8fb</UserSecretsId>
+  </PropertyGroup>
+
+  <!-- The Api is the composition root, so it is the only project that references Infrastructure,
+       and it does so only to register it. Endpoints call Application use cases. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Yalfan.Application\Yalfan.Application.csproj" />
+    <ProjectReference Include="..\Yalfan.Infrastructure\Yalfan.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Seq" />
+  </ItemGroup>
+
+  <!-- Design-time only: `dotnet ef` starts this project to build the DbContext. It is not
+       shipped and gives the Api no EF Core types to use. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
