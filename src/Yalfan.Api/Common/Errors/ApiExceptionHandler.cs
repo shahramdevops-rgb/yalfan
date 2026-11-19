@@ -45,9 +45,11 @@ internal sealed partial class ApiExceptionHandler(
         });
     }
 
+    // The path is passed as PathString: turned into text (escaped, so a crafted path cannot forge
+    // a log line) only when the level is enabled.
     [LoggerMessage(Level = LogLevel.Information, Message = "Bad request {Method} {Path}: {Reason}")]
-    private static partial void LogBadRequest(ILogger logger, string method, string path, string reason);
+    private static partial void LogBadRequest(ILogger logger, string method, PathString path, string reason);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected failure in {Method} {Path}")]
-    private static partial void LogUnexpected(ILogger logger, Exception exception, string method, string path);
+    private static partial void LogUnexpected(ILogger logger, Exception exception, string method, PathString path);
 }

@@ -11,6 +11,17 @@
     <WarningsNotAsErrors>NU1900;NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
   </PropertyGroup>
 
+  <!-- Lint (ADR 0015): the .NET analyzers' recommended rules and the code style rules in
+       .editorconfig run in every build, so a violation is a build error in the editor and in CI
+       alike. Exceptions are listed, with their reason, in .editorconfig. -->
+  <PropertyGroup>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- No GenerateDocumentationFile, although the unused-using rule (IDE0005) needs it to run in
+         the build: with it, the OpenAPI generator copies the XML comments into the panel's
+         contract, and those are notes for developers, not part of the API. -->
+  </PropertyGroup>
+
   <!-- Turns "never call DateTime.Now" from a written rule into a build error (BannedSymbols.txt). -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />

@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { logout } from '../features/auth/authApi';
 import { useSession } from '../features/auth/useSession';
@@ -18,11 +18,13 @@ const navigation: { to: string; label: MessageKey; icon: typeof HomeIcon }[] = [
  * panel on his phone.
  */
 export function AppLayout() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
-  // A tap on a link in the drawer closes it.
-  useEffect(() => setMenuOpen(false), [location.pathname]);
+  // The drawer stays open only on the page where it was opened, so a tap on one of its links
+  // closes it by itself, without an effect and its extra render.
+  const [menuOpenedOn, setMenuOpenedOn] = useState<string | null>(null);
+  const menuOpen = menuOpenedOn === location.pathname;
+  const closeMenu = () => setMenuOpenedOn(null);
 
   return (
     <div className="min-h-dvh lg:flex">
@@ -36,14 +38,14 @@ export function AppLayout() {
             type="button"
             className="absolute inset-0 bg-stone-900/40"
             aria-label={t('nav.closeMenu')}
-            onClick={() => setMenuOpen(false)}
+            onClick={closeMenu}
           />
           <aside className="absolute inset-y-0 start-0 w-72 max-w-[85%] bg-white shadow-xl">
             <button
               type="button"
               className="absolute end-3 top-4 rounded-lg p-2 text-stone-500 hover:bg-stone-100"
               aria-label={t('nav.closeMenu')}
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
             >
               <CloseIcon />
             </button>
@@ -53,7 +55,7 @@ export function AppLayout() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header onOpenMenu={() => setMenuOpen(true)} />
+        <Header onOpenMenu={() => setMenuOpenedOn(location.pathname)} />
         <main className="flex-1 px-4 py-6 lg:px-8">
           <Outlet />
         </main>
@@ -68,7 +70,7 @@ function Sidebar() {
       <div className="flex items-center gap-3 px-2 py-1">
         <BagMark />
         <div>
-          <p className="font-bold leading-tight">{t('app.name')}</p>
+          <p className="leading-tight font-bold">{t('app.name')}</p>
           <p className="text-xs text-stone-500">{t('app.subtitle')}</p>
         </div>
       </div>
@@ -118,7 +120,9 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
         <MenuIcon />
       </button>
 
-      <p className="hidden text-sm text-stone-500 sm:block">{t('header.today', { date: formatWeekdayDate(new Date()) })}</p>
+      <p className="hidden text-sm text-stone-500 sm:block">
+        {t('header.today', { date: formatWeekdayDate(new Date()) })}
+      </p>
 
       <div className="ms-auto flex items-center gap-3">
         {user && (

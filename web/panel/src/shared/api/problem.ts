@@ -17,8 +17,26 @@ export interface Problem {
 /** The code used when the API could not be reached at all. */
 export const NETWORK_UNREACHABLE = 'network.unreachable';
 
-/** Reads the ProblemDetails that openapi-fetch hands back as `error`. */
+/**
+ * A refused request as an exception, for code that must throw: a TanStack Query `queryFn` reports
+ * failure only by throwing. It carries the problem, and `toProblem` reads it back.
+ */
+export class ProblemError extends Error {
+  readonly problem: Problem;
+
+  constructor(problem: Problem) {
+    super(problem.code);
+    this.name = 'ProblemError';
+    this.problem = problem;
+  }
+}
+
+/** Reads the ProblemDetails that openapi-fetch hands back as `error`, or a thrown ProblemError. */
 export function toProblem(error: unknown): Problem {
+  if (error instanceof ProblemError) {
+    return error.problem;
+  }
+
   if (typeof error === 'object' && error !== null && typeof (error as Problem).code === 'string') {
     return error as Problem;
   }

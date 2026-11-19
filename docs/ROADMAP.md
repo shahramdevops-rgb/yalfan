@@ -1,8 +1,9 @@
 # Yalfan — Roadmap
 
 Status: **Phase 0 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
-same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28. Next task: 0.9. Read
-`docs/ARCHITECTURE.md` first.
+same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
+red run on GitHub waits for a push). Next: that run closes Phase 0; then Phase 1, after its open
+questions are answered. Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -127,6 +128,19 @@ Goal: an empty but real system: solution, database, login, an empty Persian pane
   Build and tests on every push exist since 0.7, brought forward because 0.7's own check was
   "runs in CI". Left for 0.9: lint and format checks (.NET and the panel from 0.8), and proving
   that a failing test turns the run red.
+  **Done locally 1405/08/29; the red run on GitHub waits for the developer's push.** ADR 0015.
+  204 .NET tests and 26 panel tests (3 new) pass; build has 0 warnings; every check exits
+  non-zero on a deliberate error. The .NET lint is the build itself (`AnalysisMode` Recommended,
+  code style enforced, warnings are errors); `dotnet format whitespace`, ESLint (type-checked,
+  `--max-warnings 0`) and Prettier are CI steps, and every check runs even after one fails. Two
+  ESLint rules enforce logical Tailwind utilities and no Persian text in components. LF line
+  endings everywhere, because Windows and the Linux runner disagreed. Not adopted: the
+  unused-using rule in the build, because it puts XML comments into the panel's contract.
+  Found on the way: queries threw a plain object (now `ProblemError`), the drawer closed through
+  a `setState` in an effect, and the Docker image needs `.editorconfig` copied in (it failed on
+  CA1716 without it; the image builds now). Proof on GitHub: push `main` (the first CI run ever, expected green),
+  then the throwaway branch `ci/prove-red`; expected red at .NET Format and Test and panel Lint,
+  Format and Test, with both Builds green; then delete the branch.
 
 ## Phase 1 — Master data
 

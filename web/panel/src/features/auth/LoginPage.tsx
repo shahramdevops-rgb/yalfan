@@ -68,7 +68,8 @@ export function LoginPage() {
     setBusy(false);
 
     if (result.ok) {
-      navigate(from, { replace: true });
+      // Nothing to wait for: a failed navigation is shown by the router's error page.
+      void navigate(from, { replace: true });
     } else {
       setError(messageFor(result.problem, 'code'));
     }
@@ -163,7 +164,9 @@ function ResendButton({ resendAt, disabled, onResend }: { resendAt: number; disa
 
   const secondsLeft = (resendAt - now) / 1000;
   if (secondsLeft > 0) {
-    return <span className="text-sm text-stone-500">{t('login.resendIn', { time: formatCountdown(secondsLeft) })}</span>;
+    return (
+      <span className="text-sm text-stone-500">{t('login.resendIn', { time: formatCountdown(secondsLeft) })}</span>
+    );
   }
 
   return (

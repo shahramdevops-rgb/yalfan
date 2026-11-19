@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Serilog;
@@ -11,7 +12,9 @@ using Yalfan.Infrastructure;
 
 // Logs failures that happen before the configured logger exists (bad configuration, a failed
 // migration); without it a crash at start leaves no trace. Replaced once the host is built.
-Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+    .CreateLogger();
 
 try
 {

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../shared/api/client';
-import { toProblem } from '../../shared/api/problem';
+import { ProblemError, toProblem } from '../../shared/api/problem';
 import { errorMessage, t } from '../../shared/i18n/fa';
 
 /** Empty until the modules arrive; it already reads the user through the typed client. */
@@ -10,7 +10,7 @@ export function DashboardPage() {
     queryFn: async () => {
       const { data, error } = await api.GET('/panel/auth/me');
       if (!data) {
-        throw toProblem(error);
+        throw new ProblemError(toProblem(error));
       }
       return data;
     },

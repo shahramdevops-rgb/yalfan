@@ -1,5 +1,5 @@
-# Build and every test on each push: the .NET solution since task 0.7, the panel since 0.8.
-# Lint and format checks join in 0.9.
+# Every check on each push: format, lint, build and every test, for the .NET solution and the
+# panel (ADR 0015). Build and tests since task 0.7, the panel since 0.8, format and lint since 0.9.
 name: CI
 
 on:
@@ -14,8 +14,11 @@ concurrency:
 permissions:
   contents: read
 
+# Each check runs even when an earlier one failed (`!cancelled()`), so one push reports every
+# problem at once instead of one per push. A check is skipped only when what it needs is missing
+# (no restore, no install, or no build for the tests).
 jobs:
-  build-and-test:
+  dotnet:
     # Linux, like the production image, so time zone data and the runtime behave the same.
     # Docker is preinstalled, which the integration tests need (Testcontainers).
     runs-on: ubuntu-latest
@@ -31,13 +34,23 @@ jobs:
           global-json-file: global.json
 
       - name: Restore
+        id: restore
         run: dotnet restore Yalfan.slnx
 
-      # Warnings are errors (Directory.Build.props), so a warning fails the run here too.
+      # Whitespace and layout by .editorconfig. Fix locally with `dotnet format whitespace Yalfan.slnx`.
+      - name: Format
+        if: ${{ !cancelled() && steps.restore.outcome == 'success' }}
+        run: dotnet format whitespace Yalfan.slnx --verify-no-changes --no-restore
+
+      # Also the lint: warnings are errors (Directory.Build.props), so an analyzer or code style
+      # violation fails the build here, as it does on the developer's machine.
       - name: Build
+        id: build
+        if: ${{ !cancelled() && steps.restore.outcome == 'success' }}
         run: dotnet build Yalfan.slnx --no-restore
 
       - name: Test
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: dotnet test --solution Yalfan.slnx --no-build
 
   panel:
@@ -57,11 +70,24 @@ jobs:
 
       # Exactly the versions in package-lock.json.
       - name: Install
+        id: install
         run: npm ci
+
+      # ESLint with type information; any warning fails it too.
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint
+
+      # Prettier. Fix locally with `npm run format`.
+      - name: Format
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run format:check
 
       # Generates the API types from openapi/panel.json, type-checks, and bundles.
       - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
 
       - name: Test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm test

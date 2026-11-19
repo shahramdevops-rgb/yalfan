@@ -16,7 +16,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /** Large and clear on purpose: the office operator is not technical (CLAUDE.md). */
-export function Button({ variant = 'primary', busy = false, disabled, className = '', children, ...props }: ButtonProps) {
+export function Button({
+  variant = 'primary',
+  busy = false,
+  disabled,
+  className = '',
+  children,
+  ...props
+}: ButtonProps) {
   const size = variant === 'link' ? 'px-1 py-1 text-sm' : 'h-12 px-5 text-base';
   return (
     <button
@@ -26,7 +33,9 @@ export function Button({ variant = 'primary', busy = false, disabled, className 
       aria-busy={busy || undefined}
       className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ${size} ${variants[variant]} ${className}`}
     >
-      {busy && <span className="size-4 animate-spin rounded-full border-2 border-current border-e-transparent" aria-hidden />}
+      {busy && (
+        <span className="size-4 animate-spin rounded-full border-2 border-current border-e-transparent" aria-hidden />
+      )}
       {children}
     </button>
   );

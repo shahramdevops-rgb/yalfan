@@ -7,12 +7,11 @@ function fakeSession(tokens: string[], renewSucceeds = true) {
   let current = tokens.shift() ?? null;
   return {
     getAccessToken: () => current,
-    renew: vi.fn(async () => {
-      if (!renewSucceeds) {
-        return false;
+    renew: vi.fn(() => {
+      if (renewSucceeds) {
+        current = tokens.shift() ?? null;
       }
-      current = tokens.shift() ?? null;
-      return true;
+      return Promise.resolve(renewSucceeds);
     }),
   };
 }
@@ -44,7 +43,9 @@ describe('authFetch', () => {
     const session = fakeSession(['t1', 't2']);
     const authFetch = createAuthFetch(session, send);
 
-    const response = await authFetch(new Request(`${api}/panel/users`, { method: 'POST', body: '{"fullName":"Zahra"}' }));
+    const response = await authFetch(
+      new Request(`${api}/panel/users`, { method: 'POST', body: '{"fullName":"Zahra"}' }),
+    );
 
     expect(response.status).toBe(200);
     expect(session.renew).toHaveBeenCalledOnce();

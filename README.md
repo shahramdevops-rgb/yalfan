@@ -65,6 +65,8 @@ npm ci                          # once, and after package-lock.json changes
 npm run dev                     # http://localhost:5173, /panel/* is forwarded to the API on :5080
 npm test
 npm run build
+npm run lint                    # ESLint; any warning fails it
+npm run format                  # Prettier; CI checks it with npm run format:check
 ```
 
 Set `YALFAN_API_URL` to reach an API elsewhere, e.g. `http://localhost:8080` for the API in

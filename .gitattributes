@@ -1,0 +1,11 @@
+# LF in the repository and in every checkout, on Windows too. Why: the format checks
+# (dotnet format, Prettier) must give the same answer on the developer's Windows machine and on
+# the Linux CI runner; with core.autocrlf the same file was LF in one place and CRLF in the
+# other (ADR 0015). Editors follow end_of_line in .editorconfig.
+* text=auto eol=lf
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

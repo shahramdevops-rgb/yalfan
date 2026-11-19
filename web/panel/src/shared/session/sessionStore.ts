@@ -3,10 +3,7 @@ import type { components } from '../api/schema';
 export type UserSummary = components['schemas']['UserSummary'];
 export type SessionResponse = components['schemas']['SessionResponse'];
 
-export type SessionState =
-  | { status: 'loading' }
-  | { status: 'signedIn'; user: UserSummary }
-  | { status: 'signedOut' };
+export type SessionState = { status: 'loading' } | { status: 'signedIn'; user: UserSummary } | { status: 'signedOut' };
 
 /** What one call to /panel/auth/refresh gave: a new session, or the error code. */
 export type RenewResult = { ok: true; session: SessionResponse } | { ok: false; code: string | undefined };
@@ -82,7 +79,9 @@ export function createSessionStore({ renew: callRenew, wait = sleep }: SessionSt
   return {
     getState: () => state,
     getAccessToken: () => accessToken,
-    subscribe(listener: () => void) {
+    // Arrow functions, like every member here: React and the API client call them detached
+    // from the store (useSyncExternalStore(store.subscribe, ...)).
+    subscribe: (listener: () => void) => {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
@@ -94,7 +93,7 @@ export function createSessionStore({ renew: callRenew, wait = sleep }: SessionSt
      * One renewal at a time: callers that arrive while one is running share it, so a refresh
      * token that was just rotated is never sent a second time.
      */
-    renew(): Promise<boolean> {
+    renew: (): Promise<boolean> => {
       renewing ??= renewOnce().finally(() => {
         renewing = null;
       });

@@ -1,0 +1,4 @@
+# Written by PanelDocumentTests from the API, in System.Text.Json's layout (ADR 0014).
+openapi/panel.json
+# npm owns its layout.
+package-lock.json

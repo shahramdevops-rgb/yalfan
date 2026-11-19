@@ -7,7 +7,9 @@ export type ApiResult<T> = { ok: true; value: T } | { ok: false; problem: Proble
 export async function requestLoginCode(mobileNumber: string): Promise<ApiResult<{ resendAfterSeconds: number }>> {
   return call(async () => {
     const { data, error } = await publicApi.POST('/panel/auth/otp', { body: { mobileNumber } });
-    return data ? { ok: true, value: { resendAfterSeconds: data.resendAfterSeconds } } : { ok: false, problem: toProblem(error) };
+    return data
+      ? { ok: true, value: { resendAfterSeconds: data.resendAfterSeconds } }
+      : { ok: false, problem: toProblem(error) };
   });
 }
 

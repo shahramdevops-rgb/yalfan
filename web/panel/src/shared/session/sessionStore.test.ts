@@ -33,7 +33,8 @@ describe('session store', () => {
   });
 
   it('tries once more after "superseded", because another tab renewed first', async () => {
-    const renew = vi.fn<() => Promise<RenewResult>>()
+    const renew = vi
+      .fn<() => Promise<RenewResult>>()
       .mockResolvedValueOnce(failed(REFRESH_SUPERSEDED))
       .mockResolvedValueOnce(ok('t2'));
     const wait = vi.fn(noWait);
@@ -62,7 +63,10 @@ describe('session store', () => {
     const listener = vi.fn();
     store.subscribe(listener);
 
-    const expired = createSessionStore({ renew: () => Promise.resolve(failed('identity.refresh_invalid')), wait: noWait });
+    const expired = createSessionStore({
+      renew: () => Promise.resolve(failed('identity.refresh_invalid')),
+      wait: noWait,
+    });
     expect(await expired.renew()).toBe(false);
     expect(expired.getState().status).toBe('signedOut');
     expect(expired.getAccessToken()).toBeNull();
@@ -73,7 +77,8 @@ describe('session store', () => {
   });
 
   it('keeps an existing session when the API cannot be reached', async () => {
-    const renew = vi.fn<() => Promise<RenewResult>>()
+    const renew = vi
+      .fn<() => Promise<RenewResult>>()
       .mockResolvedValueOnce(ok('t1'))
       .mockRejectedValueOnce(new TypeError('Failed to fetch'));
     const store = createSessionStore({ renew, wait: noWait });

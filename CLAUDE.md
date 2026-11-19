@@ -72,7 +72,10 @@ works alone; the workshop owner is his brother and is treated as a client.
 
 ## Commands
 Run from the repository root. Keep this section up to date when commands change.
-- Build: `dotnet build Yalfan.slnx` (warnings are errors)
+- Build: `dotnet build Yalfan.slnx` (warnings are errors; the analyzers and code style rules
+  run in it, so it is also the .NET lint; exceptions live in `.editorconfig`, ADR 0015)
+- Format C#: `dotnet format whitespace Yalfan.slnx` fixes; CI runs it with
+  `--verify-no-changes`. Run it before every commit
 - Test: `dotnet test --solution Yalfan.slnx` (Microsoft.Testing.Platform; the old
   `dotnet test Yalfan.slnx` form fails). Docker must be running: the integration tests start
   PostgreSQL with Testcontainers
@@ -92,8 +95,11 @@ Run from the repository root. Keep this section up to date when commands change.
   Microsoft packages must stay on `10.0.x` (the command offers 11.x by default). The command
   also strips the blank lines from that file; restore them
 - Panel (from `web/panel`, Node 24): `npm ci`, `npm run dev` (`http://localhost:5173`, forwards
-  `/panel/*` to the API on 5080; `YALFAN_API_URL` overrides), `npm test`, `npm run build`.
-  Vite cannot run from a path containing `#` (ADR 0014)
+  `/panel/*` to the API on 5080; `YALFAN_API_URL` overrides), `npm test`, `npm run build`,
+  `npm run lint` (ESLint, warnings fail it), `npm run format` (Prettier; CI runs
+  `npm run format:check`). Run format and lint before every commit (ADR 0015).
+  Vite cannot run from a path containing `#` (ADR 0014): use a `subst` drive until the checkout
+  moves
 - Panel API types: generated from `web/panel/openapi/panel.json` before every dev, build and
   test run. When `PanelDocumentTests` fails, it has rewritten that file from the API: review and
   commit it

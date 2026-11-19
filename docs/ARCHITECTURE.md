@@ -414,6 +414,11 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 - **Testing:** domain unit tests; integration tests against a real PostgreSQL; Vitest for
   frontend logic; Playwright for the main flows. CI (GitHub Actions, `.github/workflows/ci.yml`)
   builds and runs every test on each push, on Linux like the production image.
+  - Format and lint (decided in task 0.9, ADR 0015): the .NET analyzers and code style rules run
+    inside the build, so a violation is a build error everywhere; `dotnet format whitespace`,
+    ESLint and Prettier are CI steps. CI runs every check even after one fails, so one push
+    reports every problem. Two ESLint rules enforce right-to-left (logical Tailwind utilities
+    only) and no Persian text inside components. Line endings are LF everywhere.
   - Integration tests are kept apart by their data, not by wiping it: one database per test
     class, and each test makes its own rows (`ApiFactory.NextMobile()` for a unique mobile),
     finds them by their own ids, and never assumes a table is empty (count only as a
@@ -525,3 +530,4 @@ server in the developer's.
 | 0012 | Staff log in with an SMS code; JWT and rotating refresh cookie | 0.5 (written) |
 | 0013 | Audit: every change recorded in the same save, append-only | 0.6 (written) |
 | 0014 | Panel shell: same origin, token in memory, committed OpenAPI contract | 0.8 (written) |
+| 0015 | Code checks: format and lint in the build and on every push | 0.9 (written) |

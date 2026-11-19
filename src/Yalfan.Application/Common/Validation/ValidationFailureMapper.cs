@@ -63,7 +63,7 @@ internal static partial class ValidationFailureMapper
     /// the user typed, which must never leave the server in an error.
     /// </summary>
     private static Dictionary<string, object> Args(
-        IReadOnlyDictionary<string, object> values,
+        Dictionary<string, object> values,
         params (string Name, string Placeholder)[] wanted)
     {
         var args = new Dictionary<string, object>(StringComparer.Ordinal);
