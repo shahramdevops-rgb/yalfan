@@ -69,7 +69,8 @@ Decided by the developer on 1405/08/27.
   SameSite=Strict, Path `/panel/auth`. Why: the panel's JavaScript cannot read an HttpOnly
   cookie, so an XSS bug cannot steal a seven-day session; SameSite=Strict keeps other sites from
   using it; the path keeps it off every other request. The access token is in the response body
-  and kept in memory by the panel. CORS for the panel origin is set up in 0.8.
+  and kept in memory by the panel. The panel is served from the API's own origin, so no CORS is
+  needed (decided in 0.8, ADR 0014).
 - Logout revokes the family and deletes the cookie.
 
 ### Users and roles

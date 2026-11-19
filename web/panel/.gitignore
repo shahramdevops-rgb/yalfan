@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# Generated from openapi/panel.json before every dev, build and test run (npm run api:types).
+src/shared/api/schema.d.ts

@@ -316,6 +316,14 @@ Decisions:
   labels in workshop words, sensible defaults, undo by reversal instead of delete, printable work
   orders and receipts because contractors are used to paper.
 - Pages stay light because the workshop is on mobile internet.
+- The panel shell (ADR 0014): the panel and the API share one origin, so there is no CORS and no
+  panel page lives under `/panel/`; the access token stays in memory; the typed client comes
+  from the committed contract `web/panel/openapi/panel.json`, which a test keeps equal to the
+  API; Vazirmatn is bundled, dates and numbers use the browser's `Intl`, every text is in
+  `src/shared/i18n/fa.ts`.
+- `web/panel/src` is organized by feature like the backend: `app/` (router, frame, guards),
+  `features/<module>/`, and `shared/` (API client, session, formatting, texts, small UI parts).
+- `web/shared` is created with the second app (Phase 10), not before.
 
 ## 10. Three languages
 
@@ -445,3 +453,4 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 | 0011 | Request pipeline: handlers, validation, error responses, logging | 0.4 (written) |
 | 0012 | Staff log in with an SMS code; JWT and rotating refresh cookie | 0.5 (written) |
 | 0013 | Audit: every change recorded in the same save, append-only | 0.6 (written) |
+| 0014 | Panel shell: same origin, token in memory, committed OpenAPI contract | 0.8 (written) |

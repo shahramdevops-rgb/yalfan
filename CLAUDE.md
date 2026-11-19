@@ -89,4 +89,13 @@ Run from the repository root. Keep this section up to date when commands change.
   once). Development applies pending migrations when the API starts
 - Database: PostgreSQL on `127.0.0.1:5433`, database and user `yalfan`
 - Add a package: `dotnet add <project> package <name>`, then check `Directory.Packages.props`:
-  Microsoft packages must stay on `10.0.x` (the command offers 11.x by default)
+  Microsoft packages must stay on `10.0.x` (the command offers 11.x by default). The command
+  also strips the blank lines from that file; restore them
+- Panel (from `web/panel`, Node 24): `npm ci`, `npm run dev` (`http://localhost:5173`, forwards
+  `/panel/*` to the API on 5080; `YALFAN_API_URL` overrides), `npm test`, `npm run build`.
+  Vite cannot run from a path containing `#` (ADR 0014)
+- Panel API types: generated from `web/panel/openapi/panel.json` before every dev, build and
+  test run. When `PanelDocumentTests` fails, it has rewritten that file from the API: review and
+  commit it
+- Add a panel package: `npm install --before=<date two weeks ago> <name>` (ADR 0014), never a
+  version published in the last days

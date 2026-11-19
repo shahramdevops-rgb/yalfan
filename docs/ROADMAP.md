@@ -1,7 +1,7 @@
 # Yalfan — Roadmap
 
 Status: **Phase 0 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
-same day, 0.4 and 0.5 on 1405/08/27, 0.6 and 0.7 on 1405/08/28. Next task: 0.8. Read
+same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28. Next task: 0.9. Read
 `docs/ARCHITECTURE.md` first.
 
 How to use this file:
@@ -114,6 +114,14 @@ Goal: an empty but real system: solution, database, login, an empty Persian pane
 - **0.8 Panel shell.** `web/panel`: React, Vite, Tailwind, RTL, Persian font, login, sidebar,
   typed API client generated from OpenAPI, Jalali dates, money formatting. *Done when:* the Owner
   logs in and sees an empty dashboard.
+  **Done 1405/08/28:** checked in Chrome against a throwaway database: login with Persian
+  digits, the Persian message for a wrong code, the dashboard, the session kept across a
+  reload, logout. 204 .NET tests (4 new) and 23 panel tests pass; build has 0 warnings and 0
+  type errors; CI has a panel job. ADR 0014: one origin and no CORS, token in memory, the
+  committed contract `web/panel/openapi/panel.json` kept equal to the API by a test, numbers
+  only as JSON numbers. Not checked by eye: the phone drawer (the browser window could not be
+  narrowed). Found on the way: Vite cannot run from a path containing `#`; the developer moves
+  the checkout out of `c#project`.
 - **0.9 CI.** Build, tests, lint and format checks on every push. *Done when:* a failing test
   fails the pipeline.
   Build and tests on every push exist since 0.7, brought forward because 0.7's own check was

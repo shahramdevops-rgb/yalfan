@@ -1,0 +1,54 @@
+// A few inline icons; an icon library is not worth its weight for the shell.
+
+const common = {
+  xmlns: 'http://www.w3.org/2000/svg',
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+} as const;
+
+export function MenuIcon({ className = 'size-6' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+export function CloseIcon({ className = 'size-6' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}
+
+export function HomeIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" />
+    </svg>
+  );
+}
+
+export function LogoutIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M9 8l-4 4 4 4M5 12h10" />
+    </svg>
+  );
+}
+
+export function BagMark({ className = 'size-9' }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className={className} aria-hidden>
+      <rect width="32" height="32" rx="8" className="fill-brand-700" />
+      <path d="M9 11h14l-1.5 13h-11z" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M12.5 11a3.5 3.5 0 0 1 7 0" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}

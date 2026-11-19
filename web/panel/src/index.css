@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+/* Vazirmatn is bundled with the panel, not loaded from a font CDN that may be slow or blocked
+   in Iran (ADR 0014). Tahoma is the fallback every Windows office PC has. */
+@theme {
+  --font-sans: 'Vazirmatn Variable', Tahoma, sans-serif;
+
+  /* One place to change the panel's colour. */
+  --color-brand-50: var(--color-teal-50);
+  --color-brand-100: var(--color-teal-100);
+  --color-brand-600: var(--color-teal-600);
+  --color-brand-700: var(--color-teal-700);
+  --color-brand-800: var(--color-teal-800);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-stone-100);
+    color: var(--color-stone-900);
+    -webkit-font-smoothing: antialiased;
+  }
+}

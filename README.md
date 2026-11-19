@@ -5,7 +5,8 @@ workers and about 40 outside contractors.
 
 **Status:** Phase 0 (foundation) in progress. The solution skeleton, the database wiring, the
 common building blocks, the request pipeline, staff login, the audit and the integration test
-base with CI exist (tasks 0.1 to 0.7); there are no business features yet.
+base with CI, and the Persian panel's shell with login exist (tasks 0.1 to 0.8); there are no
+business features yet.
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — layers, modules, core models, attendance, languages
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases 0–15, tasks, the owner's own to-do list, open questions
@@ -54,6 +55,23 @@ dotnet user-secrets set "Identity:SeedOwner:MobileNumber" "<owner's mobile>" --p
 dotnet run --project src/Yalfan.Api          # http://localhost:5080/health
 ```
 
+Run the panel (needs Node 24, see `web/panel/.nvmrc`; the API runs from the host as above). Vite
+cannot run from a path that contains `#`, so keep the checkout out of folders like `c#project`
+(ADR 0014):
+
+```
+cd web/panel
+npm ci                          # once, and after package-lock.json changes
+npm run dev                     # http://localhost:5173, /panel/* is forwarded to the API on :5080
+npm test
+npm run build
+```
+
+Set `YALFAN_API_URL` to reach an API elsewhere, e.g. `http://localhost:8080` for the API in
+Docker. The panel's API types come from `web/panel/openapi/panel.json`; when an API change
+under `/panel` makes `PanelDocumentTests` fail, the test has rewritten that file: review the
+diff, commit it, and the panel picks the new types up on its next run.
+
 Add a migration after changing the model:
 
 ```
@@ -61,4 +79,4 @@ dotnet tool restore             # once
 dotnet ef migrations add <Name> --project src/Yalfan.Infrastructure --startup-project src/Yalfan.Api --output-dir Persistence/Migrations
 ```
 
-Next step: task 0.8 (panel shell). The Phase 1 questions must be answered before Phase 1.
+Next step: task 0.9 (CI lint and format checks). The Phase 1 questions must be answered before Phase 1.
