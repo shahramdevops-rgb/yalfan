@@ -9,6 +9,7 @@
        line as the net10.0 runtime. `dotnet add package` offers 11.x by default: do not accept it
        until the whole solution moves to a new .NET version. -->
   <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.15" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.15" />

@@ -4,6 +4,7 @@ using Serilog;
 using Yalfan.Api.Common.Endpoints;
 using Yalfan.Api.Common.Errors;
 using Yalfan.Api.Common.Logging;
+using Yalfan.Api.Common.OpenApi;
 using Yalfan.Api.Common.Security;
 using Yalfan.Application;
 using Yalfan.Infrastructure;
@@ -24,14 +25,22 @@ try
 
     // Enums travel as camelCase names ("operator"), never numbers: reordering an enum must not
     // change what the API means (ADR 0012).
-    builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(
-        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
+    // Numbers travel as JSON numbers only. The web default also accepts "5" for 5, which makes
+    // the OpenAPI contract say "integer or string" and the panel's types "number | string"
+    // (ADR 0014).
+    builder.Services.ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+        options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+    });
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddErrorHandling();
     builder.Services.AddStaffAuthentication();
     builder.Services.AddEndpointModules(typeof(Program).Assembly);
+    builder.Services.AddApiDocuments();
 
     var app = builder.Build();
 
@@ -45,6 +54,7 @@ try
     // 200 "Healthy" when the API runs and can reach its database, 503 otherwise.
     app.MapHealthChecks("/health").AllowAnonymous();
     app.MapEndpointModules();
+    app.MapApiDocuments();
 
     await app.RunAsync();
     return 0;

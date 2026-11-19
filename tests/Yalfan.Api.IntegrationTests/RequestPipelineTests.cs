@@ -136,6 +136,19 @@ public sealed class RequestPipelineTests(ApiFactory factory) : IClassFixture<Api
     }
 
     [Fact]
+    public async Task A_number_sent_as_text_is_a_malformed_body()
+    {
+        // Numbers are JSON numbers only, so the OpenAPI contract can say "integer" (ADR 0014).
+        using var content = new StringContent("""{ "name": "bag", "quantity": "5" }""", Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("/sample", content, Cancel);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await ReadJson(response);
+        Assert.Equal("request.malformed", problem.GetProperty("code").GetString());
+    }
+
+    [Fact]
     public async Task A_malformed_body_returns_a_coded_400_also_when_minimal_apis_throw()
     {
         // Development makes minimal APIs throw BadHttpRequestException instead of answering 400;
