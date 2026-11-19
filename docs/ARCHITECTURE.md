@@ -428,13 +428,84 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 
 - Docker Compose on one VPS: API, PostgreSQL, the panels, a reverse proxy with HTTPS.
 - The server is bought only when Phase 3 starts; until then everything runs on the developer's
-  machine.
+  machine. Why: an idle server is only a cost, and its size may still change.
 - **Open question:** a server in Iran is right for the panel, the Iranian payment gateway and SMS,
   but slow for foreign visitors; a server abroad is the reverse. The likely answer is the backend
   and panels in Iran and the store's pages served from a second place abroad. Decided by an ADR in
   Phase 11, when the store starts.
 - Domains: `yalfan.ir` and `yalfan.com` are both unregistered today and must be registered in the
   owner's name.
+
+### 13.1 Server to buy (recommended 1405/08/28, accepted by the developer)
+
+Sized from this architecture and from the gym project's server, which runs the same stack
+(Docker Compose, PostgreSQL, .NET, Caddy) on 2 cores and 4 GB. To be confirmed in task 3.1 with
+ADR 0008. Prices were not compared; that is done near Phase 3, because prices move fast.
+
+**One Linux VPS in an Iranian data centre, in the developer's name, sized in two steps:**
+
+| Step | CPU | RAM | Disk |
+|---|---|---|---|
+| Phases 3–10, panels only | 2 cores | 4 GB | about 80 GB SSD/NVMe |
+| From Phase 11, with the store | 4 cores | 8 GB | about 120 GB SSD/NVMe |
+
+Why two steps: until the store, the load is about five office users and sixty phone users, which
+is light. The store adds public traffic and a permanently running Node.js process (Next.js).
+Why the step is safe: the provider must allow a plan upgrade without reinstalling.
+
+**RAM is the binding limit** (as on the gym server), not CPU or disk. Estimated use with the store:
+
+| Part | RAM |
+|---|---|
+| PostgreSQL | about 1–1.5 GB |
+| API (.NET, Hangfire, SignalR) | about 0.5–1 GB |
+| Store (Next.js) | about 300–500 MB |
+| Caddy (HTTPS, panels' static files) | about 100 MB |
+| OS and Docker | about 500 MB |
+| Headroom (nightly dump, spikes) | the rest |
+
+About 3–3.5 GB in total: it fits in 4 GB with no margin, hence 8 GB from Phase 11. Swap is set
+up as on the gym server, so a spike means slowness rather than the OOM killer stopping Postgres.
+
+**Disk:** SSD or NVMe, because database speed follows disk speed. Business data stays at a few GB
+even after years; product images (several sizes and formats each), the last days of nightly
+dumps and the previous image tags for rollback take most of the space.
+
+**Why Iran:**
+- The panel is used in Hamedan over mobile internet; a domestic server answers faster.
+- During past cuts of the international internet, domestic servers kept working for domestic
+  users. For a system holding sixty people's pay and accounts this is the strongest reason.
+- The payment gateway, the SMS panel and later the payout provider usually work best with a
+  domestic server, and some accept only Iranian IPs. Ask each one when signing up.
+
+**Foreign store visitors:** nothing is bought for them now. In Phase 11 (ADR 0008) compare a CDN
+for the store's pages and images (usually simpler and cheaper) with a small second server abroad
+(only if a CDN is not enough). Whatever sits in front must pass WebSockets for SignalR.
+
+**Choosing the provider:**
+
+| Criterion | Why |
+|---|---|
+| Dedicated public IPv4 | Domain, HTTPS and the attendance device need it |
+| Ubuntu LTS image | The gym server's runbook can be reused |
+| Plan upgrade without reinstall | Phase 11 changes the plan, not the installation |
+| Inbound 80 and 443 open | Let's Encrypt needs 80; some providers block it until identity is verified |
+| A custom inbound port can be opened | Some attendance devices push on a fixed port; the model is chosen in 4.0 |
+| Clear monthly traffic quota | Panel traffic is small; store images are not |
+| Whole-server snapshots | Optional; a full copy before a large upgrade |
+| Responsive support | If the server is down at 9 a.m., the workshop's office is down |
+
+Yearly prepayment is worth considering if the provider discounts it, because monthly prices rise
+with inflation.
+
+**Not needed:** a Windows server (.NET runs on Linux, which is lighter and cheaper); a dedicated
+physical server; a separate database server; a staging server (production images are tested on
+the developer's machine first, as for the gym); Seq in production (console logs, as for the gym).
+
+**Around the server:** backups off the server are mandatory because the data is financial: the
+office laptop (O.4) pulls the newest nightly dump and copies it to a flash drive, as at the gym.
+HTTPS certificates are free and automatic. Domains and the SMS panel are in the owner's name, the
+server in the developer's.
 
 ## 14. Planned ADRs
 

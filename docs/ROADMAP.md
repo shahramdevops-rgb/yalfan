@@ -45,7 +45,7 @@ developer runs and maintains it. Phases wait for these.
 | O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates | Phase 2 |
 | O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator | Phase 3 |
 | O.5 | Collect from the paper books: each contractor's balance, work still out with contractors | Phase 3 |
-| O.6 | Buy a server (ParsPack or another provider) in the developer's name, sized in task 3.1 | Phase 3 |
+| O.6 | Buy a server (ParsPack or another provider) in the developer's name: Iranian VPS, 2 cores, 4 GB, ~80 GB SSD, upgradable to 4 cores and 8 GB for Phase 11. Criteria in docs/ARCHITECTURE.md 13.1; confirmed in task 3.1 | Phase 3 |
 | O.7 | Buy the attendance device **only after** task 4.0 names the model | Phase 4 |
 | O.8 | Decide shift hours, allowed lateness, overtime and leave rules | Phase 4 |
 | O.9 | Decide how each in-house worker is paid (fixed, piecework, mixed) | Phase 5 |
