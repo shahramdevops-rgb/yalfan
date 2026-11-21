@@ -88,3 +88,9 @@ owner's users screen (1.6) uses it too.
   ever matters, old entries are archived, not deleted (decided then, with the trigger in view).
 - Owned types and complex properties are not handled yet; the first entity that uses one
   extends the interceptor.
+  **Update 1405/09/01 (task 1.1, ADR 0006):** owned collections in a table of their own, the
+  catalog's translation rows, are audited as rows of that table with no change needed:
+  `entity_type` is the translation table and `entity_id` the composite key, each part in its
+  stored form (`<item id>,fa`; the key now goes through the value converter like the changed
+  values). Owned types that share their owner's table, and complex properties, are still not
+  handled.

@@ -185,15 +185,8 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IClock clock) : S
     /// <summary>The value as it is stored ("09121234567", "Owner"), not the C# object.</summary>
     private static JsonNode? ToJson(PropertyEntry property, object? value)
     {
-        if (value is null)
-        {
-            return null;
-        }
-
-        var converter = property.Metadata.GetValueConverter() ?? property.Metadata.GetTypeMapping().Converter;
-        var stored = converter is null ? value : converter.ConvertToProvider(value);
-
-        return JsonSerializer.SerializeToNode(stored);
+        var stored = ToStored(property, value);
+        return stored is null ? null : JsonSerializer.SerializeToNode(stored);
     }
 
     private static string KeyOf(EntityEntry entry)
@@ -201,8 +194,22 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IClock clock) : S
         var key = entry.Metadata.FindPrimaryKey()
             ?? throw new InvalidOperationException($"{entry.Metadata.DisplayName()} has no key and cannot be audited.");
 
+        // A composite key reads "<owner id>,fa" for a translation row: each part in its stored
+        // form, like the changed values, so the key matches what a query of the table shows.
         return string.Join(
             ",",
-            key.Properties.Select(property => Convert.ToString(entry.Property(property.Name).CurrentValue, CultureInfo.InvariantCulture)));
+            key.Properties.Select(property =>
+            {
+                var part = entry.Property(property.Name);
+                return Convert.ToString(ToStored(part, part.CurrentValue), CultureInfo.InvariantCulture);
+            }));
+    }
+
+    /// <summary>The value as the database stores it, through the property's converter if it has one.</summary>
+    private static object? ToStored(PropertyEntry property, object? value)
+    {
+        var converter = property.Metadata.GetValueConverter() ?? property.Metadata.GetTypeMapping().Converter;
+
+        return value is null || converter is null ? value : converter.ConvertToProvider(value);
     }
 }

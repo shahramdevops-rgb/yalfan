@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Identity;
 
 namespace Yalfan.Application.Common;
@@ -14,6 +15,15 @@ public interface IAppDbContext
     DbSet<OtpCode> OtpCodes { get; }
 
     DbSet<RefreshToken> RefreshTokens { get; }
+
+    DbSet<Category> Categories { get; }
+
+    DbSet<Fabric> Fabrics { get; }
+
+    DbSet<Colour> Colours { get; }
+
+    /// <summary>Models; their sizes and variants are reached through the model.</summary>
+    DbSet<Product> Products { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -1,9 +1,9 @@
 # Yalfan — Roadmap
 
-Status: **Phase 0 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
+Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
-red run on GitHub waits for a push). Next: that run closes Phase 0; then Phase 1, after its open
-questions are answered. Read `docs/ARCHITECTURE.md` first.
+red run on GitHub waits for a push, which closes Phase 0), 1.1 on 1405/09/01. Next: 1.2, after
+O.2 and Q.1 (the real stages) are answered. Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -148,9 +148,47 @@ Goal: everything the later phases point at exists and can be edited by the opera
 
 Open questions: O.2; how many models and colours; do colours change the material recipe.
 
-- **1.1 Catalog core.** Product (model code), Variant (colour → SKU), Category,
-  `ProductTranslation` with locale (Persian filled, others empty). *Done when:* a product with
-  three colours can be created and read back through the API.
+Answered by the developer on 1405/09/01, for 1.1 (O.2 and Q.1, the stages, are still open and
+block 1.2 and 1.3):
+- **No codes today.** The workshop has no model codes and no SKUs, so the system numbers each
+  model itself (a short sequential number shown next to the name), because a number is short to
+  write on a work order and to say on the phone, and similar names cannot be mixed up.
+- **Many models** (Q.10, no exact count), so product lists are searched and paged, not one list.
+- **A bag is model + fabric + colour + optional size.** One model is sewn in several fabrics;
+  colours are one shared list, any colour with any fabric. So a variant is fabric × colour ×
+  size. Why it is decided now: work orders and stock point at variants, so changing what a
+  variant is later would mean moving every one of those rows.
+- **Sizes belong to each model, not to a shared list.** A model either has sizes or not. When it
+  has, the operator ticks "has sizes", says how many, and types each size's name; every variant
+  of that model then names one of them. A model without sizes has none, and its variants none.
+- **No translation in the panel.** Everything on the panel is Persian; the operator never sees a
+  language. Catalog text is still stored in translation rows with only Persian filled, because
+  the store shows it in three languages and moving single Persian columns into rows later would
+  touch every product. Where Arabic and English are entered is asked in Phase 11.
+- **Accepted proposals (1405/09/01):** the SKU is model number + variant number (`101-1`),
+  because it is short, made by the system and needs no codes invented for fabrics and colours;
+  model numbers start at 101, because a one-digit number on a work order reads like a quantity;
+  no two models, categories, fabrics or colours share a Persian name, because entering the same
+  model twice is the likely mistake with many models; categories are one level, at most one per
+  model and optional for now, because the store is the first to need them and a parent level is
+  one column later; models and variants are never deleted, only deactivated, because work
+  orders and stock will point at them.
+
+- **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
+  optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
+  (Persian filled, others empty). *Done when:* a product with three colours can be created and
+  read back through the API.
+  **Done 1405/09/01:** 256 .NET tests pass (52 new: 29 domain, 23 integration on PostgreSQL),
+  26 panel tests pass, build has 0 warnings; the operator creates a model with three colours and
+  reads it back (`ProductTests`). ADR 0006 (Persian-only panels, catalog text in translation
+  rows, one table per kind) and ADR 0016 (numbered models, variants, SKUs). API under
+  `/panel/catalog`: categories, fabrics and colours (add, rename, list); models (create with
+  sizes and variants in one request, add a variant, read, search by number or name with pages).
+  Persian names are normalized (Arabic «ي» and «ك», spaces) before checks and search. Found on
+  the way: the audit wrote a composite key's enum part as `Fa`, not the stored `fa`; the key now
+  goes through the value converter (ADR 0013 updated). Left for 1.6 with the screens: renaming
+  a model or changing its category, deactivating models and variants, adding a size to an
+  existing model.
 - **1.2 Stages and routes.** Stage list and the ordered route of stages for each product.
   *Done when:* a product's route can be defined and reordered.
 - **1.3 Contractors.** Profile, phone, which stages they do, active flag, optional IBAN (checksum-validated, stored encrypted, shown masked; used by Phase 15). *Done when:* CRUD plus
@@ -379,7 +417,9 @@ Open questions: O.11; which events send an SMS; who pays for SMS volume.
 Goal: the brand is visible again on the web, in three languages, with real products.
 
 Open questions: O.12; third language confirmed as English; where the store is served from for
-foreign visitors (ADR 0008); show prices to everyone or wholesale prices only after login.
+foreign visitors (ADR 0008); show prices to everyone or wholesale prices only after login;
+where Arabic and English text is entered, since the developer said on 1405/09/01 that no
+translation is done in the panel (11.5 still lists translations and must change with the answer).
 
 - **11.1 Store API.** Public catalog endpoints with locale and currency, caching. *Done when:* a
   product is returned in the asked locale with a clean fallback to Persian.
@@ -547,6 +587,6 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 | Q.7 | Wholesale price tiers, credit and return policy | Phase 8 |
 | Q.8 | Third language is English (assumed) | Phase 11 |
 | Q.9 | Where the store is served from for foreign visitors | Phase 11 |
-| Q.10 | Number of models and colours today | Phase 1 |
+| Q.10 | Number of models and colours today. **Answered 1405/09/01: many** (no exact count); models have no codes today; a bag is model + fabric + colour + optional size (see Phase 1) | Phase 1 |
 | Q.11 | Registered company or individual; which bank | 12.3 / 15.0 |
 | Q.12 | How often and how contractors are paid today | Phase 2 |

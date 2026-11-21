@@ -4,9 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Yalfan.Application.Catalog;
 using Yalfan.Application.Common;
 using Yalfan.Application.Common.Security;
 using Yalfan.Application.Common.Sms;
+using Yalfan.Infrastructure.Catalog;
 using Yalfan.Infrastructure.Identity;
 using Yalfan.Infrastructure.Persistence;
 using Yalfan.Infrastructure.Persistence.Interceptors;
@@ -48,6 +50,7 @@ public static class DependencyInjection
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(provider.GetRequiredService<AuditInterceptor>()));
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+        services.AddScoped<IProductNumbers, ProductNumberSequence>();
 
         // One audit interceptor per DbContext: it holds the entries of the save in progress.
         services.AddScoped<AuditInterceptor>();

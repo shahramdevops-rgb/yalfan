@@ -124,7 +124,7 @@ Each module is a folder with the same name in Domain, Application and Api.
 | Module | Main entities | Notes |
 |---|---|---|
 | **Identity** | User, OtpCode, RefreshToken | Everyone logs in with mobile + SMS code, no passwords (ADR 0012). Permissions come later |
-| **Catalog** | Product (model), Variant (colour → SKU), Category, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store |
+| **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1) |
 | **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger |
 | **Production** | Stage, ProductRouting, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, RateCard | The heart of the system. See 7.1 |
 | **Inventory** | Material, Bom, Warehouse, StockMovement, StockCount | Stock is a ledger of movements. See 7.3 |
@@ -178,8 +178,9 @@ ProductionOrder (model, colours, quantity, due date)
 - A contractor is a **warehouse**. Handing 100 metres of fabric to a contractor moves it from the
   main store to that contractor's location; it leaves when finished pieces come back, when unused
   material is returned, or when waste is recorded. Missing material is then visible per contractor.
-- **BOM** per product (and per colour where it differs) gives expected usage, so real usage, waste
-  and the material cost of each bag can be compared.
+- **BOM** per product gives expected usage, so real usage, waste and the material cost of each
+  bag can be compared. The fabric and its colour come from the variant (a variant is fabric ×
+  colour × size); whether a size changes the quantities is asked in Phase 6.
 - Finished bags are stock items too; the store sells from the same numbers.
 
 ### 7.4 Sales
@@ -333,7 +334,7 @@ content waits until foreign selling is real.
 
 | Concern | Rule |
 |---|---|
-| Product text | Names and descriptions live in `ProductTranslation(product, locale, …)`, never in a single Persian column |
+| Product text | Names and descriptions of models, categories, fabrics, colours and sizes live in translation rows, one table per kind (`product_translations`, …), never in a single Persian column. The panel fills only Persian and has no translation screen (ADR 0006) |
 | UI text | No text in components. Message files per locale |
 | API errors | The API returns error codes; each frontend translates |
 | Direction | fa and ar are right-to-left, en is left-to-right. Only logical CSS (`start`/`end`), no `left`/`right` |
@@ -521,7 +522,7 @@ server in the developer's.
 | 0003 | Rates and prices are snapshotted on the document | 2.2 |
 | 0004 | Stock as a movement ledger; a contractor is a warehouse | 6.2 |
 | 0005 | Gregorian UTC storage, localized display | 0.3 |
-| 0006 | Three-language store, Persian-only panels | 1.1 |
+| 0006 | Three-language store, Persian-only panels, catalog text in translation rows | 1.1 (written) |
 | 0007 | Attendance device: push protocol and chosen model | 4.0 |
 | 0008 | Deployment topology and where the store is served from | 3.1 / 11.2 |
 | 0009 | One sales order model for every channel | 8.2 |
@@ -531,3 +532,4 @@ server in the developer's.
 | 0013 | Audit: every change recorded in the same save, append-only | 0.6 (written) |
 | 0014 | Panel shell: same origin, token in memory, committed OpenAPI contract | 0.8 (written) |
 | 0015 | Code checks: format and lint in the build and on every push | 0.9 (written) |
+| 0016 | Catalog: numbered models, variants of fabric × colour × size | 1.1 (written) |
