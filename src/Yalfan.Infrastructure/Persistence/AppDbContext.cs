@@ -3,6 +3,7 @@ using Yalfan.Application.Common;
 using Yalfan.Domain.Audit;
 using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Identity;
+using Yalfan.Domain.Production;
 using Yalfan.Infrastructure.Catalog;
 
 namespace Yalfan.Infrastructure.Persistence;
@@ -22,6 +23,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Colour> Colours => Set<Colour>();
 
     public DbSet<Product> Products => Set<Product>();
+
+    public DbSet<Stage> Stages => Set<Stage>();
 
     /// <summary>Written only by the audit interceptor; read by a history screen later (1.6).</summary>
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();

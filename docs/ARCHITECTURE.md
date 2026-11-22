@@ -126,7 +126,7 @@ Each module is a folder with the same name in Domain, Application and Api.
 | **Identity** | User, OtpCode, RefreshToken | Everyone logs in with mobile + SMS code, no passwords (ADR 0012). Permissions come later |
 | **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1) |
 | **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger |
-| **Production** | Stage, ProductRouting, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, RateCard | The heart of the system. See 7.1 |
+| **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, RateCard | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018) |
 | **Inventory** | Material, Bom, Warehouse, StockMovement, StockCount | Stock is a ledger of movements. See 7.3 |
 | **Ledger** | LedgerEntry, CashAccount, Payment, Cheque, Expense | All money. See 7.2 |
 | **Attendance** | Device, Punch, Shift, AttendanceDay, Leave | Live board. See 8 |
@@ -157,7 +157,11 @@ ProductionOrder (model, colours, quantity, due date)
   never changes old work orders. The same rule holds for material cost and selling price.
 - **Rework and rejects** stay on the contractor's record: they drive the quality numbers and can
   carry a deduction.
-- Stages and the route of each product are data, not code. The workshop defines its own.
+- **Stages are data, one shared list** (ADR 0018, 1405/09/01): cutting (in the workshop only),
+  sewing (contractors or in-house day-wage workers), packing; the operator can add more, such as
+  a part of a job given out on its own ("sewing the handles"). There is **no route per model**:
+  a work order names the variant and the stage directly, and progress is counted per stage from
+  the work orders.
 
 ### 7.2 Money
 
@@ -534,3 +538,4 @@ server in the developer's.
 | 0015 | Code checks: format and lint in the build and on every push | 0.9 (written) |
 | 0016 | Catalog: numbered models, variants of fabric × colour × size | 1.1 (written) |
 | 0017 | Local checks: one script with short output | outside the roadmap (written) |
+| 0018 | Production stages: one shared list, no route per model | 1.2 (written) |

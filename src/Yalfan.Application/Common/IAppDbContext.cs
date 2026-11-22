@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Identity;
+using Yalfan.Domain.Production;
 
 namespace Yalfan.Application.Common;
 
@@ -24,6 +25,9 @@ public interface IAppDbContext
 
     /// <summary>Models; their sizes and variants are reached through the model.</summary>
     DbSet<Product> Products { get; }
+
+    /// <summary>The shared list of stages (ADR 0018).</summary>
+    DbSet<Stage> Stages { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

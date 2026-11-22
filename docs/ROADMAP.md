@@ -2,8 +2,9 @@
 
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
-red run on GitHub waits for a push, which closes Phase 0), 1.1 on 1405/09/01. Next: 1.2, after
-O.2 and Q.1 (the real stages) are answered. Read `docs/ARCHITECTURE.md` first.
+red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01. Next: 1.3,
+after its own details are asked (which stages a contractor does). Read `docs/ARCHITECTURE.md`
+first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -42,7 +43,7 @@ developer runs and maintains it. Phases wait for these.
 | # | Task | Needed by |
 |---|---|---|
 | O.1 | Register `yalfan.ir` (IRNIC handle in the owner's name) and `yalfan.com`. Both are free today and anyone can take them | Now |
-| O.2 | Write down the real production stages and which contractors do which stage | Phase 1 |
+| O.2 | Write down the real production stages and which contractors do which stage. **Stages answered 1405/09/01** (cutting, sewing, packing; ADR 0018); which contractor does which stage is asked in 1.3 | Phase 1 |
 | O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates | Phase 2 |
 | O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator | Phase 3 |
 | O.5 | Collect from the paper books: each contractor's balance, work still out with contractors | Phase 3 |
@@ -148,8 +149,8 @@ Goal: everything the later phases point at exists and can be edited by the opera
 
 Open questions: O.2; how many models and colours; do colours change the material recipe.
 
-Answered by the developer on 1405/09/01, for 1.1 (O.2 and Q.1, the stages, are still open and
-block 1.2 and 1.3):
+Answered by the developer on 1405/09/01, for 1.1 (the stages, O.2 and Q.1, are answered further
+down, for 1.2):
 - **No codes today.** The workshop has no model codes and no SKUs, so the system numbers each
   model itself (a short sequential number shown next to the name), because a number is short to
   write on a work order and to say on the phone, and similar names cannot be mixed up.
@@ -174,6 +175,15 @@ block 1.2 and 1.3):
   one column later; models and variants are never deleted, only deactivated, because work
   orders and stock will point at them.
 
+Answered by the developer on 1405/09/01, for 1.2 (O.2 and Q.1, ADR 0018):
+- **Three stages: cutting, sewing, packing**, more added when needed. Cutting is done in the
+  workshop, never by a contractor; sewing by contractors (per piece) or by in-house workers on a
+  day wage; anything but cutting may be given out, including part of a job ("only the handles").
+- **No route per model**, the developer's call: the steps differ from model to model and could
+  become many, so an ordered route for each of many models would make the system complicated.
+  "Build the base, add the details as the phases need them." Whether leather adds a step is not
+  known, and with no routes it does not need to be.
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -189,8 +199,15 @@ block 1.2 and 1.3):
   goes through the value converter (ADR 0013 updated). Left for 1.6 with the screens: renaming
   a model or changing its category, deactivating models and variants, adding a size to an
   existing model.
-- **1.2 Stages and routes.** Stage list and the ordered route of stages for each product.
-  *Done when:* a product's route can be defined and reordered.
+- **1.2 Stages.** One shared stage list, no route per model (changed on 1405/09/01 from "stages
+  and routes", see the answers above). *Done when:* a new database has the three stages, and a
+  stage can be added, renamed and listed through the API, with audit.
+  **Done 1405/09/01:** 271 .NET tests pass (15 new: 6 domain, 9 integration on PostgreSQL),
+  26 panel tests pass, build has 0 warnings. ADR 0018. API `/panel/production/stages` (list,
+  add, rename) for every staff role; the migration `AddStages` inserts «برش», «دوخت»,
+  «بسته‌بندی» once, in the order of the work, and the list keeps that order. The name is one
+  Persian column, not translation rows, because stages never appear in the store. No delete;
+  deactivation comes with the 1.6 screens, like the catalog lists.
 - **1.3 Contractors.** Profile, phone, which stages they do, active flag, optional IBAN (checksum-validated, stored encrypted, shown masked; used by Phase 15). *Done when:* CRUD plus
   search by name and phone work, with audit.
 - **1.4 Workers.** In-house worker profile, job, start date, active flag, optional IBAN as in 1.3. *Done when:* same as 1.3.
@@ -199,15 +216,19 @@ block 1.2 and 1.3):
 - **1.6 Panel screens.** Products, stages, contractors, workers, rates; and the owner's users
   screen (list, add, deactivate, change a user's mobile when a phone is lost; added 1405/08/27
   with ADR 0012); and, for the owner, the change history of a record from the audit (added
-  1405/08/28 with ADR 0013). *Done when:* the operator can enter a real model with its route and rates
-  without help.
+  1405/08/28 with ADR 0013). *Done when:* the operator can enter a real model with its rates
+  without help. The stage list is shown in its stored order (the order of the work), not sorted
+  by name (ADR 0018).
 
 ## Phase 2 — Contractor work and accounts
 
 Goal: the paper notebook for contractors is replaced. This is the heart of the system.
 
 Open questions: O.3; is material handed over tracked from the start or only in Phase 6; are
-rejected pieces deducted or only recorded; who approves QC.
+rejected pieces deducted or only recorded; who approves QC. Added 1405/09/01 with ADR 0018:
+is the number of cut pieces recorded (cutting is in-house); are bags sewn by in-house day-wage
+workers counted, so that progress (2.8) shows all sewing and not only the contractors'; does
+the system refuse to issue cutting to a contractor (decided in 2.2).
 
 - **2.1 Production orders.** Model, colours and quantities, due date, status. *Done when:* an order
   can be opened, changed while unstarted, and closed.
@@ -578,7 +599,7 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 
 | # | Question | Blocks |
 |---|---|---|
-| Q.1 | Real stages of making a bag, and which are done outside | Phase 1 |
+| Q.1 | Real stages of making a bag, and which are done outside. **Answered 1405/09/01:** cutting (in-house only), sewing (contractors or in-house day-wage workers), packing; one shared list, no route per model (ADR 0018) | Phase 1 |
 | Q.2 | Contractor pay method and rates; what happens to rejects | Phase 2 |
 | Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002 | 0.3 |
 | Q.4 | Do contractors receive raw material or cut pieces | Phase 2 / 6 |

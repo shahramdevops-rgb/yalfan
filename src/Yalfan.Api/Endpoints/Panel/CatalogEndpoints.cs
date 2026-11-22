@@ -131,8 +131,5 @@ public sealed class CatalogEndpoints : IEndpointModule
     }
 }
 
-/// <summary>The body of a rename; the id is in the path.</summary>
-public sealed record RenameRequest(string? Name);
-
 /// <summary>The body of adding a variant; the model's id is in the path.</summary>
 public sealed record AddVariantRequest(Guid? FabricId, Guid? ColourId, Guid? SizeId);

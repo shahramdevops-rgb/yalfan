@@ -396,6 +396,28 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("Yalfan.Domain.Production.Stage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stages");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_stages_name");
+
+                    b.ToTable("stages", (string)null);
+                });
+
             modelBuilder.Entity("Yalfan.Domain.Catalog.Category", b =>
                 {
                     b.OwnsMany("Yalfan.Domain.Catalog.NameTranslation", "Names", b1 =>
