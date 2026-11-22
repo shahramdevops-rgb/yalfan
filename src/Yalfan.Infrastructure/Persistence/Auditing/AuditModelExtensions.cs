@@ -27,6 +27,10 @@ public static class AuditModelExtensions
     public static PropertyBuilder<T> IsAuditRedacted<T>(this PropertyBuilder<T> builder) =>
         builder.HasAnnotation(RedactedAnnotation, true);
 
+    /// <summary>The same mark set on the model directly, for rules applied by type (every IBAN, ADR 0019).</summary>
+    internal static void SetAuditRedacted(this IMutableProperty property) =>
+        property.SetAnnotation(RedactedAnnotation, true);
+
     internal static bool IsExcludedFromAudit(this IReadOnlyEntityType entityType) =>
         entityType.FindAnnotation(ExcludedAnnotation)?.Value is true;
 

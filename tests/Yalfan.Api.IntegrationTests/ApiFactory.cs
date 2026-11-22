@@ -30,6 +30,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public const string SeededOwnerMobile = "09120000000";
 
+    /// <summary>
+    /// One IBAN key for every test class, unlike the JWT key: the IBAN cipher lives inside the EF
+    /// model, which EF Core may build once and reuse for every API in the test run (ADR 0019), so
+    /// they must all use the same key.
+    /// </summary>
+    public static readonly string IbanKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
     private static int _nextMobile = 1000;
     private string _connectionString = string.Empty;
 
@@ -119,6 +126,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Database:MigrateOnStartup", "true");
         builder.UseSetting("Sms:Provider", "Log");
         builder.UseSetting("Jwt:SigningKey", Convert.ToBase64String(RandomNumberGenerator.GetBytes(48)));
+        builder.UseSetting("Encryption:IbanKey", IbanKey);
         builder.UseSetting("Identity:SeedOwner:FullName", "Seeded Owner");
         builder.UseSetting("Identity:SeedOwner:MobileNumber", SeededOwnerMobile);
 

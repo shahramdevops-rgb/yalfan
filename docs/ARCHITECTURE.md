@@ -125,7 +125,7 @@ Each module is a folder with the same name in Domain, Application and Api.
 |---|---|---|
 | **Identity** | User, OtpCode, RefreshToken | Everyone logs in with mobile + SMS code, no passwords (ADR 0012). Permissions come later |
 | **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1) |
-| **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger |
+| **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger. Contractors do one or more stages; IBANs are stored encrypted and shown masked (ADR 0019) |
 | **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, RateCard | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018) |
 | **Inventory** | Material, Bom, Warehouse, StockMovement, StockCount | Stock is a ledger of movements. See 7.3 |
 | **Ledger** | LedgerEntry, CashAccount, Payment, Cheque, Expense | All money. See 7.2 |
@@ -433,6 +433,15 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   - The tests of one class share the fixture's fake clock, and it only moves forward. A test
     that needs a fixed instant builds its own `FakeTimeProvider`.
 - **Backups:** nightly database dump, copied off the server, restore tested before go-live.
+  The IBAN key (`Encryption:IbanKey`, ADR 0019) is kept off the server as well, but never next
+  to the dumps: without it the IBANs in a restored database cannot be read, and with it beside
+  the dump the encryption protects nothing. The restore test includes reading an IBAN back.
+- **Encrypted columns (decided in task 1.3, ADR 0019):** IBANs are stored with AES-256-GCM and
+  a key from configuration, applied to every `Iban` property of the model by type, together with
+  the audit's redaction. The API never returns a whole IBAN except to the owner on request.
+- **Persian order:** a column people read as a sorted list of Persian names gets the ICU
+  collation `fa-x-icu` (contractor names, ADR 0019), so the order does not depend on the
+  server's locale.
 
 ## 13. Deployment (to be settled in Phase 3)
 
@@ -539,3 +548,4 @@ server in the developer's.
 | 0016 | Catalog: numbered models, variants of fabric × colour × size | 1.1 (written) |
 | 0017 | Local checks: one script with short output | outside the roadmap (written) |
 | 0018 | Production stages: one shared list, no route per model | 1.2 (written) |
+| 0019 | Contractors; IBANs stored encrypted, shown masked | 1.3 (written) |

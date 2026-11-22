@@ -3,12 +3,14 @@ using Yalfan.Application.Common;
 using Yalfan.Domain.Audit;
 using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Identity;
+using Yalfan.Domain.Parties;
 using Yalfan.Domain.Production;
 using Yalfan.Infrastructure.Catalog;
+using Yalfan.Infrastructure.Persistence.Encryption;
 
 namespace Yalfan.Infrastructure.Persistence;
 
-public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
+public sealed class AppDbContext(DbContextOptions<AppDbContext> options, IbanCipher ibanCipher) : DbContext(options), IAppDbContext
 {
     public DbSet<User> Users => Set<User>();
 
@@ -26,6 +28,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Stage> Stages => Set<Stage>();
 
+    public DbSet<Contractor> Contractors => Set<Contractor>();
+
     /// <summary>Written only by the audit interceptor; read by a history screen later (1.6).</summary>
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
@@ -37,5 +41,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         // Model numbers (ADR 0016). A sequence, not MAX + 1, so two saves at the same moment
         // never get the same number.
         modelBuilder.HasSequence<int>(ProductNumberSequence.Name).StartsAt(Product.FirstNumber);
+
+        // After the configurations, so it sees every IBAN property they named (ADR 0019).
+        modelBuilder.EncryptIbans(ibanCipher);
     }
 }

@@ -94,3 +94,9 @@ owner's users screen (1.6) uses it too.
   stored form (`<item id>,fa`; the key now goes through the value converter like the changed
   values). Owned types that share their owner's table, and complex properties, are still not
   handled.
+  **Update 1405/09/02 (task 1.3, ADR 0019):** a link row, a row that is nothing but its key
+  (`contractor_stages`: contractor id, stage id), records its key columns as its fields when it
+  is created or deleted (`{"contractorId": {"new": …}, "stageId": {"new": …}}`); without that,
+  adding or removing a contractor's stage left no entry at all. Every `Iban` property is marked
+  redacted by type in `AppDbContext` (`IbanMapping`), not property by property, so no IBAN can be
+  audited with its value by forgetting the mark.

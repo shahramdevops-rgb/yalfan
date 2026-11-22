@@ -35,7 +35,7 @@ tests on every push.
 Run the whole stack in Docker (PostgreSQL, the API and Seq):
 
 ```
-copy .env.example .env          # once; then set POSTGRES_PASSWORD, JWT_SIGNING_KEY and the first owner in .env
+copy .env.example .env          # once; then set POSTGRES_PASSWORD, JWT_SIGNING_KEY, IBAN_ENCRYPTION_KEY and the first owner in .env
 docker compose up --build --wait
 curl http://localhost:8080/health
 ```
@@ -57,6 +57,7 @@ Run the API from the host against the database in Docker (the user-secrets lines
 docker compose up db seq --wait
 dotnet user-secrets set "ConnectionStrings:Database" "Host=localhost;Port=5433;Database=yalfan;Username=yalfan;Password=<the password in .env>" --project src/Yalfan.Api
 dotnet user-secrets set "Jwt:SigningKey" "<at least 32 random characters>" --project src/Yalfan.Api
+dotnet user-secrets set "Encryption:IbanKey" "<32 random bytes in base64, as in .env.example>" --project src/Yalfan.Api
 dotnet user-secrets set "Identity:SeedOwner:FullName" "<owner's name>" --project src/Yalfan.Api
 dotnet user-secrets set "Identity:SeedOwner:MobileNumber" "<owner's mobile>" --project src/Yalfan.Api
 dotnet run --project src/Yalfan.Api          # http://localhost:5080/health

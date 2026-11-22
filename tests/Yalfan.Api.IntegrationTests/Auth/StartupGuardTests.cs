@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Options;
 using Yalfan.Infrastructure;
 using Yalfan.Infrastructure.Identity;
+using Yalfan.Infrastructure.Persistence.Encryption;
 using Yalfan.Infrastructure.Sms;
 
 namespace Yalfan.Api.IntegrationTests.Auth;
@@ -75,6 +76,37 @@ public sealed class StartupGuardTests(ApiFactory factory) : IClassFixture<ApiFac
         var exception = Assert.Throws<OptionsValidationException>(
             () => services.GetRequiredService<IOptions<JwtOptions>>().Value);
         Assert.Contains("Jwt:SigningKey", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_api_does_not_start_without_an_iban_key()
+    {
+        using var noKey = factory.WithWebHostBuilder(builder => builder.UseSetting("Encryption:IbanKey", string.Empty));
+
+        Assert.ThrowsAny<Exception>(() => noKey.CreateClient());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("not base64 at all")]
+    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==")]
+    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")]
+    public void An_iban_key_that_is_not_32_bytes_in_base64_is_refused(string key)
+    {
+        using var services = Infrastructure("Development", new() { ["Encryption:IbanKey"] = key });
+
+        var exception = Assert.Throws<OptionsValidationException>(
+            () => services.GetRequiredService<IOptions<EncryptionOptions>>().Value);
+        Assert.Contains("Encryption:IbanKey", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_iban_key_of_32_bytes_in_base64_is_accepted()
+    {
+        var key = Convert.ToBase64String(new byte[EncryptionOptions.KeyBytes]);
+        using var services = Infrastructure("Development", new() { ["Encryption:IbanKey"] = key });
+
+        Assert.Equal(key, services.GetRequiredService<IOptions<EncryptionOptions>>().Value.IbanKey);
     }
 
     private static ServiceProvider Infrastructure(string environment, Dictionary<string, string?> settings)

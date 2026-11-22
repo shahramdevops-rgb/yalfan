@@ -141,12 +141,16 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IClock clock) : S
     {
         var changes = new JsonObject();
 
+        // A link row, such as a stage a contractor does, has nothing but its key. Its key columns
+        // are then its fields, or adding and removing it would leave an entry that says nothing.
+        var isLinkRow = entry.Properties.All(property => property.Metadata.IsPrimaryKey() || property.Metadata.IsConcurrencyToken);
+
         foreach (var property in entry.Properties)
         {
             var metadata = property.Metadata;
 
             // The key is already the entry's EntityId; the row version (xmin) means nothing to a reader.
-            if (metadata.IsPrimaryKey() || metadata.IsConcurrencyToken)
+            if ((metadata.IsPrimaryKey() && !isLinkRow) || metadata.IsConcurrencyToken)
             {
                 continue;
             }

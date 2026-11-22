@@ -34,6 +34,8 @@ services:
       # Inside the compose network Seq is reached by its service name, not localhost.
       Serilog__WriteTo__Seq__Args__serverUrl: http://seq
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env (at least 32 characters)}
+      # Encrypts stored IBANs (ADR 0019). Losing it loses every stored IBAN: keep a copy off the server.
+      Encryption__IbanKey: ${IBAN_ENCRYPTION_KEY:?Set IBAN_ENCRYPTION_KEY in .env (32 random bytes in base64)}
       # The first owner, created at start when no owner exists. Optional.
       Identity__SeedOwner__FullName: ${OWNER_FULL_NAME:-}
       Identity__SeedOwner__MobileNumber: ${OWNER_MOBILE:-}

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Identity;
+using Yalfan.Domain.Parties;
 using Yalfan.Domain.Production;
 
 namespace Yalfan.Application.Common;
@@ -28,6 +29,9 @@ public interface IAppDbContext
 
     /// <summary>The shared list of stages (ADR 0018).</summary>
     DbSet<Stage> Stages { get; }
+
+    /// <summary>Outside contractors; the stages each one does are reached through him (ADR 0019).</summary>
+    DbSet<Contractor> Contractors { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

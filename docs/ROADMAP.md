@@ -2,8 +2,8 @@
 
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
-red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01. Next: 1.3,
-after its own details are asked (which stages a contractor does). Read `docs/ARCHITECTURE.md`
+red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3 on
+1405/09/02. Next: 1.4 (workers), after its own details are asked. Read `docs/ARCHITECTURE.md`
 first.
 
 How to use this file:
@@ -43,7 +43,7 @@ developer runs and maintains it. Phases wait for these.
 | # | Task | Needed by |
 |---|---|---|
 | O.1 | Register `yalfan.ir` (IRNIC handle in the owner's name) and `yalfan.com`. Both are free today and anyone can take them | Now |
-| O.2 | Write down the real production stages and which contractors do which stage. **Stages answered 1405/09/01** (cutting, sewing, packing; ADR 0018); which contractor does which stage is asked in 1.3 | Phase 1 |
+| O.2 | Write down the real production stages and which contractors do which stage. **Stages answered 1405/09/01** (cutting, sewing, packing; ADR 0018). Which contractor does which stage is ticked per contractor by the operator (1.3, ADR 0019); the owner gives the list when the contractors are entered | Phase 1 |
 | O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates | Phase 2 |
 | O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator | Phase 3 |
 | O.5 | Collect from the paper books: each contractor's balance, work still out with contractors | Phase 3 |
@@ -184,6 +184,32 @@ Answered by the developer on 1405/09/01, for 1.2 (O.2 and Q.1, ADR 0018):
   "Build the base, add the details as the phases need them." Whether leather adds a step is not
   known, and with no routes it does not need to be.
 
+Answered by the developer on 1405/09/02, for 1.3 (all the proposals accepted; ADR 0019):
+- **A contractor does one or more stages**, ticked from the shared list, and at least one,
+  because in Phase 2 the work-order screen lists contractors by stage and one with no stage
+  would appear in no list. Whether giving a contractor a stage he has not ticked is refused or
+  only warned, and whether cutting can be ticked at all, is decided in 2.2, the only place it
+  has an effect (as ADR 0018 left cutting).
+- **Profile: full name, mobile, stages, optional IBAN, optional notes**, because the operator is
+  not technical and wants few fields; a rare detail (address, workshop name) goes into the
+  notes instead of a column nobody fills. **No national ID** for now: nothing uses it, and
+  personal data that is not needed is not kept; if 15.0 finds an IBAN-to-national-ID check, it
+  is one column. A contractor with his own helpers is one record: the person who takes the work
+  and is paid, because the account is with him.
+- **Mobile is required, an Iranian mobile, and one contractor per number**, because in Phase 10
+  he logs into his own panel with it and an SMS code, and one number cannot open two accounts;
+  it also catches the likely mistake of entering one contractor twice. **Two contractors may
+  share a name**: people's names repeat, and the mobile tells them apart.
+- **Every staff role may enter or change the IBAN**, because the operator types the
+  contractors from the paper book and nothing is paid to it by the system before Phase 15; each
+  change is audited as "changed" without the number, and the real guard (holder name verified,
+  a holding period after a change) is 15.1. **Screens show only the last four digits; only the
+  owner can see the whole number**, on a separate request, because until Phase 15 he pays by
+  hand and needs it, while a leaked or swapped IBAN is the usual payout fraud and nobody else
+  needs it once it is typed. Only Iranian IBANs (IR + 24 digits), because payouts are domestic.
+- **No delete; deactivate and reactivate**, because work orders and accounts (Phase 2) will
+  point at contractors. An inactive contractor is left out of pickers; his history stays.
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -210,6 +236,18 @@ Answered by the developer on 1405/09/01, for 1.2 (O.2 and Q.1, ADR 0018):
   deactivation comes with the 1.6 screens, like the catalog lists.
 - **1.3 Contractors.** Profile, phone, which stages they do, active flag, optional IBAN (checksum-validated, stored encrypted, shown masked; used by Phase 15). *Done when:* CRUD plus
   search by name and phone work, with audit.
+  **Done 1405/09/02:** 342 .NET tests pass (71 new: 33 domain, 38 integration on PostgreSQL),
+  26 panel tests pass, build has 0 warnings. ADR 0019. API `/panel/parties/contractors` for every
+  staff role: search (part of the name or of the mobile in one box, Persian alphabetical order,
+  active filter, pages), read, add, save the profile, deactivate and activate, set or remove the
+  IBAN on its own request; the whole IBAN only for the owner (`GET …/{id}/iban`, logged). The
+  stages are a table with foreign keys to `stages`. IBANs: `Iban` value object (ISO 13616 check,
+  Iranian only), AES-256-GCM with the key `Encryption:IbanKey` (`IBAN_ENCRYPTION_KEY` in `.env`),
+  applied with the audit's redaction to every `Iban` property by type, so 1.4 needs no new code
+  for it. The API refuses to start without the key; losing the key loses the IBANs, so it is
+  kept off the server, apart from the backups (ARCHITECTURE.md 12). Found on the way: the audit
+  wrote nothing for a row that is only its key (a contractor's stage); such link rows now record
+  their key columns (ADR 0013 updated).
 - **1.4 Workers.** In-house worker profile, job, start date, active flag, optional IBAN as in 1.3. *Done when:* same as 1.3.
 - **1.5 Rate cards.** Rate per product × stage, with a start date; history kept. *Done when:* the
   rate valid on a given date can be queried and old rates are never overwritten.

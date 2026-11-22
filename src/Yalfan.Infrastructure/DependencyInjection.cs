@@ -11,6 +11,7 @@ using Yalfan.Application.Common.Sms;
 using Yalfan.Infrastructure.Catalog;
 using Yalfan.Infrastructure.Identity;
 using Yalfan.Infrastructure.Persistence;
+using Yalfan.Infrastructure.Persistence.Encryption;
 using Yalfan.Infrastructure.Persistence.Interceptors;
 using Yalfan.Infrastructure.Sms;
 using Yalfan.Infrastructure.Time;
@@ -61,6 +62,17 @@ public static class DependencyInjection
 
         services.AddOptions<DatabaseOptions>()
             .Bind(configuration.GetSection(DatabaseOptions.SectionName));
+
+        // IBANs are stored encrypted (ADR 0019); without a usable key the API refuses to start.
+        services.AddOptions<EncryptionOptions>()
+            .Bind(configuration.GetSection(EncryptionOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<EncryptionOptions>, EncryptionOptionsValidator>();
+
+        // Bound here without the validator, so design-time tools (dotnet ef) can create the
+        // DbContext without the key; the running API is stopped by the validator above instead.
+        services.AddSingleton(_ => new IbanCipher(
+            configuration.GetSection(EncryptionOptions.SectionName).Get<EncryptionOptions>() ?? new EncryptionOptions()));
 
         // Hosted services start in registration order: the schema first, then the first owner.
         services.AddHostedService<DatabaseMigrator>();

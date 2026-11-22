@@ -85,7 +85,8 @@ Run from the repository root. Keep this section up to date when commands change.
   `dotnet test Yalfan.slnx` form fails). Docker must be running: the integration tests start
   PostgreSQL with Testcontainers
 - Login in Development: no SMS is sent; the code is in the API log and Seq (ADR 0012).
-  `.env` needs `JWT_SIGNING_KEY`; from the host, `Jwt:SigningKey` comes from user-secrets
+  `.env` needs `JWT_SIGNING_KEY` and `IBAN_ENCRYPTION_KEY`; from the host, `Jwt:SigningKey` and
+  `Encryption:IbanKey` come from user-secrets (the API does not start without either; ADR 0019)
 - Run the stack in Docker: `docker compose up --build --wait` (needs `.env`, copied from
   `.env.example`); health at `http://localhost:8080/health`; stop with `docker compose down`
 - Logs: console; in Development also Seq at `http://localhost:5342` (compose service `seq`)
