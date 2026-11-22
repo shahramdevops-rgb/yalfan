@@ -22,6 +22,13 @@ dotnet build Yalfan.slnx
 dotnet test --solution Yalfan.slnx
 ```
 
+Or run every check CI runs, for .NET and the panel, with one line per step and only the errors
+of a failed step (full logs in `artifacts/check/`; ADR 0017):
+
+```
+./scripts/check.ps1             # -Only dotnet or -Only panel for one side
+```
+
 CI (GitHub Actions, [.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the same build and
 tests on every push.
 

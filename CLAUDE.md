@@ -68,10 +68,15 @@ works alone; the workshop owner is his brother and is treated as a client.
   his GitHub repositories.
 - Commit messages follow Conventional Commits, e.g. `feat(production): add work order issue`.
 - Never commit secrets.
-- Every task ends with passing tests, shown as evidence.
+- Every task ends with passing tests, shown as evidence (the summary of `scripts/check.ps1`).
 
 ## Commands
 Run from the repository root. Keep this section up to date when commands change.
+- Check everything CI checks: `./scripts/check.ps1` (`-Only dotnet` or `-Only panel`). One line
+  per step with the test counts, and for a failure only its errors, grouped; full logs in
+  `artifacts/check/` (ADR 0017). Use it instead of the separate build, test, lint and format
+  checks below, so long output stays out of the conversation; read a log only when the summary
+  is not enough. It sets up the panel's `subst` drive itself; Docker must be running
 - Build: `dotnet build Yalfan.slnx` (warnings are errors; the analyzers and code style rules
   run in it, so it is also the .NET lint; exceptions live in `.editorconfig`, ADR 0015)
 - Format C#: `dotnet format whitespace Yalfan.slnx` fixes; CI runs it with

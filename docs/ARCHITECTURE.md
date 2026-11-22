@@ -533,3 +533,4 @@ server in the developer's.
 | 0014 | Panel shell: same origin, token in memory, committed OpenAPI contract | 0.8 (written) |
 | 0015 | Code checks: format and lint in the build and on every push | 0.9 (written) |
 | 0016 | Catalog: numbered models, variants of fabric × colour × size | 1.1 (written) |
+| 0017 | Local checks: one script with short output | outside the roadmap (written) |
