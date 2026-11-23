@@ -402,8 +402,10 @@ A future `Assistant` module would call existing handlers. It needs no change to 
     local tool (`dotnet ef`, version in `dotnet-tools.json`), so everyone generates the same code.
   - `Database:MigrateOnStartup` applies pending migrations before the API accepts requests. It
     is **off by default** and on only in Development, so starting the API never changes a schema
-    by surprise. How production migrates (on start, or as a deploy step after a backup) is
-    decided in task 3.1.
+    by surprise. How production migrates is decided in task 3.1, within one rule set on
+    1405/09/02: in production the API connects as a database user that cannot change the
+    schema, and migrations run with the table owner's password, which the running API does not
+    hold, because the table owner can drop the audit's append-only trigger (ADR 0013).
   - `GET /health` answers 200 when the API can reach the database and 503 when it cannot. The
     compose health check and, later, the reverse proxy and the uptime monitor use it.
   - No password is in the repository, not even a development one: docker compose reads `.env`

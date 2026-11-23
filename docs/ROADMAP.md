@@ -307,7 +307,31 @@ Open questions: O.4, O.5, O.6, O.11; server in Iran, size and provider; panel ad
   cannot log in without it (ADR 0012). *Done when:* a real login code reaches a real phone and
   the log provider is no longer configured outside Development.
 - **3.1 Production images.** Dockerfiles, production compose, reverse proxy with HTTPS, secrets
-  outside the repository. ADR on deployment. *Done when:* the stack runs from images on a clean machine.
+  outside the repository. ADR on deployment. *Done when:* the stack runs from images on a clean
+  machine, and from outside: the security headers are on every response, plain HTTP redirects to
+  HTTPS, a burst of login requests from one IP is refused, and the API's database user cannot
+  drop a table.
+  Added 1405/09/02, after the project was checked against a generic security checklist. Each item
+  needs the proxy, the domain or the production database, which is why it waits for this task:
+  - **Security headers and HTTPS in Caddy:** HTTP redirects to HTTPS, HSTS,
+    `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'`, `Referrer-Policy`, and a
+    Content-Security-Policy for the panel. Why in the proxy: one place covers both the panel's
+    static files and the API. None of them exists today and no other task names them.
+  - **Forwarded headers, then a per-IP rate limit on `/panel/auth/*`** (the ASP.NET Core rate
+    limiter), and a wrong login code logged as a warning with the IP. Why in this order: until
+    the API trusts the proxy's `X-Forwarded-For`, every request seems to come from the proxy, so
+    a per-IP limit would block everyone at once and the logged IP would be useless. The
+    per-number code limits (ADR 0012) stay; this adds a limit on one machine trying many numbers.
+  - **Two database users:** the table owner runs migrations only; the API connects as a user
+    that can read and write rows but cannot change the schema. Why: the owner of `audit_entries`
+    can drop its append-only trigger (ADR 0013), so while the API connects as the owner, a bug or
+    a break-in can still erase the audit. The running API therefore does not hold the owner's
+    password (see the migration note in docs/ARCHITECTURE.md).
+  - **`AllowedHosts`** set to the real domains instead of `*`, so a request with a forged `Host`
+    header is refused.
+  - **Fresh production keys:** the JWT signing key, the IBAN key and the database passwords are
+    made new for the server, never copied from a development `.env`, because development keys
+    sit on the developer's machine and in its logs.
 - **3.2 Server setup.** Hardening, firewall, non-root deploy user, written runbook.
   *Done when:* a second person could repeat the setup from the document.
 - **3.3 Backups.** Nightly dump, copy off the server, a tested restore. *Done when:* a restore
@@ -544,7 +568,10 @@ Goal: shops and foreign buyers order in bulk, and bulk orders drive production.
 
 ## Phase 14 — Hardening
 
-- **14.1 Security review.** Auth, permissions, uploads, rate limits, dependency audit.
+- **14.1 Security review.** Auth, permissions, uploads, rate limits, dependency audit, and a
+  secret scan of the whole git history with gitleaks. Why gitleaks (added 1405/09/02): the check
+  on that day was a hand-written grep over 16 commits and found nothing, but gitleaks knows far
+  more key formats than a hand-written pattern.
   *Done when:* the review's findings are fixed or accepted in writing.
 - **14.2 Performance.** Realistic data volume, slow-query review, indexes, page weight on mobile
   internet. *Done when:* the main screens stay fast with three years of data.
