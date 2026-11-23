@@ -25,11 +25,9 @@ public sealed record ContractorListItem(
 
 public sealed class SearchContractorsValidator : AbstractValidator<SearchContractorsQuery>
 {
-    public const int SearchMaxLength = 100;
-
     public SearchContractorsValidator()
     {
-        RuleFor(query => query.Search).MaximumLength(SearchMaxLength);
+        RuleFor(query => query.Search).MaximumLength(PartySearch.SearchMaxLength);
         RuleFor(query => query.Page).GreaterThanOrEqualTo(1);
         RuleFor(query => query.PageSize).InclusiveBetween(1, Paging.MaxPageSize);
     }
@@ -53,7 +51,7 @@ internal sealed class SearchContractorsHandler(IAppDbContext db)
         var term = PersianText.Normalize(query.Search);
         if (term.Length > 0)
         {
-            var digits = MobileDigits(term);
+            var digits = PartySearch.MobileDigits(term);
 
             // The mobile is a value object stored as text through a converter; the cast through
             // object lets EF search the stored text for part of the number, which comparing value
@@ -74,34 +72,18 @@ internal sealed class SearchContractorsHandler(IAppDbContext db)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        var names = await ContractorViews.StageNamesAsync(db, found.SelectMany(c => c.StageIds), cancellationToken);
+        var names = await PartyStages.NamesAsync(db, found.SelectMany(c => c.StageIds), cancellationToken);
 
         var items = found
             .Select(c => new ContractorListItem(
                 c.Id,
                 c.FullName,
                 c.MobileNumber.Value,
-                ContractorViews.StagesOf(c.StageIds, names),
+                PartyStages.Of(c.StageIds, names),
                 c.Iban?.Masked,
                 c.IsActive))
             .ToList();
 
         return new PagedList<ContractorListItem>(items, totalCount, page, pageSize);
-    }
-
-    /// <summary>
-    /// The digits to look for in the stored mobiles (<c>09XXXXXXXXX</c>), or null when the search
-    /// is not a phone number. A whole number in any form (<c>+98…</c>, Persian digits) becomes the
-    /// stored form; a part, such as the last four digits, is looked for as typed.
-    /// </summary>
-    private static string? MobileDigits(string term)
-    {
-        if (MobileNumber.Create(term) is { IsSuccess: true } whole)
-        {
-            return whole.Value.Value;
-        }
-
-        var digits = Digits.ToLatin(term).Replace(" ", string.Empty, StringComparison.Ordinal).Replace("-", string.Empty, StringComparison.Ordinal);
-        return Digits.AreAllLatin(digits) ? digits : null;
     }
 }

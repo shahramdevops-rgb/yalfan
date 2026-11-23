@@ -51,7 +51,7 @@ internal sealed class CreateContractorHandler(IAppDbContext db, IClock clock)
             contractor.ChangeIban(Iban.Create(command.Iban).Value);
         }
 
-        if (!await ContractorViews.StagesExistAsync(db, stageIds, cancellationToken))
+        if (!await PartyStages.ExistAsync(db, stageIds, cancellationToken))
         {
             return PartiesErrors.StageNotFound;
         }

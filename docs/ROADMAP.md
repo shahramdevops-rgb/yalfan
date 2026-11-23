@@ -2,9 +2,9 @@
 
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
-red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3 on
-1405/09/02. Next: 1.4 (workers), after its own details are asked. Read `docs/ARCHITECTURE.md`
-first.
+red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3 and
+1.4 on 1405/09/02. Next: 1.5 (rate cards), after its own details are asked. Read
+`docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -210,6 +210,30 @@ Answered by the developer on 1405/09/02, for 1.3 (all the proposals accepted; AD
 - **No delete; deactivate and reactivate**, because work orders and accounts (Phase 2) will
   point at contractors. An inactive contractor is left out of pickers; his history stays.
 
+Answered by the developer on 1405/09/02, for 1.4 (ADR 0020; the proposals he did not change were
+accepted as written):
+- **Every worker has a mobile**, so it is required, an Iranian mobile and one worker per number,
+  because in Phase 10 it is the worker's login and it catches the same worker entered twice.
+  **But some workers may not manage the app**, for example a woman who cannot read well enough;
+  for them the office handles the account by hand (see 10.6). The same number may also be a
+  contractor's or a staff user's, because one person may be in two lists (a manager on the
+  payroll, a worker who also takes piecework home); Phase 10 decides how one login shows both.
+- **The IBAN is optional for now**; when payouts start it must be verified against the holder's
+  national ID (15.1). Otherwise as in 1.3: every staff role may set it, screens show the last
+  four digits, only the owner sees the whole number.
+- **Profile: full name, mobile, stages, start date, optional IBAN, optional notes.** No national
+  ID or insurance number yet, because nothing uses them before Phase 5 and 15.
+- **The job is the stages** from the shared list, **none or more**, because in-house work is
+  recorded by stage with the contractors' screens (5.2), and someone like a storekeeper does no
+  stage (the notes say what that person does).
+- **The start date is required and not after today**, because payroll and the length of service
+  count from it and a future date is almost always a mistyped year; an approximate day is typed
+  when the exact one is not known.
+- **No leaving date and no delete**: a worker who leaves is deactivated, because the rules of a
+  final settlement are not known yet (5.5 adds the date if it needs it) and attendance and
+  payslips will point at the worker. Names may repeat. The device number comes with 4.1 and pay
+  terms with 5.1.
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -249,6 +273,15 @@ Answered by the developer on 1405/09/02, for 1.3 (all the proposals accepted; AD
   wrote nothing for a row that is only its key (a contractor's stage); such link rows now record
   their key columns (ADR 0013 updated).
 - **1.4 Workers.** In-house worker profile, job, start date, active flag, optional IBAN as in 1.3. *Done when:* same as 1.3.
+  **Done 1405/09/02:** 382 .NET tests pass (40 new: 11 domain, 29 integration on PostgreSQL),
+  26 panel tests pass, build has 0 warnings. ADR 0020. API `/panel/parties/workers` for every
+  staff role, the same shape as the contractors: search (part of the name or of the mobile,
+  Persian alphabetical order, active filter, pages), read, add, save the profile, deactivate and
+  activate, set or remove the IBAN; the whole IBAN only for the owner, logged. The stages are
+  `worker_stages` with foreign keys to `stages`; the start date is a `date` column. The IBAN
+  needed no new code: the encryption and the audit's redaction apply to it by type (ADR 0019).
+  The name and notes checks, the stage lookups and the search box are shared with the
+  contractors; there is no common base class, because the two diverge from Phase 4.
 - **1.5 Rate cards.** Rate per product × stage, with a start date; history kept. *Done when:* the
   rate valid on a given date can be queried and old rates are never overwritten.
 - **1.6 Panel screens.** Products, stages, contractors, workers, rates; and the owner's users
@@ -492,6 +525,9 @@ Open questions: O.11; which events send an SMS; who pays for SMS volume.
 - **10.6 Worker view.** The same app for in-house workers: today's and this month's attendance,
   lateness and overtime, piecework, advances, payslips and payments, always up to date.
   *Done when:* tests prove one worker can never read another's data.
+  Said by the developer on 1405/09/02 (ADR 0020): some workers will not manage the app, for
+  example a woman who cannot read well enough, so the app is never the only way: the office
+  prints or reads the same statement (5.6), and nothing waits for a worker to log in.
 - **10.7 Requests.** A worker asks for leave or an advance in the app; the manager approves with
   one tap. *Done when:* an approved request lands in Attendance or the ledger without retyping.
 
@@ -631,6 +667,9 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 - **15.1 Payee bank accounts.** IBAN with checksum validation, encrypted storage, masked display,
   verification state, holding period after a change, audit. *Done when:* an unverified or
   just-changed IBAN cannot be put in a batch.
+  Decided by the developer on 1405/09/02 (ADR 0020): the IBAN is verified against the holder's
+  **national ID**, so this task adds the national ID to contractors and workers (they have none
+  until then, because nothing else uses it).
 - **15.2 Payout batch.** Build a batch from approved, unpaid payroll, settlements and advances;
   per-item idempotency key and status; checks (duplicates, ceilings, total against balance);
   owner approval. *Done when:* the same payable can never be in two open batches.

@@ -444,6 +444,58 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                     b.ToTable("contractors", (string)null);
                 });
 
+            modelBuilder.Entity("Yalfan.Domain.Parties.Worker", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("full_name")
+                        .UseCollation("fa-x-icu");
+
+                    b.Property<string>("Iban")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("iban")
+                        .HasAnnotation("Yalfan:Audit:Redacted", true);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("MobileNumber")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("mobile_number");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_workers");
+
+                    b.HasIndex("MobileNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_workers_mobile_number");
+
+                    b.ToTable("workers", (string)null);
+                });
+
             modelBuilder.Entity("Yalfan.Domain.Production.Stage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -737,6 +789,41 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                                 .OnDelete(DeleteBehavior.Restrict)
                                 .IsRequired()
                                 .HasConstraintName("fk_contractor_stages_stages_stage_id");
+                        });
+
+                    b.Navigation("Stages");
+                });
+
+            modelBuilder.Entity("Yalfan.Domain.Parties.Worker", b =>
+                {
+                    b.OwnsMany("Yalfan.Domain.Parties.WorkerStage", "Stages", b1 =>
+                        {
+                            b1.Property<Guid>("WorkerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("worker_id");
+
+                            b1.Property<Guid>("StageId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("stage_id");
+
+                            b1.HasKey("WorkerId", "StageId")
+                                .HasName("pk_worker_stages");
+
+                            b1.HasIndex("StageId")
+                                .HasDatabaseName("ix_worker_stages_stage_id");
+
+                            b1.ToTable("worker_stages", (string)null);
+
+                            b1.HasOne("Yalfan.Domain.Production.Stage", null)
+                                .WithMany()
+                                .HasForeignKey("StageId")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired()
+                                .HasConstraintName("fk_worker_stages_stages_stage_id");
+
+                            b1.WithOwner()
+                                .HasForeignKey("WorkerId")
+                                .HasConstraintName("fk_worker_stages_workers_worker_id");
                         });
 
                     b.Navigation("Stages");

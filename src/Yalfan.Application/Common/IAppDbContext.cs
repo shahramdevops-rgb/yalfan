@@ -33,5 +33,8 @@ public interface IAppDbContext
     /// <summary>Outside contractors; the stages each one does are reached through him (ADR 0019).</summary>
     DbSet<Contractor> Contractors { get; }
 
+    /// <summary>In-house workers; the stages each one does are reached through the worker (ADR 0020).</summary>
+    DbSet<Worker> Workers { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

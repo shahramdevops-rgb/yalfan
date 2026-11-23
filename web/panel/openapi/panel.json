@@ -823,6 +823,308 @@
         }
       }
     },
+    "/panel/parties/workers": {
+      "get": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedListOfWorkerListItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Parties"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkerCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/parties/workers/{id}": {
+      "get": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/parties/workers/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/parties/workers/{id}/activate": {
+      "post": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/parties/workers/{id}/iban": {
+      "get": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerIbanResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeIbanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Parties"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/production/stages": {
       "get": {
         "tags": [
@@ -1332,6 +1634,60 @@
           }
         }
       },
+      "CreateWorkerCommand": {
+        "required": [
+          "fullName",
+          "mobileNumber",
+          "stageIds",
+          "startDate",
+          "notes",
+          "iban"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mobileNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stageIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "startDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "iban": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "LoginCodeRequested": {
         "required": [
           "expiresInSeconds",
@@ -1442,6 +1798,35 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductListItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PagedListOfWorkerListItem": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "pageSize"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkerListItem"
             }
           },
           "totalCount": {
@@ -1666,6 +2051,53 @@
           }
         }
       },
+      "UpdateWorkerRequest": {
+        "required": [
+          "fullName",
+          "mobileNumber",
+          "stageIds",
+          "startDate",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mobileNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stageIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "startDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "UserSummary": {
         "required": [
           "id",
@@ -1722,6 +2154,115 @@
               {
                 "$ref": "#/components/schemas/CatalogOptionSummary"
               }
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkerDetails": {
+        "required": [
+          "id",
+          "fullName",
+          "mobileNumber",
+          "stages",
+          "startDate",
+          "notes",
+          "maskedIban",
+          "isActive",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "mobileNumber": {
+            "type": "string"
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageSummary"
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maskedIban": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkerIbanResponse": {
+        "required": [
+          "iban"
+        ],
+        "type": "object",
+        "properties": {
+          "iban": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkerListItem": {
+        "required": [
+          "id",
+          "fullName",
+          "mobileNumber",
+          "stages",
+          "startDate",
+          "maskedIban",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "mobileNumber": {
+            "type": "string"
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageSummary"
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "maskedIban": {
+            "type": [
+              "null",
+              "string"
             ]
           },
           "isActive": {

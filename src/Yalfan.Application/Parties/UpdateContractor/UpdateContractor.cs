@@ -43,7 +43,7 @@ internal sealed class UpdateContractorHandler(IAppDbContext db) : ICommandHandle
         var mobile = MobileNumber.Create(command.MobileNumber).Value;
         var stageIds = command.StageIds ?? [];
 
-        if (!await ContractorViews.StagesExistAsync(db, stageIds, cancellationToken))
+        if (!await PartyStages.ExistAsync(db, stageIds, cancellationToken))
         {
             return PartiesErrors.StageNotFound;
         }

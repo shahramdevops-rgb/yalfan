@@ -13,9 +13,9 @@ namespace Yalfan.Domain.Parties;
 /// </summary>
 public sealed class Contractor : Entity
 {
-    public const int FullNameMaxLength = 100;
+    public const int FullNameMaxLength = PartyProfile.FullNameMaxLength;
 
-    public const int NotesMaxLength = 500;
+    public const int NotesMaxLength = PartyProfile.NotesMaxLength;
 
     private readonly List<ContractorStage> _stages = [];
 
@@ -80,21 +80,16 @@ public sealed class Contractor : Entity
         ArgumentNullException.ThrowIfNull(mobileNumber);
         ArgumentNullException.ThrowIfNull(stageIds);
 
-        var name = PersianText.Normalize(fullName);
-        if (name.Length == 0)
+        var name = PartyProfile.CheckFullName(fullName);
+        if (name.IsFailure)
         {
-            return PartiesErrors.FullNameRequired;
+            return name.Error;
         }
 
-        if (name.Length > FullNameMaxLength)
+        var checkedNotes = PartyProfile.CheckNotes(notes);
+        if (checkedNotes.IsFailure)
         {
-            return PartiesErrors.FullNameTooLong;
-        }
-
-        var checkedNotes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
-        if (checkedNotes?.Length > NotesMaxLength)
-        {
-            return PartiesErrors.NotesTooLong;
+            return checkedNotes.Error;
         }
 
         var stages = stageIds.ToHashSet();
@@ -103,9 +98,9 @@ public sealed class Contractor : Entity
             return PartiesErrors.StageRequired;
         }
 
-        FullName = name;
+        FullName = name.Value;
         MobileNumber = mobileNumber;
-        Notes = checkedNotes;
+        Notes = checkedNotes.Value;
 
         _stages.RemoveAll(stage => !stages.Contains(stage.StageId));
         foreach (var stageId in stages.Where(id => _stages.TrueForAll(stage => stage.StageId != id)))

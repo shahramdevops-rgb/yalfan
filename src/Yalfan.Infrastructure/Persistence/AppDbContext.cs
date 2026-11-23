@@ -30,6 +30,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, IbanCip
 
     public DbSet<Contractor> Contractors => Set<Contractor>();
 
+    public DbSet<Worker> Workers => Set<Worker>();
+
     /// <summary>Written only by the audit interceptor; read by a history screen later (1.6).</summary>
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
