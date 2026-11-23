@@ -289,7 +289,10 @@ accepted as written):
   with ADR 0012); and, for the owner, the change history of a record from the audit (added
   1405/08/28 with ADR 0013). *Done when:* the operator can enter a real model with its rates
   without help. The stage list is shown in its stored order (the order of the work), not sorted
-  by name (ADR 0018).
+  by name (ADR 0018). Added 1405/09/02 (ADR 0002 point 9): the first amounts on screen are the
+  rates, so this task builds the money display used everywhere after it: the Rial figure, and
+  under it a quieter line with the Toman equivalent and its words («۱۲٬۰۰۰ تومان · دوازده هزار
+  تومان»), following the typing under an amount field.
 
 ## Phase 2 — Contractor work and accounts
 
@@ -705,7 +708,7 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 |---|---|---|
 | Q.1 | Real stages of making a bag, and which are done outside. **Answered 1405/09/01:** cutting (in-house only), sewing (contractors or in-house day-wage workers), packing; one shared list, no route per model (ADR 0018) | Phase 1 |
 | Q.2 | Contractor pay method and rates; what happens to rejects | Phase 2 |
-| Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002 | 0.3 |
+| Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002. **Added 1405/09/02:** under every Rial amount shown, its Toman equivalent and its words in Toman (ADR 0002 point 9) | 0.3 |
 | Q.4 | Do contractors receive raw material or cut pieces | Phase 2 / 6 |
 | Q.5 | Shift hours, grace period, overtime, leave rules | Phase 4 |
 | Q.6 | In-house pay types; legal deductions in scope or not | Phase 5 |

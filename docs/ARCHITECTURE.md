@@ -173,8 +173,9 @@ ProductionOrder (model, colours, quantity, due date)
   bounced, returned). Wholesale selling in Iran runs on them.
 - **Opening balances** are ordinary entries dated on the go-live day, so paper history ends and
   system history begins at one clear point.
-- Amounts are whole numbers with a currency code, in **Rial everywhere**: stored, sent by the
-  API and shown on every screen and print-out. There is no Toman in the system (ADR 0002).
+- Amounts are whole numbers with a currency code, in **Rial**: stored, sent by the API, typed
+  and shown on every screen and print-out. Under every Rial amount shown, a quieter line gives
+  its Toman equivalent and its words; Toman is display-only and never stored (ADR 0002).
 
 ### 7.3 Stock
 

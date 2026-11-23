@@ -1,7 +1,8 @@
 import { t } from '../i18n/fa';
 
-// Money is Rial everywhere: stored, in the API and on every screen, and every amount shown is
-// labelled «ریال» (ADR 0002). Never Toman.
+// Money is Rial: stored, in the API, typed and shown, and every amount shown is labelled «ریال»
+// (ADR 0002). Under every amount shown, a quieter line gives its Toman equivalent and its words
+// (ADR 0002 point 9, built with the first screen that shows an amount in task 1.6).
 
 const rial = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
 
