@@ -89,4 +89,4 @@ dotnet tool restore             # once
 dotnet ef migrations add <Name> --project src/Yalfan.Infrastructure --startup-project src/Yalfan.Api --output-dir Persistence/Migrations
 ```
 
-Next step: task 0.9 (CI lint and format checks). The Phase 1 questions must be answered before Phase 1.
+Next step: see the status at the top of [docs/ROADMAP.md](docs/ROADMAP.md).

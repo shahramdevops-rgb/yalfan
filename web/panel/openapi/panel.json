@@ -1214,6 +1214,110 @@
         }
       }
     },
+    "/panel/production/rates": {
+      "get": {
+        "tags": [
+          "Production"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "on",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateCardDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Production"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPieceRateCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PieceRateEntry"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/production/rates/history": {
+      "get": {
+        "tags": [
+          "Production"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "stageId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PieceRateEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/users": {
       "post": {
         "tags": [
@@ -1246,6 +1350,45 @@
   },
   "components": {
     "schemas": {
+      "AddPieceRateCommand": {
+        "required": [
+          "productId",
+          "stageId",
+          "amount",
+          "startsOn"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "stageId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "amount": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "startsOn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        }
+      },
       "AddVariantRequest": {
         "required": [
           "fabricId",
@@ -1843,6 +1986,41 @@
           }
         }
       },
+      "PieceRateEntry": {
+        "required": [
+          "id",
+          "stage",
+          "amount",
+          "startsOn",
+          "enteredAt",
+          "isReplaced"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/StageSummary"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startsOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "enteredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isReplaced": {
+            "type": "boolean"
+          }
+        }
+      },
       "ProductDetails": {
         "required": [
           "id",
@@ -1941,6 +2119,39 @@
           }
         }
       },
+      "RateCardDetails": {
+        "required": [
+          "productId",
+          "productNumber",
+          "productName",
+          "on",
+          "stages"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "on": {
+            "type": "string",
+            "format": "date"
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageRate"
+            }
+          }
+        }
+      },
       "RenameRequest": {
         "required": [
           "name"
@@ -1993,6 +2204,33 @@
           },
           "user": {
             "$ref": "#/components/schemas/UserSummary"
+          }
+        }
+      },
+      "StageRate": {
+        "required": [
+          "stage",
+          "amount",
+          "startsOn"
+        ],
+        "type": "object",
+        "properties": {
+          "stage": {
+            "$ref": "#/components/schemas/StageSummary"
+          },
+          "amount": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "startsOn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },

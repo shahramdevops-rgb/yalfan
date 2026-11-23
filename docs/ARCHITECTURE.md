@@ -125,8 +125,8 @@ Each module is a folder with the same name in Domain, Application and Api.
 |---|---|---|
 | **Identity** | User, OtpCode, RefreshToken | Everyone logs in with mobile + SMS code, no passwords (ADR 0012). Permissions come later |
 | **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1) |
-| **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger. Contractors do one or more stages; IBANs are stored encrypted and shown masked (ADR 0019). Workers do none or more stages and have a start date (ADR 0020) |
-| **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, RateCard | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018) |
+| **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger. Contractors do one or more stages; IBANs are stored encrypted and shown masked (ADR 0019). Workers do none or more stages and have a start date (ADR 0020). In-house workers are paid a day wage, contractors by the piece (answered 1405/09/02) |
+| **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, PieceRate | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018). Piece rates are an append-only rate card per model and stage, with start dates (ADR 0021) |
 | **Inventory** | Material, Bom, Warehouse, StockMovement, StockCount | Stock is a ledger of movements. See 7.3 |
 | **Ledger** | LedgerEntry, CashAccount, Payment, Cheque, Expense | All money. See 7.2 |
 | **Attendance** | Device, Punch, Shift, AttendanceDay, Leave | Live board. See 8 |
@@ -153,6 +153,13 @@ ProductionOrder (model, colours, quantity, due date)
 - **Wage method stays open.** Pay is always *stage × accepted quantity × rate*. A product whose
   whole bag is paid as one price is simply a product with one paid stage. So per-bag, per-stage and
   mixed pay all fit, and the real rates can be entered later.
+- **Who is paid by the piece** (answered 1405/09/02): outside contractors, by the number of
+  pieces (کنترات). In-house workers are paid a day wage, held per worker in payroll (5.1), not in
+  the rate card.
+- **Rate card** (ADR 0021): append-only `PieceRate` entries of model × stage × amount in Rial ×
+  start date, the same for every fabric, colour, size and contractor. The rate in force on a day
+  is the latest start date that has come; a mistyped rate is corrected by a later entry with
+  the same start date. The database refuses UPDATE and DELETE on the table.
 - **Rate snapshot.** A work order copies the rate when it is issued. Changing a rate card later
   never changes old work orders. The same rule holds for material cost and selling price.
 - **Rework and rejects** stay on the contractor's record: they drive the quality numbers and can
@@ -534,7 +541,7 @@ server in the developer's.
 | # | Decision | Written in |
 |---|---|---|
 | 0001 | Modular monolith with Clean Architecture | 0.1 |
-| 0002 | Money: stored unit, currency code, no deletion, calculated balances | 0.3 / 2.4 |
+| 0002 | Money: stored unit, currency code, no deletion, calculated balances; Toman and words shown under every amount | 0.3 (amended 1405/09/02) / 2.4 |
 | 0003 | Rates and prices are snapshotted on the document | 2.2 |
 | 0004 | Stock as a movement ledger; a contractor is a warehouse | 6.2 |
 | 0005 | Gregorian UTC storage, localized display | 0.3 |
@@ -553,3 +560,4 @@ server in the developer's.
 | 0018 | Production stages: one shared list, no route per model | 1.2 (written) |
 | 0019 | Contractors; IBANs stored encrypted, shown masked | 1.3 (written) |
 | 0020 | In-house workers: stages as the job, start date, mobile unique among workers | 1.4 (written) |
+| 0021 | Piece rates: an append-only rate card per model and stage | 1.5 (written) |

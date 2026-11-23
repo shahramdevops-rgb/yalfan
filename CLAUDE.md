@@ -6,7 +6,7 @@ and about 40 outside contractors paid by the piece. Three front doors:
 - The contractor panel: each contractor sees only his own work and account, on a phone. Persian only.
 - The store: retail, wholesale and foreign buyers. Persian, Arabic, English.
 
-Status: Phase 0 (foundation) in progress; see docs/ROADMAP.md for the next task. The developer
+Status: Phase 1 (master data) in progress; see docs/ROADMAP.md for the next task. The developer
 works alone; the workshop owner is his brother and is treated as a client.
 
 ## Where things are

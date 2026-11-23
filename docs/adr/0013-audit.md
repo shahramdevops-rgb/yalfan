@@ -100,3 +100,11 @@ owner's users screen (1.6) uses it too.
   adding or removing a contractor's stage left no entry at all. Every `Iban` property is marked
   redacted by type in `AppDbContext` (`IbanMapping`), not property by property, so no IBAN can be
   audited with its value by forgetting the mark.
+  **Update 1405/09/02 (task 1.5, ADR 0021):** complex properties, the value objects stored in
+  their owner's own columns, are audited as fields of the row. The first is `Money` on a piece
+  rate (`amount`, `currency`). Each part is named after its **column** in camelCase, not after
+  its C# property, because the part names repeat (`Amount` inside a `Money` called `Amount`)
+  and only the column name is unique in the row: `{"amount": {"new": 1200000}, "currency":
+  {"new": "IRR"}}`; a `Money` property mapped with the default column names gives
+  `priceAmount`, `priceCurrency`. Owned types that share their owner's table are still not
+  handled; nothing uses one.

@@ -1,0 +1,73 @@
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Yalfan.Application.Common;
+using Yalfan.Application.Common.Handlers;
+using Yalfan.Domain.Common;
+using Yalfan.Domain.Production;
+
+namespace Yalfan.Application.Production.AddPieceRate;
+
+/// <summary>
+/// A new entry in the rate card: the pay for one piece of a model at a stage, in Rial, from a
+/// start date on (ADR 0021). The start date may be in the past or the future. Entering a rate
+/// with the start date of an existing entry corrects that entry; the old one stays, replaced.
+/// </summary>
+public sealed record AddPieceRateCommand(Guid? ProductId, Guid? StageId, long? Amount, DateOnly? StartsOn);
+
+public sealed class AddPieceRateValidator : AbstractValidator<AddPieceRateCommand>
+{
+    public AddPieceRateValidator()
+    {
+        RuleFor(command => command.ProductId).NotEmpty();
+        RuleFor(command => command.StageId).NotEmpty();
+        RuleFor(command => command.Amount).NotNull().GreaterThan(0);
+        RuleFor(command => command.StartsOn).NotNull();
+    }
+}
+
+internal sealed class AddPieceRateHandler(IAppDbContext db, IClock clock)
+    : ICommandHandler<AddPieceRateCommand, PieceRateEntry>
+{
+    public async Task<Result<PieceRateEntry>> Handle(AddPieceRateCommand command, CancellationToken cancellationToken)
+    {
+        var productId = command.ProductId!.Value;
+        var stageId = command.StageId!.Value;
+
+        if (!await db.Products.AnyAsync(product => product.Id == productId, cancellationToken))
+        {
+            return ProductionErrors.ProductNotFound;
+        }
+
+        var stageName = await db.Stages
+            .Where(stage => stage.Id == stageId)
+            .Select(stage => stage.Name)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (stageName is null)
+        {
+            return ProductionErrors.StageNotFound;
+        }
+
+        var created = PieceRate.Create(
+            productId,
+            stageId,
+            Money.Rial(command.Amount!.Value),
+            command.StartsOn!.Value,
+            clock.UtcNow);
+        if (created.IsFailure)
+        {
+            return created.Error;
+        }
+
+        var rate = created.Value;
+        db.PieceRates.Add(rate);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return new PieceRateEntry(
+            rate.Id,
+            new StageSummary(stageId, stageName),
+            rate.Amount.Amount,
+            rate.StartsOn,
+            rate.EnteredAt,
+            IsReplaced: false);
+    }
+}

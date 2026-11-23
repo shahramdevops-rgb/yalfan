@@ -2,9 +2,8 @@
 
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
-red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3 and
-1.4 on 1405/09/02. Next: 1.5 (rate cards), after its own details are asked. Read
-`docs/ARCHITECTURE.md` first.
+red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
+and 1.5 on 1405/09/02. Next: 1.6 (the Phase 1 panel screens). Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -44,13 +43,13 @@ developer runs and maintains it. Phases wait for these.
 |---|---|---|
 | O.1 | Register `yalfan.ir` (IRNIC handle in the owner's name) and `yalfan.com`. Both are free today and anyone can take them | Now |
 | O.2 | Write down the real production stages and which contractors do which stage. **Stages answered 1405/09/01** (cutting, sewing, packing; ADR 0018). Which contractor does which stage is ticked per contractor by the operator (1.3, ADR 0019); the owner gives the list when the contractors are entered | Phase 1 |
-| O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates | Phase 2 |
+| O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates. **How, answered 1405/09/02:** by the piece (کنترات), per model and stage (ADR 0021). Today's rates are still to be listed; the operator enters them in the 1.6 screens | Phase 2 |
 | O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator | Phase 3 |
 | O.5 | Collect from the paper books: each contractor's balance, work still out with contractors | Phase 3 |
 | O.6 | Buy a server (ParsPack or another provider) in the developer's name: Iranian VPS, 2 cores, 4 GB, ~80 GB SSD, upgradable to 4 cores and 8 GB for Phase 11. Criteria in docs/ARCHITECTURE.md 13.1; confirmed in task 3.1 | Phase 3 |
 | O.7 | Buy the attendance device **only after** task 4.0 names the model | Phase 4 |
 | O.8 | Decide shift hours, allowed lateness, overtime and leave rules | Phase 4 |
-| O.9 | Decide how each in-house worker is paid (fixed, piecework, mixed) | Phase 5 |
+| O.9 | Decide how each in-house worker is paid (fixed, piecework, mixed). **Answered 1405/09/02: a day wage** (روزمزد) | Phase 5 |
 | O.9b | Open a separate bank account used only for payouts; documents for a bank or provider contract if 15.0 says go | Phase 15 |
 | O.10 | List materials and count the stock on hand; write the material recipe of each model | Phase 6 |
 | O.11 | An SMS provider account and a **service line** (خط خدماتی) with a login-code template, in the owner's name. Moved earlier on 1405/08/27: staff log in with SMS codes (ADR 0012), so the panel cannot go live without it. The developer gets the service line early instead of waiting for the store | Phase 3 (task 3.0) |
@@ -234,6 +233,31 @@ accepted as written):
   payslips will point at the worker. Names may repeat. The device number comes with 4.1 and pay
   terms with 5.1.
 
+Answered by the developer on 1405/09/02, for 1.5 (ADR 0021; the proposals he did not change were
+accepted as written):
+- **In-house workers are paid a day wage; outside contractors are paid by the piece** (کنترات,
+  by the number of pieces). So the rate card holds the contractors' piece rates only, and each
+  worker's day wage belongs to 5.1 (O.9 answered).
+- **A rate is per model and stage**, the same for every fabric, colour and size, because the
+  operator then types a few numbers per model, not dozens; if a size is ever paid differently,
+  an optional size column whose empty value means "all sizes" leaves the existing rates as they
+  are.
+- **One rate for every contractor**, for the same reason; a contractor-specific rate would be the
+  same kind of optional column.
+- **The start date may be in the past or the future**: future, because a raise announced for
+  next month is entered now and starts on its day; past, because a rate taken over from the
+  paper book is entered with its real date. Work orders already issued keep their own copy.
+- **A mistyped rate is corrected by entering the right one with the same start date**; the later
+  entry wins and the wrong one stays in the history as replaced, because nothing is overwritten
+  and it stays visible who changed what.
+- **Per piece, in Rial, a whole number above zero**; a stage that is not paid has no rate,
+  because work orders count pieces and a zero is almost always a forgotten amount.
+- **Every staff role may enter rates**, because 1.6 expects the operator to enter a model with
+  its rates; every entry is audited.
+- **Money display (changes ADR 0002):** wherever an amount is written, its Toman equivalent and
+  its words in Toman go under it, so nobody confuses Rial and Toman (ADR 0002 point 9, built in
+  1.6).
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -284,6 +308,16 @@ accepted as written):
   contractors; there is no common base class, because the two diverge from Phase 4.
 - **1.5 Rate cards.** Rate per product × stage, with a start date; history kept. *Done when:* the
   rate valid on a given date can be queried and old rates are never overwritten.
+  **Done 1405/09/02:** 412 .NET tests pass (30 new: 12 domain, 18 integration on PostgreSQL),
+  26 panel tests pass, build has 0 warnings. ADR 0021. `PieceRate` entries (model, stage, Rial
+  amount, start date, entry time) in `piece_rates`, the first money in the database (`amount`
+  bigint, `currency`). API `/panel/production/rates` for every staff role: add a rate; the
+  model's rate card on a day (default today in Tehran), every stage in the order of the work
+  with its rate in force or none; the history of a model or of one stage, newest first, with
+  replaced entries flagged. A trigger refuses UPDATE, DELETE and TRUNCATE on the table, proven
+  by tests. Found on the way: the audit skipped complex properties, so a `Money` would have been
+  saved without its amount in the history; their parts are now audited as fields named after
+  their columns (ADR 0013 updated).
 - **1.6 Panel screens.** Products, stages, contractors, workers, rates; and the owner's users
   screen (list, add, deactivate, change a user's mobile when a phone is lost; added 1405/08/27
   with ADR 0012); and, for the owner, the change history of a record from the audit (added
@@ -410,10 +444,15 @@ Open questions: O.7, O.8; fingerprint or face; one door or more; a wall screen o
 
 Goal: month-end pay for the 20 workers comes out of the system.
 
-Open questions: O.9; insurance and legal deductions in or out; pay period (monthly or weekly).
+Open questions: insurance and legal deductions in or out; pay period (monthly or weekly). O.9 is
+answered: in-house workers are paid a day wage (1405/09/02).
 
 - **5.1 Pay setup.** Per worker: fixed salary, hourly, piecework or mixed; overtime and lateness
   factors, with history. *Done when:* the terms valid on any date can be queried.
+  Answered 1405/09/02: in-house workers are paid **a day wage**, so the terms are each worker's
+  day wage with a start date, kept like the piece rates (ADR 0021: entries, never overwritten);
+  piecework is for contractors only. Whether a day wage ever comes with a piece bonus is asked
+  before Phase 5.
 - **5.2 In-house work records.** Work orders for in-house workers or teams using the Phase 2
   model. *Done when:* an in-house stage is recorded with the same screens as a contractor's.
 - **5.3 Advances.** Advance against pay, posted to the worker's ledger. *Done when:* advances
@@ -707,11 +746,11 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 | # | Question | Blocks |
 |---|---|---|
 | Q.1 | Real stages of making a bag, and which are done outside. **Answered 1405/09/01:** cutting (in-house only), sewing (contractors or in-house day-wage workers), packing; one shared list, no route per model (ADR 0018) | Phase 1 |
-| Q.2 | Contractor pay method and rates; what happens to rejects | Phase 2 |
+| Q.2 | Contractor pay method and rates; what happens to rejects. **Method answered 1405/09/02:** by the piece, per model and stage (ADR 0021); rejects still open | Phase 2 |
 | Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002. **Added 1405/09/02:** under every Rial amount shown, its Toman equivalent and its words in Toman (ADR 0002 point 9) | 0.3 |
 | Q.4 | Do contractors receive raw material or cut pieces | Phase 2 / 6 |
 | Q.5 | Shift hours, grace period, overtime, leave rules | Phase 4 |
-| Q.6 | In-house pay types; legal deductions in scope or not | Phase 5 |
+| Q.6 | In-house pay types; legal deductions in scope or not. **Pay type answered 1405/09/02: a day wage**; legal deductions still open | Phase 5 |
 | Q.7 | Wholesale price tiers, credit and return policy | Phase 8 |
 | Q.8 | Third language is English (assumed) | Phase 11 |
 | Q.9 | Where the store is served from for foreign visitors | Phase 11 |

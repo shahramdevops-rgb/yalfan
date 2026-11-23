@@ -28,6 +28,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, IbanCip
 
     public DbSet<Stage> Stages => Set<Stage>();
 
+    public DbSet<PieceRate> PieceRates => Set<PieceRate>();
+
     public DbSet<Contractor> Contractors => Set<Contractor>();
 
     public DbSet<Worker> Workers => Set<Worker>();

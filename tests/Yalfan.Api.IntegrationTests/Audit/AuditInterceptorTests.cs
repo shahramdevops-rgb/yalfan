@@ -110,6 +110,31 @@ public sealed class AuditInterceptorTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task The_parts_of_a_value_object_in_the_row_are_fields_named_after_their_columns()
+    {
+        await using var db = NewContext();
+        var priced = new Priced(Money.Rial(100));
+        db.Priced.Add(priced);
+        await db.SaveChangesAsync(Cancel);
+
+        priced.Price = Money.Rial(250);
+        await db.SaveChangesAsync(Cancel);
+
+        var entries = await db.AuditEntries.Where(e => e.EntityId == priced.Id.ToString()).ToListAsync(Cancel);
+        var created = Parse(entries.Single(e => e.Action == AuditAction.Created).Changes);
+        var updated = Parse(entries.Single(e => e.Action == AuditAction.Updated).Changes);
+
+        Assert.Equal(100, created.GetProperty("priceAmount").GetProperty("new").GetInt64());
+        Assert.Equal("IRR", created.GetProperty("priceCurrency").GetProperty("new").GetString());
+
+        // Only the part that changed, as for any other field.
+        var amount = Assert.Single(updated.EnumerateObject());
+        Assert.Equal("priceAmount", amount.Name);
+        Assert.Equal(100, amount.Value.GetProperty("old").GetInt64());
+        Assert.Equal(250, amount.Value.GetProperty("new").GetInt64());
+    }
+
+    [Fact]
     public async Task Changing_or_deleting_an_audit_entry_in_code_is_refused()
     {
         await using var db = NewContext();
@@ -155,6 +180,8 @@ public sealed class AuditInterceptorTests : IAsyncLifetime
 
         public DbSet<Ignored> Ignored => Set<Ignored>();
 
+        public DbSet<Priced> Priced => Set<Priced>();
+
         public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -173,6 +200,18 @@ public sealed class AuditInterceptorTests : IAsyncLifetime
                 ignored.HasKey(i => i.Id);
                 ignored.ExcludeFromAudit();
             });
+
+            // Money as the product maps it (ADR 0002), with the default column names.
+            modelBuilder.Entity<Priced>(priced =>
+            {
+                priced.HasKey(p => p.Id);
+                priced.ComplexProperty(p => p.Price, money =>
+                {
+                    money.Property(m => m.Amount);
+                    money.Property(m => m.Currency)
+                        .HasConversion(currency => currency.Code, code => Currency.FromCode(code).Value);
+                });
+            });
         }
     }
 }
@@ -187,4 +226,14 @@ public sealed class Gadget(string name, string secret) : Entity
 public sealed class Ignored(string note) : Entity
 {
     public string Note { get; set; } = note;
+}
+
+public sealed class Priced(Money price) : Entity
+{
+    private Priced()
+        : this(Money.Rial(0))
+    {
+    }
+
+    public Money Price { get; set; } = price;
 }

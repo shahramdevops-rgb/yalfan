@@ -143,9 +143,10 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IClock clock) : S
 
         // A link row, such as a stage a contractor does, has nothing but its key. Its key columns
         // are then its fields, or adding and removing it would leave an entry that says nothing.
-        var isLinkRow = entry.Properties.All(property => property.Metadata.IsPrimaryKey() || property.Metadata.IsConcurrencyToken);
+        var isLinkRow = !entry.ComplexProperties.Any()
+            && entry.Properties.All(property => property.Metadata.IsPrimaryKey() || property.Metadata.IsConcurrencyToken);
 
-        foreach (var property in entry.Properties)
+        foreach (var (property, name) in FieldsOf(entry))
         {
             var metadata = property.Metadata;
 
@@ -179,12 +180,50 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IClock clock) : S
                 field["redacted"] = true;
             }
 
-            // camelCase, the names the API uses, so a history screen can reuse its field labels.
-            changes[JsonNamingPolicy.CamelCase.ConvertName(metadata.Name)] = field;
+            changes[name] = field;
         }
 
         return changes;
     }
+
+    /// <summary>
+    /// Every stored field of the row with the name it is recorded under: camelCase, the names the
+    /// API uses, so a history screen can reuse its field labels. The parts of a value object
+    /// stored in the row's own columns (a complex property, such as the amount and currency of
+    /// <c>Money</c>) are fields too, named after their columns, because their own names repeat
+    /// ("amount" inside "Amount") and only the column name is unique in the row.
+    /// </summary>
+    private static IEnumerable<(PropertyEntry Property, string Name)> FieldsOf(EntityEntry entry)
+    {
+        foreach (var property in entry.Properties)
+        {
+            yield return (property, JsonNamingPolicy.CamelCase.ConvertName(property.Metadata.Name));
+        }
+
+        foreach (var field in entry.ComplexProperties.SelectMany(FieldsOf))
+        {
+            yield return field;
+        }
+    }
+
+    private static IEnumerable<(PropertyEntry Property, string Name)> FieldsOf(ComplexPropertyEntry complex)
+    {
+        foreach (var property in complex.Properties)
+        {
+            yield return (property, CamelCase(property.Metadata.GetColumnName()));
+        }
+
+        foreach (var field in complex.ComplexProperties.SelectMany(FieldsOf))
+        {
+            yield return field;
+        }
+    }
+
+    /// <summary>A snake_case column name in camelCase: "rate_currency" becomes "rateCurrency".</summary>
+    private static string CamelCase(string columnName) =>
+        string.Concat(columnName
+            .Split('_', StringSplitOptions.RemoveEmptyEntries)
+            .Select((part, index) => index == 0 ? part : char.ToUpperInvariant(part[0]) + part[1..]));
 
     /// <summary>The value as it is stored ("09121234567", "Owner"), not the C# object.</summary>
     private static JsonNode? ToJson(PropertyEntry property, object? value)

@@ -30,6 +30,9 @@ public interface IAppDbContext
     /// <summary>The shared list of stages (ADR 0018).</summary>
     DbSet<Stage> Stages { get; }
 
+    /// <summary>The rate card: append-only piece rates per model and stage (ADR 0021).</summary>
+    DbSet<PieceRate> PieceRates { get; }
+
     /// <summary>Outside contractors; the stages each one does are reached through him (ADR 0019).</summary>
     DbSet<Contractor> Contractors { get; }
 
