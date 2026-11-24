@@ -69,6 +69,39 @@ export function StagesIcon({ className = 'size-5' }: { className?: string }) {
   );
 }
 
+/** The models: a bag. */
+export function BagIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M5 8h14l-1.3 11.1a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9zM9 8a3 3 0 0 1 6 0" />
+    </svg>
+  );
+}
+
+export function CheckIcon({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg {...common} className={className} strokeWidth={2.4}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  );
+}
+
+export function PlusIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function SearchIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />
+    </svg>
+  );
+}
+
 /** The handle a row is dragged by. */
 export function GripIcon({ className = 'size-5' }: { className?: string }) {
   return (

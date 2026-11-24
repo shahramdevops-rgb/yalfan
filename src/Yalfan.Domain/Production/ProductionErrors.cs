@@ -25,6 +25,9 @@ public static class ProductionErrors
     /// <summary>The model a rate names does not exist (the catalog's own code is the catalog's).</summary>
     public static readonly Error ProductNotFound = Error.NotFound("production.product_not_found");
 
+    /// <summary>A new rate for a deactivated model; its old rates stay (task 1.6.2, ADR 0023).</summary>
+    public static readonly Error ProductInactive = Error.Rule("production.product_inactive");
+
     /// <summary>A piece rate is more than zero; a stage that is not paid has no rate at all.</summary>
     public static readonly Error RateNotPositive = Error.Validation("production.rate_not_positive");
 }

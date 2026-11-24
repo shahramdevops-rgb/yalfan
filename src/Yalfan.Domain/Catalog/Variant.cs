@@ -42,4 +42,22 @@ public sealed class Variant : Entity
     public Guid? SizeId { get; private set; }
 
     public bool IsActive { get; private set; }
+
+    internal void Activate() => IsActive = true;
+
+    internal void Deactivate() => IsActive = false;
+
+    /// <summary>
+    /// Gives a size to a bag of a model that had none, when the model gets its first size; the
+    /// SKU stays. Only <see cref="Product.AddSize"/> calls it.
+    /// </summary>
+    internal void AssignSize(Guid sizeId)
+    {
+        if (SizeId is not null)
+        {
+            throw new InvalidOperationException("A variant that has a size keeps it.");
+        }
+
+        SizeId = sizeId;
+    }
 }

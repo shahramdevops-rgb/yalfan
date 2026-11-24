@@ -4,6 +4,9 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { LoginPage } from '../features/auth/LoginPage';
 import { CatalogListsPage } from '../features/catalog/CatalogListsPage';
+import { ModelPage } from '../features/catalog/ModelPage';
+import { ModelsPage } from '../features/catalog/ModelsPage';
+import { NewModelPage } from '../features/catalog/NewModelPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { StagesPage } from '../features/production/StagesPage';
 import { sessionStore } from '../shared/api/client';
@@ -23,6 +26,9 @@ const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { index: true, element: <DashboardPage /> },
+          { path: 'models', element: <ModelsPage /> },
+          { path: 'models/new', element: <NewModelPage /> },
+          { path: 'models/:id', element: <ModelPage /> },
           { path: 'lists', element: <Navigate to="/lists/fabrics" replace /> },
           { path: 'lists/:kind', element: <CatalogListsPage /> },
           { path: 'stages', element: <StagesPage /> },

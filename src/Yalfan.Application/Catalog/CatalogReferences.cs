@@ -72,8 +72,13 @@ internal static class CatalogReferences
         };
     }
 
-    public static Task<bool> ProductNameTakenAsync(IAppDbContext db, string persianName, CancellationToken cancellationToken) =>
+    /// <summary>Whether another model has this Persian name; <paramref name="exceptId"/> is the model being renamed.</summary>
+    public static Task<bool> ProductNameTakenAsync(
+        IAppDbContext db,
+        string persianName,
+        Guid? exceptId,
+        CancellationToken cancellationToken) =>
         db.Products.AnyAsync(
-            p => p.Translations.Any(t => t.Locale == Locale.Fa && t.Name == persianName),
+            p => p.Id != exceptId && p.Translations.Any(t => t.Locale == Locale.Fa && t.Name == persianName),
             cancellationToken);
 }

@@ -37,7 +37,15 @@ interface SortableListProps<T> {
  */
 export function SortableList<T>({ items, getId, getName, onMove, locked = false, renderItem }: SortableListProps<T>) {
   const listRef = useRef<HTMLUListElement>(null);
-  const [drag, setDrag] = useState<Drag | null>(null);
+  // The handlers read the drag from a ref, not from the rendered state: a quick flick sends its
+  // last move and its release before React has rendered the move, and the release must still
+  // land where the finger was (found in the 1.6.2 browser check; the state is for drawing only).
+  const dragRef = useRef<Drag | null>(null);
+  const [drag, setDragState] = useState<Drag | null>(null);
+  const setDrag = (next: Drag | null) => {
+    dragRef.current = next;
+    setDragState(next);
+  };
   const [announcement, setAnnouncement] = useState('');
   // React moves a row's element to its new place, and a moved element loses the focus; the handle
   // of a row moved with the keyboard gets it back after the move.
@@ -78,6 +86,7 @@ export function SortableList<T>({ items, getId, getName, onMove, locked = false,
   }
 
   function move(event: PointerEvent<HTMLButtonElement>) {
+    const drag = dragRef.current;
     if (!drag || event.pointerId !== drag.pointerId) {
       return;
     }
@@ -88,6 +97,7 @@ export function SortableList<T>({ items, getId, getName, onMove, locked = false,
   }
 
   function end(event: PointerEvent<HTMLButtonElement>, dropped: boolean) {
+    const drag = dragRef.current;
     if (!drag || event.pointerId !== drag.pointerId) {
       return;
     }

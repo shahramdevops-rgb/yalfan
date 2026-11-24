@@ -57,7 +57,9 @@ public sealed class InactiveMasterDataTests(ApiFactory factory) : IClassFixture<
         await client.DeactivateAsync($"/panel/catalog/colours/{colour}");
 
         var added = await client.PostAsJsonAsync(
-            $"/panel/catalog/products/{product}/variants", new { fabricId = otherFabric, colourId = colour }, Cancel);
+            $"/panel/catalog/products/{product}/variants",
+            new { variants = new[] { new { fabricId = otherFabric, colourId = colour } } },
+            Cancel);
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, added.StatusCode);
         Assert.Equal("catalog.colour_inactive", await added.ErrorCode());

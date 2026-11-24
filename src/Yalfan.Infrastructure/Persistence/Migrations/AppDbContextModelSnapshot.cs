@@ -187,7 +187,6 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                         .HasName("pk_product_sizes");
 
                     b.HasIndex("ProductId", "Position")
-                        .IsUnique()
                         .HasDatabaseName("ix_product_sizes_product_id_position");
 
                     b.ToTable("product_sizes", (string)null);

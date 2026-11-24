@@ -1,0 +1,106 @@
+import { useId, useState, type KeyboardEvent } from 'react';
+import { normalizePersianName, samePersianName } from '../../shared/format/persianName';
+import { t } from '../../shared/i18n/fa';
+import { Button } from '../../shared/ui/Button';
+import { CloseIcon } from '../../shared/ui/icons';
+
+interface SizeNamesFieldProps {
+  sizes: readonly string[];
+  onChange: (sizes: string[]) => void;
+  error?: string;
+}
+
+/** The longest size name the API takes (ProductSize.NameMaxLength). */
+const maxLength = 30;
+
+/**
+ * The sizes of a new model, typed one after another in their order; the count is how many were
+ * typed, so there is no separate field for it (decided 1405/09/03). A typed size is a small tag
+ * that can be taken out again before the model is saved.
+ */
+export function SizeNamesField({ sizes, onChange, error }: SizeNamesFieldProps) {
+  const id = useId();
+  const [draft, setDraft] = useState('');
+  const [duplicate, setDuplicate] = useState(false);
+
+  function add() {
+    const name = draft.trim();
+    if (name === '') {
+      return;
+    }
+
+    if (sizes.some((size) => samePersianName(size, name))) {
+      setDuplicate(true);
+      return;
+    }
+
+    onChange([...sizes, normalizePersianName(name)]);
+    setDraft('');
+    setDuplicate(false);
+  }
+
+  // Enter adds the size; it must not send the whole form.
+  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      add();
+    }
+  }
+
+  const message = duplicate ? t('newModel.sizeDuplicate') : error;
+
+  return (
+    <div className="flex flex-col gap-2">
+      {sizes.length > 0 && (
+        <ol className="flex flex-wrap gap-2">
+          {sizes.map((size) => (
+            <li
+              key={size}
+              className="inline-flex h-10 items-center gap-1 rounded-full bg-stone-100 ps-3.5 pe-0.5 text-sm text-stone-800"
+            >
+              {size}
+              <button
+                type="button"
+                onClick={() => onChange(sizes.filter((other) => other !== size))}
+                aria-label={t('newModel.removeSize', { size })}
+                // As large as the tag allows (36px), so a finger on a phone hits it, not the next one.
+                className="flex size-9 items-center justify-center rounded-full text-stone-500 hover:bg-stone-200 hover:text-stone-800"
+              >
+                <CloseIcon className="size-4" />
+              </button>
+            </li>
+          ))}
+        </ol>
+      )}
+      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+        {sizes.length === 0 ? t('newModel.firstSize') : t('newModel.nextSize')}
+      </label>
+      <div className="flex gap-2">
+        <input
+          id={id}
+          value={draft}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            setDuplicate(false);
+          }}
+          onKeyDown={onKeyDown}
+          maxLength={maxLength}
+          autoComplete="off"
+          aria-invalid={message ? true : undefined}
+          aria-describedby={message ? `${id}-error` : undefined}
+          className={`h-12 min-w-0 flex-1 rounded-lg border bg-white px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 sm:max-w-xs ${
+            message ? 'border-red-500' : 'border-stone-300'
+          }`}
+        />
+        <Button variant="secondary" onClick={add} disabled={draft.trim() === ''}>
+          {t('list.add')}
+        </Button>
+      </div>
+      {message && (
+        <p id={`${id}-error`} role="alert" className="text-sm text-red-700">
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}

@@ -16,7 +16,8 @@ interface NameListProps {
   items: readonly NamedItem[];
   /** Each answers the message to show when the API refuses, or nothing. */
   onRename: (id: string, name: string) => Promise<string | undefined>;
-  onSetActive: (id: string, isActive: boolean) => Promise<string | undefined>;
+  /** Left out for a list whose items cannot be switched off (a model's sizes): no switch column. */
+  onSetActive?: (id: string, isActive: boolean) => Promise<string | undefined>;
   /** Given only for a list whose order means something (the stages); its rows get a drag handle. */
   onMove?: (from: number, to: number) => void;
   moving?: boolean;
@@ -39,7 +40,7 @@ export function NameList({ items, onRename, onSetActive, onMove, moving = false,
     <div>
       <div className="flex items-center justify-between border-b border-stone-200 pb-2 text-sm text-stone-500">
         <span className={onMove ? 'ps-11' : ''}>{t('list.columnName')}</span>
-        <span>{t('list.columnActive')}</span>
+        {onSetActive && <span>{t('list.columnActive')}</span>}
       </div>
       {onMove ? (
         <SortableList
@@ -76,6 +77,10 @@ function Row({
   const [busy, setBusy] = useState(false);
 
   async function toggle(isActive: boolean) {
+    if (!onSetActive) {
+      return;
+    }
+
     setBusy(true);
     setError(await onSetActive(item.id, isActive));
     setBusy(false);
@@ -92,12 +97,14 @@ function Row({
             </span>
           )}
         </div>
-        <Switch
-          checked={item.isActive}
-          onChange={(isActive) => void toggle(isActive)}
-          label={t('list.activeLabel', { name: item.name })}
-          disabled={busy}
-        />
+        {onSetActive && (
+          <Switch
+            checked={item.isActive}
+            onChange={(isActive) => void toggle(isActive)}
+            label={t('list.activeLabel', { name: item.name })}
+            disabled={busy}
+          />
+        )}
       </div>
       {error && (
         <p role="alert" className="text-sm text-red-700">

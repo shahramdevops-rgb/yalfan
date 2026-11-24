@@ -104,12 +104,18 @@ public sealed class ProductTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         var medium = sizes[1].GetProperty("id").GetGuid();
         var added = await client.PostAsJsonAsync(
-            $"/panel/catalog/products/{id}/variants", new { fabricId = fabric, colourId = black, sizeId = medium }, Cancel);
+            $"/panel/catalog/products/{id}/variants",
+            new { variants = new[] { new { fabricId = fabric, colourId = black, sizeId = medium } } },
+            Cancel);
         Assert.Equal(HttpStatusCode.OK, added.StatusCode);
-        Assert.Equal($"{number}-3", (await added.Body()).GetProperty("sku").GetString());
+        var inMedium = (await added.Body()).GetProperty("variants").EnumerateArray()
+            .Single(v => v.GetProperty("size").GetProperty("id").GetGuid() == medium);
+        Assert.Equal($"{number}-3", inMedium.GetProperty("sku").GetString());
 
         var withoutSize = await client.PostAsJsonAsync(
-            $"/panel/catalog/products/{id}/variants", new { fabricId = fabric, colourId = await client.CreateColourAsync() }, Cancel);
+            $"/panel/catalog/products/{id}/variants",
+            new { variants = new[] { new { fabricId = fabric, colourId = await client.CreateColourAsync() } } },
+            Cancel);
         Assert.Equal(HttpStatusCode.UnprocessableEntity, withoutSize.StatusCode);
         Assert.Equal("catalog.size_required", await withoutSize.ErrorCode());
     }
@@ -122,7 +128,13 @@ public sealed class ProductTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         var response = await client.PostAsJsonAsync(
             $"/panel/catalog/products/{id}/variants",
-            new { fabricId = await client.CreateFabricAsync(), colourId = await client.CreateColourAsync(), sizeId = Guid.CreateVersion7() },
+            new
+            {
+                variants = new[]
+                {
+                    new { fabricId = await client.CreateFabricAsync(), colourId = await client.CreateColourAsync(), sizeId = Guid.CreateVersion7() },
+                },
+            },
             Cancel);
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
@@ -179,7 +191,7 @@ public sealed class ProductTests(ApiFactory factory) : IClassFixture<ApiFactory>
         });
 
         var response = await client.PostAsJsonAsync(
-            $"/panel/catalog/products/{id}/variants", new { fabricId = fabric, colourId = colour }, Cancel);
+            $"/panel/catalog/products/{id}/variants", new { variants = new[] { new { fabricId = fabric, colourId = colour } } }, Cancel);
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         Assert.Equal("catalog.variant_exists", await response.ErrorCode());

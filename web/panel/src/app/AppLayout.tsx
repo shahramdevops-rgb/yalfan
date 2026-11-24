@@ -5,11 +5,12 @@ import { logout } from '../features/auth/authApi';
 import { useSession } from '../features/auth/useSession';
 import { formatWeekdayDate } from '../shared/format/dates';
 import { t, type MessageKey } from '../shared/i18n/fa';
-import { BagMark, CloseIcon, HomeIcon, ListIcon, LogoutIcon, MenuIcon, StagesIcon } from '../shared/ui/icons';
+import { BagIcon, BagMark, CloseIcon, HomeIcon, ListIcon, LogoutIcon, MenuIcon, StagesIcon } from '../shared/ui/icons';
 
 // The sidebar grows one item per module as the phases land (docs/ROADMAP.md).
 const navigation: { to: string; label: MessageKey; icon: typeof HomeIcon }[] = [
   { to: '/', label: 'nav.dashboard', icon: HomeIcon },
+  { to: '/models', label: 'nav.models', icon: BagIcon },
   { to: '/lists', label: 'nav.lists', icon: ListIcon },
   { to: '/stages', label: 'nav.stages', icon: StagesIcon },
 ];

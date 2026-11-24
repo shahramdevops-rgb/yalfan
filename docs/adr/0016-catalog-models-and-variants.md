@@ -83,7 +83,11 @@ at them. Every foreign key in the catalog is `RESTRICT`, so a delete can never c
 Renaming a model or changing its category, deactivating models and variants, and adding a size to
 an existing model come with the panel screens (1.6). **Update 1405/09/03 (task 1.6.1, ADR 0022):**
 categories, fabrics and colours can now be deactivated and activated, and a new model or variant
-cannot use an inactive one; the model's own changes come with 1.6.2. Prices (Phases 8 and 11), images (11.4) and
+cannot use an inactive one; the model's own changes come with 1.6.2. **Update 1405/09/03 (task
+1.6.2, ADR 0023):** a model is renamed, described, moved to another category and deactivated;
+its variants are switched off and on; sizes are added later, renamed and reordered (their
+position is no longer unique); and adding variants to an existing model takes several in one
+request, all or none, replacing the one-variant request above. Prices (Phases 8 and 11), images (11.4) and
 the material recipe (Phase 6) are later.
 
 ## Consequences

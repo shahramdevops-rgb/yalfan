@@ -72,7 +72,7 @@ internal sealed class CreateProductHandler(IAppDbContext db, IProductNumbers num
             return references.Error;
         }
 
-        if (await CatalogReferences.ProductNameTakenAsync(db, PersianText.Normalize(command.Name), cancellationToken))
+        if (await CatalogReferences.ProductNameTakenAsync(db, PersianText.Normalize(command.Name), exceptId: null, cancellationToken))
         {
             return CatalogErrors.NameTaken;
         }

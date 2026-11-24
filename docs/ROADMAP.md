@@ -3,7 +3,8 @@
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
 red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
-and 1.5 on 1405/09/02, 1.6.1 on 1405/09/03. Next: 1.6.2 (the model screens). Read
+and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03. Next: 1.6.3 (rates and the money
+display). Read
 `docs/ARCHITECTURE.md` first.
 
 How to use this file:
@@ -282,6 +283,20 @@ were accepted as written):
 - **Before and after building, three questions** are asked and answered in the report: is
   security complete, is this the best that could be done, and is nothing else broken.
 
+Answered by the developer on 1405/09/03, for 1.6.2 (ADR 0023; every proposal of the plan was
+accepted as written):
+- **Each fabric of a model has its own colours**: the operator ticks, under each fabric, the
+  colours sewn in it, so nothing that is not sewn gets a code.
+- **A model with sizes makes each fabric and colour in every size**; a bag not made in one size
+  is switched off on the model's page, because asking size by size multiplies the taps for a
+  rare exception.
+- **A size added later** is made in every fabric and colour the model still makes; added to a
+  model that had none, the bags it already has become that size and keep their codes, because
+  the codes are written on paper.
+- **The sizes of a new model are typed one by one**, with no separate count; the description is
+  on the model's page, not on the new-model form; inactive models stay in the list, greyed, with
+  no filter. In the screens a variant is a «کیف» and its SKU its «کد».
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -379,6 +394,31 @@ were accepted as written):
   - **1.6.2 Models.** Search and pages; create a model with its sizes and variants; the model
     page. API: rename a model, change its description and category, deactivate models and
     variants, add a size to an existing model.
+    **Done 1405/09/03:** 475 .NET tests pass (29 new: 17 domain, 12 integration on
+    PostgreSQL), 56 panel tests pass (14 new), build has 0 warnings. ADR 0023. API under
+    `/panel/catalog/products/{id}`: save the name, description and category (`PUT`);
+    `…/deactivate` and `…/activate`; several bags in one request, all or none (`POST
+    …/variants`, replacing the one-bag request); `…/variants/{variantId}/deactivate|activate`;
+    sizes added (`POST …/sizes`), renamed (`PUT …/sizes/{sizeId}`) and reordered (`PUT
+    …/sizes/order`). Every change answers the whole model. A deactivated model takes no new
+    bag, size (`catalog.product_inactive`) or rate (`production.product_inactive`). Migration
+    `SizePositionNotUnique`. Panel: «مدل‌ها» (`/models`, search and pages in the address),
+    «مدل تازه» (`/models/new`), and the model's page (`/models/:id`).
+    Checked in Chrome against a throwaway database (dropped afterwards), at a phone width of
+    390 px: no sideways scrolling on any of the pages; a new model with two sizes and three
+    fabric and colour pairs made six codes in order; the duplicate size typed on an Arabic
+    keyboard, the empty name, the missing sizes and the taken name are refused with their
+    messages; renaming, the category, the description, the model's and a bag's switch, a size
+    added to a model with sizes and to one without, sizes renamed, moved with the arrow keys and
+    dragged with a real mouse, more bags added with the locked ticks; the search by Persian
+    digits and by a name typed on an Arabic keyboard, two pages and the back button; the stages
+    and the lists of 1.6.1 again; no console errors. The Chrome window was minimized and could
+    not be restored from the tools, so the phone width was a 390 px frame inside the page,
+    measured through the DOM, not seen by eye. Found on the way and fixed: a quick drag released
+    before React had drawn its last move dropped the row one place short, or not at all (also
+    on the stages, ADR 0022 updated); the button that removes a typed size was 28 px, now 36;
+    a page change in the model list now scrolls back to the top. Still to check on a real
+    phone: the drag by finger.
   - **1.6.3 Rates and the money display.** The Rial figure with the Toman line and words; the
     amount field with its live line; the Jalali date field; a model's rate card, a new rate, the
     rate history. Ends with the check of 1.6: a real model entered with its rates without help.

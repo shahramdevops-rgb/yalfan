@@ -25,4 +25,10 @@ public sealed class ProductTranslation
     public string Name { get; private set; } = null!;
 
     public string? Description { get; private set; }
+
+    internal void Change(string name, string? description)
+    {
+        Name = name;
+        Description = description;
+    }
 }

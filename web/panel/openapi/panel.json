@@ -659,6 +659,104 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/activate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/panel/catalog/products/{id}/variants": {
@@ -681,7 +779,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddVariantRequest"
+                "$ref": "#/components/schemas/AddVariantsRequest"
               }
             }
           },
@@ -693,7 +791,214 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddVariantResponse"
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/variants/{variantId}/deactivate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/variants/{variantId}/activate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/sizes": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/sizes/order": {
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderSizesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/products/{id}/sizes/{sizeId}": {
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sizeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetails"
                 }
               }
             }
@@ -1661,50 +1966,20 @@
           }
         }
       },
-      "AddVariantRequest": {
+      "AddVariantsRequest": {
         "required": [
-          "fabricId",
-          "colourId",
-          "sizeId"
+          "variants"
         ],
         "type": "object",
         "properties": {
-          "fabricId": {
+          "variants": {
             "type": [
               "null",
-              "string"
+              "array"
             ],
-            "format": "uuid"
-          },
-          "colourId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "sizeId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          }
-        }
-      },
-      "AddVariantResponse": {
-        "required": [
-          "id",
-          "sku"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sku": {
-            "type": "string"
+            "items": {
+              "$ref": "#/components/schemas/VariantToAdd"
+            }
           }
         }
       },
@@ -2349,7 +2624,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/CatalogOptionSummary"
+                "$ref": "#/components/schemas/CatalogListItem"
               }
             ]
           },
@@ -2455,6 +2730,24 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "ReorderSizesRequest": {
+        "required": [
+          "sizeIds"
+        ],
+        "type": "object",
+        "properties": {
+          "sizeIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2603,6 +2896,35 @@
           }
         }
       },
+      "UpdateProductRequest": {
+        "required": [
+          "name",
+          "description",
+          "categoryId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "categoryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
       "UpdateWorkerRequest": {
         "required": [
           "fullName",
@@ -2693,10 +3015,10 @@
             "type": "string"
           },
           "fabric": {
-            "$ref": "#/components/schemas/CatalogOptionSummary"
+            "$ref": "#/components/schemas/CatalogListItem"
           },
           "colour": {
-            "$ref": "#/components/schemas/CatalogOptionSummary"
+            "$ref": "#/components/schemas/CatalogListItem"
           },
           "size": {
             "oneOf": [
@@ -2710,6 +3032,37 @@
           },
           "isActive": {
             "type": "boolean"
+          }
+        }
+      },
+      "VariantToAdd": {
+        "required": [
+          "fabricId",
+          "colourId",
+          "sizeId"
+        ],
+        "type": "object",
+        "properties": {
+          "fabricId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "colourId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "sizeId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },

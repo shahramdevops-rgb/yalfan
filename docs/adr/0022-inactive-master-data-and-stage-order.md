@@ -50,7 +50,8 @@ and workers (ADR 0019, ADR 0020). Every existing row started active.
 - **Every staff role may deactivate and activate**, as they may add and rename these lists
   (1.1, 1.2); each change is audited (`isActive` old and new).
 - A model's own deactivation, and a rate for an inactive model, come with the model screens
-  (1.6.2): the model's flag exists since 1.1, but nothing can set it yet.
+  (1.6.2): the model's flag exists since 1.1, but nothing can set it yet. **Done in 1.6.2
+  (ADR 0023):** a deactivated model takes no new variant, size or rate.
 
 Why: one rule for every list of master data, the same as the contractors'. Deleting is
 impossible once something points at an item, and hiding it only on the screen would let an old
@@ -116,4 +117,7 @@ tab or a later caller (the contractor app, an assistant) use it again.
   order; nothing there needs a route per model (ADR 0018 still holds).
 - The panel has its first shared list parts (`NameList`, `SortableList`, `InlineName`, `Switch`,
   `AddNameForm`); later list screens reuse them. Sizes of a model (1.6.2) can reuse the sortable
-  list if their order needs changing.
+  list if their order needs changing. **Update 1405/09/03 (1.6.2, ADR 0023):** they do; and the
+  browser check there found that a quick drag released before React had drawn its last move
+  dropped the row one place short, or not at all. The handlers now read the drag from a ref
+  (the state only draws it), which fixed the stages too.

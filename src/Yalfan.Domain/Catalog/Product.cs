@@ -51,8 +51,11 @@ public sealed class Product : Entity
 
     public IReadOnlyCollection<ProductTranslation> Translations => _translations.AsReadOnly();
 
-    /// <summary>The model's sizes in the order they were typed; empty when it has none.</summary>
-    public IReadOnlyList<ProductSize> Sizes => _sizes.OrderBy(size => size.Position).ToList();
+    /// <summary>
+    /// The model's sizes in their order, typed or dragged; empty when it has none. Two sizes added
+    /// at the same moment can share a position, so the id breaks the tie (as for stages, ADR 0022).
+    /// </summary>
+    public IReadOnlyList<ProductSize> Sizes => _sizes.OrderBy(size => size.Position).ThenBy(size => size.Id).ToList();
 
     public IReadOnlyList<Variant> Variants => _variants.OrderBy(variant => variant.Number).ToList();
 
@@ -83,7 +86,7 @@ public sealed class Product : Entity
             return persianName.Error;
         }
 
-        var persianDescription = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        var persianDescription = Description(description);
         if (persianDescription?.Length > DescriptionMaxLength)
         {
             return CatalogErrors.DescriptionTooLong;
@@ -122,6 +125,12 @@ public sealed class Product : Entity
     /// </summary>
     public Result<Variant> AddVariant(Guid fabricId, Guid colourId, Guid? sizeId)
     {
+        // Nothing new is made of a deactivated model (decided 1405/09/03, task 1.6.2).
+        if (!IsActive)
+        {
+            return CatalogErrors.ProductInactive;
+        }
+
         if (HasSizes && sizeId is null)
         {
             return CatalogErrors.SizeRequired;
@@ -156,6 +165,188 @@ public sealed class Product : Entity
         var name = PersianText.Normalize(persianName);
         return _sizes.SingleOrDefault(size => size.PersianName == name);
     }
+
+    /// <summary>
+    /// The name, description and category, as saved from the model's page. The number never
+    /// changes: it is written on paper. The caller checks that the name is not another model's
+    /// and that a newly chosen category exists and is active, because those are other rows.
+    /// </summary>
+    public Result Update(string? name, string? description, Guid? categoryId)
+    {
+        var persianName = CatalogText.PersianName(name, NameMaxLength);
+        if (persianName.IsFailure)
+        {
+            return persianName.Error;
+        }
+
+        var persianDescription = Description(description);
+        if (persianDescription?.Length > DescriptionMaxLength)
+        {
+            return CatalogErrors.DescriptionTooLong;
+        }
+
+        // Changed in place, so the audit records only the fields that really changed.
+        PersianTranslation().Change(persianName.Value, persianDescription);
+        CategoryId = categoryId;
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Takes the model out of use. Its variants keep their own switches, so activating the model
+    /// again brings back exactly the bags that were in use; a variant is usable only while it and
+    /// its model are both active.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Switches one bag on or off: a fabric, colour or size that is no longer made. Never deleted,
+    /// because work orders and stock will point at it, and its SKU is never given to another bag.
+    /// </summary>
+    public Result SetVariantActive(Guid variantId, bool isActive)
+    {
+        var variant = _variants.SingleOrDefault(v => v.Id == variantId);
+        if (variant is null)
+        {
+            return CatalogErrors.VariantNotFound;
+        }
+
+        if (isActive)
+        {
+            variant.Activate();
+        }
+        else
+        {
+            variant.Deactivate();
+        }
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// One more size, at the end (decided 1405/09/03):
+    /// <list type="bullet">
+    /// <item>A model that had no sizes: every variant it already has becomes this size, because a
+    /// model with sizes names a size on every variant and the bags made so far were of the size
+    /// the operator adds first. Their SKUs stay, because they are written on paper.</item>
+    /// <item>A model that had sizes: each fabric and colour it still makes (one of its bags in
+    /// them is active) is made in the new size too, because a model is made in all its sizes.
+    /// <paramref name="canBeMade"/> leaves out a fabric or colour that is no longer used for new
+    /// work (ADR 0022); the caller knows which, because they are other rows.</item>
+    /// </list>
+    /// </summary>
+    public Result<ProductSize> AddSize(string? name, Func<Guid, Guid, bool> canBeMade)
+    {
+        ArgumentNullException.ThrowIfNull(canBeMade);
+
+        if (!IsActive)
+        {
+            return CatalogErrors.ProductInactive;
+        }
+
+        if (_sizes.Count >= MaxSizes)
+        {
+            return CatalogErrors.TooManySizes;
+        }
+
+        var persianSize = CatalogText.PersianName(name, ProductSize.NameMaxLength);
+        if (persianSize.IsFailure)
+        {
+            return persianSize.Error;
+        }
+
+        if (_sizes.Any(size => size.PersianName == persianSize.Value))
+        {
+            return CatalogErrors.SizeNameDuplicate;
+        }
+
+        var hadSizes = HasSizes;
+        var madePairs = Variants
+            .Where(variant => variant.IsActive)
+            .Select(variant => (variant.FabricId, variant.ColourId))
+            .Distinct()
+            .Where(pair => canBeMade(pair.FabricId, pair.ColourId))
+            .ToList();
+
+        var position = hadSizes ? _sizes.Max(size => size.Position) + 1 : 1;
+        var newSize = new ProductSize(position, persianSize.Value);
+        _sizes.Add(newSize);
+
+        if (!hadSizes)
+        {
+            foreach (var variant in _variants)
+            {
+                variant.AssignSize(newSize.Id);
+            }
+
+            return newSize;
+        }
+
+        foreach (var (fabricId, colourId) in madePairs)
+        {
+            // Cannot be refused: the model is active, and no bag has the new size yet.
+            var added = AddVariant(fabricId, colourId, newSize.Id);
+            if (added.IsFailure)
+            {
+                throw new InvalidOperationException($"A new size could not be given to a bag: {added.Error.Code}.");
+            }
+        }
+
+        return newSize;
+    }
+
+    /// <summary>Corrects a size's name; it stays unique within the model.</summary>
+    public Result RenameSize(Guid sizeId, string? name)
+    {
+        var size = _sizes.SingleOrDefault(s => s.Id == sizeId);
+        if (size is null)
+        {
+            return CatalogErrors.SizeNotFound;
+        }
+
+        var persianSize = CatalogText.PersianName(name, ProductSize.NameMaxLength);
+        if (persianSize.IsFailure)
+        {
+            return persianSize.Error;
+        }
+
+        if (_sizes.Any(s => s.Id != sizeId && s.PersianName == persianSize.Value))
+        {
+            return CatalogErrors.SizeNameDuplicate;
+        }
+
+        size.Rename(persianSize.Value);
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Puts the sizes in the order the operator dragged them into, sent as the whole list as for
+    /// the stages (ADR 0022). A list that does not name every size exactly once was made from an
+    /// old copy, and changes nothing.
+    /// </summary>
+    public Result ReorderSizes(IReadOnlyList<Guid> orderedIds)
+    {
+        ArgumentNullException.ThrowIfNull(orderedIds);
+
+        var byId = _sizes.ToDictionary(size => size.Id);
+        if (orderedIds.Count != byId.Count
+            || orderedIds.Distinct().Count() != orderedIds.Count
+            || !orderedIds.All(byId.ContainsKey))
+        {
+            return CatalogErrors.SizeOrderOutdated;
+        }
+
+        for (var index = 0; index < orderedIds.Count; index++)
+        {
+            byId[orderedIds[index]].MoveTo(index + 1);
+        }
+
+        return Result.Success();
+    }
+
+    private static string? Description(string? description) =>
+        string.IsNullOrWhiteSpace(description) ? null : description.Trim();
 
     private ProductTranslation PersianTranslation() => _translations.Single(t => t.Locale == Locale.Fa);
 }

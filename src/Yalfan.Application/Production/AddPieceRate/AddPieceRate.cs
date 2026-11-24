@@ -33,9 +33,19 @@ internal sealed class AddPieceRateHandler(IAppDbContext db, IClock clock)
         var productId = command.ProductId!.Value;
         var stageId = command.StageId!.Value;
 
-        if (!await db.Products.AnyAsync(product => product.Id == productId, cancellationToken))
+        var productIsActive = await db.Products.AsNoTracking()
+            .Where(product => product.Id == productId)
+            .Select(product => (bool?)product.IsActive)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (productIsActive is null)
         {
             return ProductionErrors.ProductNotFound;
+        }
+
+        // Nothing new is given out for a deactivated model; its old rates stay (ADR 0023).
+        if (productIsActive is false)
+        {
+            return ProductionErrors.ProductInactive;
         }
 
         var stage = await db.Stages.AsNoTracking().SingleOrDefaultAsync(s => s.Id == stageId, cancellationToken);

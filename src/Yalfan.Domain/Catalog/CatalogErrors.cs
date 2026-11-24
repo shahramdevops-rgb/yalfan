@@ -47,4 +47,19 @@ public static class CatalogErrors
 
     /// <summary>The size is not one of this model's sizes.</summary>
     public static readonly Error SizeNotFound = Error.NotFound("catalog.size_not_found");
+
+    /// <summary>The variant is not one of this model's variants.</summary>
+    public static readonly Error VariantNotFound = Error.NotFound("catalog.variant_not_found");
+
+    /// <summary>A new variant or size for a deactivated model: nothing new is made of it.</summary>
+    public static readonly Error ProductInactive = Error.Rule("catalog.product_inactive");
+
+    /// <summary>A model already has <see cref="Product.MaxSizes"/> sizes.</summary>
+    public static readonly Error TooManySizes = Error.Rule("catalog.too_many_sizes");
+
+    /// <summary>
+    /// The new order of a model's sizes does not name each of them exactly once: it was made from
+    /// an old copy, for example while another user added a size. The panel reloads the model.
+    /// </summary>
+    public static readonly Error SizeOrderOutdated = Error.Conflict("catalog.size_order_outdated");
 }

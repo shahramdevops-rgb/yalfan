@@ -124,7 +124,7 @@ Each module is a folder with the same name in Domain, Application and Api.
 | Module | Main entities | Notes |
 |---|---|---|
 | **Identity** | User, OtpCode, RefreshToken | Everyone logs in with mobile + SMS code, no passwords (ADR 0012). Permissions come later |
-| **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1) |
+| **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1). Each fabric of a model has its own colours, every bag is made in every size, and a size added later is given to the bags (ADR 0023) |
 | **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger. Contractors do one or more stages; IBANs are stored encrypted and shown masked (ADR 0019). Workers do none or more stages and have a start date (ADR 0020). In-house workers are paid a day wage, contractors by the piece (answered 1405/09/02) |
 | **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, PieceRate | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018), in an order the operator drags (ADR 0022). Piece rates are an append-only rate card per model and stage, with start dates (ADR 0021) |
 | **Inventory** | Material, Bom, Warehouse, StockMovement, StockCount | Stock is a ledger of movements. See 7.3 |
@@ -340,7 +340,9 @@ Decisions:
 - **Few controls, all direct** (decided 1405/09/03): a name is edited by tapping it, a switch
   turns an item on and off, a list whose order matters is put in order by dragging a handle; no
   button where a direct action does the job. The shared parts are `NameList`, `SortableList`
-  (Pointer Events, no library), `InlineName`, `Switch` and `AddNameForm` (ADR 0022).
+  (Pointer Events, no library), `InlineName`, `Switch` and `AddNameForm` (ADR 0022). A step
+  that cannot be undone, such as adding bags that get codes, collects the ticks and is saved
+  with one button that says what it makes («افزودن ۶ کیف»), not on each tap (ADR 0023).
 - `web/shared` is created with the second app (Phase 10), not before.
 
 ## 10. Three languages
@@ -459,7 +461,9 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   the server's locale.
 - **Master data is deactivated, never deleted** (ADR 0022): categories, fabrics, colours,
   stages, contractors and workers have an active flag. An inactive item is left out of pickers,
-  the API refuses a new link to it, and whatever already points at it keeps it.
+  the API refuses a new link to it, and whatever already points at it keeps it. Models and their
+  bags too (ADR 0023): a bag is usable only while it, its model, its fabric and its colour are
+  all active.
 
 ## 13. Deployment (to be settled in Phase 3)
 
@@ -570,3 +574,4 @@ server in the developer's.
 | 0020 | In-house workers: stages as the job, start date, mobile unique among workers | 1.4 (written) |
 | 0021 | Piece rates: an append-only rate card per model and stage | 1.5 (written) |
 | 0022 | Inactive master data; the stages in an order dragged by the operator | 1.6.1 (written) |
+| 0023 | The model screens: bags per fabric, every size, sizes added later | 1.6.2 (written) |
