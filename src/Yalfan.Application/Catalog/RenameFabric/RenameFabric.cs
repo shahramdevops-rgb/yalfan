@@ -17,9 +17,9 @@ public sealed class RenameFabricValidator : AbstractValidator<RenameFabricComman
     }
 }
 
-internal sealed class RenameFabricHandler(IAppDbContext db) : ICommandHandler<RenameFabricCommand, CatalogOptionSummary>
+internal sealed class RenameFabricHandler(IAppDbContext db) : ICommandHandler<RenameFabricCommand, CatalogListItem>
 {
-    public async Task<Result<CatalogOptionSummary>> Handle(RenameFabricCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CatalogListItem>> Handle(RenameFabricCommand command, CancellationToken cancellationToken)
     {
         var fabric = await db.Fabrics.SingleOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
         if (fabric is null)
@@ -43,6 +43,6 @@ internal sealed class RenameFabricHandler(IAppDbContext db) : ICommandHandler<Re
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CatalogOptionSummary(fabric.Id, name);
+        return new CatalogListItem(fabric.Id, name, fabric.IsActive);
     }
 }

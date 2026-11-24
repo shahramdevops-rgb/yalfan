@@ -10,14 +10,16 @@ using Yalfan.Application.Production.GetPieceRateHistory;
 using Yalfan.Application.Production.GetRateCard;
 using Yalfan.Application.Production.ListStages;
 using Yalfan.Application.Production.RenameStage;
+using Yalfan.Application.Production.ReorderStages;
+using Yalfan.Application.Production.SetStageActive;
 
 namespace Yalfan.Api.Endpoints.Panel;
 
 /// <summary>
 /// The shared stage list (ADR 0018) and the rate card (ADR 0021). Every staff role may use
 /// them, like the catalog lists, because the operator enters the master data with the rates
-/// (roadmap 1.6). There is no delete: work orders will point at stages, and the rate card is
-/// append-only.
+/// (roadmap 1.6). There is no delete: work orders will point at stages, which are deactivated
+/// instead (ADR 0022), and the rate card is append-only.
 /// </summary>
 public sealed class ProductionEndpoints : IEndpointModule
 {
@@ -48,6 +50,26 @@ public sealed class ProductionEndpoints : IEndpointModule
                 ICommandHandler<RenameStageCommand, StageSummary> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new RenameStageCommand(id, request.Name), cancellationToken)).ToOk());
+
+        // The whole list in its new order, after the operator dragged a stage (ADR 0022).
+        stages.MapPut("/order", async Task<Results<Ok<IReadOnlyList<StageSummary>>, ProblemHttpResult>> (
+                ReorderStagesCommand command,
+                ICommandHandler<ReorderStagesCommand, IReadOnlyList<StageSummary>> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(command, cancellationToken)).ToOk());
+
+        // Not a delete: an inactive stage is left out of the pickers and the rate card (ADR 0022).
+        stages.MapPost("/{id:guid}/deactivate", async Task<Results<Ok<StageSummary>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetStageActiveCommand, StageSummary> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetStageActiveCommand(id, IsActive: false), cancellationToken)).ToOk());
+
+        stages.MapPost("/{id:guid}/activate", async Task<Results<Ok<StageSummary>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetStageActiveCommand, StageSummary> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetStageActiveCommand(id, IsActive: true), cancellationToken)).ToOk());
     }
 
     private static void MapRates(RouteGroupBuilder rates)

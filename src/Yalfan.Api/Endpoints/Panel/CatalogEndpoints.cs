@@ -16,6 +16,9 @@ using Yalfan.Application.Catalog.RenameCategory;
 using Yalfan.Application.Catalog.RenameColour;
 using Yalfan.Application.Catalog.RenameFabric;
 using Yalfan.Application.Catalog.SearchProducts;
+using Yalfan.Application.Catalog.SetCategoryActive;
+using Yalfan.Application.Catalog.SetColourActive;
+using Yalfan.Application.Catalog.SetFabricActive;
 using Yalfan.Application.Common.Handlers;
 using Yalfan.Application.Common.Paging;
 
@@ -39,65 +42,104 @@ public sealed class CatalogEndpoints : IEndpointModule
 
     private static void MapCategories(RouteGroupBuilder categories)
     {
-        categories.MapGet("/", async Task<Results<Ok<IReadOnlyList<CatalogOptionSummary>>, ProblemHttpResult>> (
-                IQueryHandler<ListCategoriesQuery, IReadOnlyList<CatalogOptionSummary>> handler,
+        categories.MapGet("/", async Task<Results<Ok<IReadOnlyList<CatalogListItem>>, ProblemHttpResult>> (
+                IQueryHandler<ListCategoriesQuery, IReadOnlyList<CatalogListItem>> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new ListCategoriesQuery(), cancellationToken)).ToOk());
 
-        categories.MapPost("/", async Task<Results<Ok<CatalogOptionSummary>, ProblemHttpResult>> (
+        categories.MapPost("/", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
                 CreateCategoryCommand command,
-                ICommandHandler<CreateCategoryCommand, CatalogOptionSummary> handler,
+                ICommandHandler<CreateCategoryCommand, CatalogListItem> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(command, cancellationToken)).ToOk());
 
-        categories.MapPut("/{id:guid}", async Task<Results<Ok<CatalogOptionSummary>, ProblemHttpResult>> (
+        categories.MapPut("/{id:guid}", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
                 Guid id,
                 RenameRequest request,
-                ICommandHandler<RenameCategoryCommand, CatalogOptionSummary> handler,
+                ICommandHandler<RenameCategoryCommand, CatalogListItem> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new RenameCategoryCommand(id, request.Name), cancellationToken)).ToOk());
+
+        // Not a delete: an inactive one is left out of the pickers for new work (ADR 0022).
+        categories.MapPost("/{id:guid}/deactivate", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetCategoryActiveCommand, CatalogListItem> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetCategoryActiveCommand(id, IsActive: false), cancellationToken)).ToOk());
+
+        categories.MapPost("/{id:guid}/activate", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetCategoryActiveCommand, CatalogListItem> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetCategoryActiveCommand(id, IsActive: true), cancellationToken)).ToOk());
     }
 
     private static void MapFabrics(RouteGroupBuilder fabrics)
     {
-        fabrics.MapGet("/", async Task<Results<Ok<IReadOnlyList<CatalogOptionSummary>>, ProblemHttpResult>> (
-                IQueryHandler<ListFabricsQuery, IReadOnlyList<CatalogOptionSummary>> handler,
+        fabrics.MapGet("/", async Task<Results<Ok<IReadOnlyList<CatalogListItem>>, ProblemHttpResult>> (
+                IQueryHandler<ListFabricsQuery, IReadOnlyList<CatalogListItem>> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new ListFabricsQuery(), cancellationToken)).ToOk());
 
-        fabrics.MapPost("/", async Task<Results<Ok<CatalogOptionSummary>, ProblemHttpResult>> (
+        fabrics.MapPost("/", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
                 CreateFabricCommand command,
-                ICommandHandler<CreateFabricCommand, CatalogOptionSummary> handler,
+                ICommandHandler<CreateFabricCommand, CatalogListItem> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(command, cancellationToken)).ToOk());
 
-        fabrics.MapPut("/{id:guid}", async Task<Results<Ok<CatalogOptionSummary>, ProblemHttpResult>> (
+        fabrics.MapPut("/{id:guid}", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
                 Guid id,
                 RenameRequest request,
-                ICommandHandler<RenameFabricCommand, CatalogOptionSummary> handler,
+                ICommandHandler<RenameFabricCommand, CatalogListItem> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new RenameFabricCommand(id, request.Name), cancellationToken)).ToOk());
+
+        // Not a delete: an inactive one is left out of the pickers for new work (ADR 0022).
+        fabrics.MapPost("/{id:guid}/deactivate", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetFabricActiveCommand, CatalogListItem> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetFabricActiveCommand(id, IsActive: false), cancellationToken)).ToOk());
+
+        fabrics.MapPost("/{id:guid}/activate", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetFabricActiveCommand, CatalogListItem> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetFabricActiveCommand(id, IsActive: true), cancellationToken)).ToOk());
     }
 
     private static void MapColours(RouteGroupBuilder colours)
     {
-        colours.MapGet("/", async Task<Results<Ok<IReadOnlyList<CatalogOptionSummary>>, ProblemHttpResult>> (
-                IQueryHandler<ListColoursQuery, IReadOnlyList<CatalogOptionSummary>> handler,
+        colours.MapGet("/", async Task<Results<Ok<IReadOnlyList<CatalogListItem>>, ProblemHttpResult>> (
+                IQueryHandler<ListColoursQuery, IReadOnlyList<CatalogListItem>> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new ListColoursQuery(), cancellationToken)).ToOk());
 
-        colours.MapPost("/", async Task<Results<Ok<CatalogOptionSummary>, ProblemHttpResult>> (
+        colours.MapPost("/", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
                 CreateColourCommand command,
-                ICommandHandler<CreateColourCommand, CatalogOptionSummary> handler,
+                ICommandHandler<CreateColourCommand, CatalogListItem> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(command, cancellationToken)).ToOk());
 
-        colours.MapPut("/{id:guid}", async Task<Results<Ok<CatalogOptionSummary>, ProblemHttpResult>> (
+        colours.MapPut("/{id:guid}", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
                 Guid id,
                 RenameRequest request,
-                ICommandHandler<RenameColourCommand, CatalogOptionSummary> handler,
+                ICommandHandler<RenameColourCommand, CatalogListItem> handler,
                 CancellationToken cancellationToken) =>
                 (await handler.Handle(new RenameColourCommand(id, request.Name), cancellationToken)).ToOk());
+
+        // Not a delete: an inactive one is left out of the pickers for new work (ADR 0022).
+        colours.MapPost("/{id:guid}/deactivate", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetColourActiveCommand, CatalogListItem> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetColourActiveCommand(id, IsActive: false), cancellationToken)).ToOk());
+
+        colours.MapPost("/{id:guid}/activate", async Task<Results<Ok<CatalogListItem>, ProblemHttpResult>> (
+                Guid id,
+                ICommandHandler<SetColourActiveCommand, CatalogListItem> handler,
+                CancellationToken cancellationToken) =>
+                (await handler.Handle(new SetColourActiveCommand(id, IsActive: true), cancellationToken)).ToOk());
     }
 
     private static void MapProducts(RouteGroupBuilder products)

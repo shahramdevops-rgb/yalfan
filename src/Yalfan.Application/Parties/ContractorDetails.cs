@@ -26,14 +26,14 @@ internal static class ContractorViews
         Contractor contractor,
         CancellationToken cancellationToken)
     {
-        var names = await PartyStages.NamesAsync(db, contractor.StageIds, cancellationToken);
+        var stages = await PartyStages.InOrderAsync(db, contractor.StageIds, cancellationToken);
 
         return new ContractorDetails(
             contractor.Id,
             contractor.FullName,
             contractor.MobileNumber.Value,
             contractor.Notes,
-            PartyStages.Of(contractor.StageIds, names),
+            PartyStages.Of(contractor.StageIds, stages),
             contractor.Iban?.Masked,
             contractor.IsActive,
             contractor.CreatedAt);

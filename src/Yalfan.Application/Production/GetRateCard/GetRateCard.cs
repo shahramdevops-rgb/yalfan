@@ -14,8 +14,10 @@ namespace Yalfan.Application.Production.GetRateCard;
 public sealed record GetRateCardQuery(Guid? ProductId, DateOnly? On);
 
 /// <summary>
-/// Every stage in the order of the work, each with the rate in force on <paramref name="On"/>.
-/// A stage with no rate yet is listed without one, so the screen shows what is still missing.
+/// Every active stage in the order of the work, each with the rate in force on
+/// <paramref name="On"/>. A stage with no rate yet is listed without one, so the screen shows
+/// what is still missing. A deactivated stage is left out, because nothing new is given out at
+/// it; its rates stay in the history (ADR 0022).
 /// </summary>
 public sealed record RateCardDetails(
     Guid ProductId,
@@ -47,7 +49,7 @@ internal sealed class GetRateCardHandler(IAppDbContext db, IClock clock)
         }
 
         var on = query.On ?? clock.Today;
-        var stages = await PieceRateLookups.StagesAsync(db, cancellationToken);
+        var stages = (await PieceRateLookups.StagesAsync(db, cancellationToken)).Where(stage => stage.IsActive);
 
         // Every entry of the model that has started by that day: a few per stage, so the rule of
         // which one is in force runs in the Domain, not in SQL.

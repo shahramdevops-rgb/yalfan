@@ -24,12 +24,9 @@ internal static class PieceRateLookups
         db.Products.AsNoTracking().SingleOrDefaultAsync(p => p.Id == productId, cancellationToken);
 
     /// <summary>
-    /// Every stage in the order of the stage list (by id, ADR 0018), so a rate card reads
-    /// «برش، دوخت، بسته‌بندی» in the order of the work.
+    /// Every stage in the order of the work (ADR 0022), so a rate card reads
+    /// «برش، دوخت، بسته‌بندی» in that order.
     /// </summary>
     public static Task<List<StageSummary>> StagesAsync(IAppDbContext db, CancellationToken cancellationToken) =>
-        db.Stages.AsNoTracking()
-            .OrderBy(stage => stage.Id)
-            .Select(stage => new StageSummary(stage.Id, stage.Name))
-            .ToListAsync(cancellationToken);
+        StageLists.InOrderAsync(db, cancellationToken);
 }

@@ -21,7 +21,10 @@ internal sealed class CreateStageHandler(IAppDbContext db) : ICommandHandler<Cre
 {
     public async Task<Result<StageSummary>> Handle(CreateStageCommand command, CancellationToken cancellationToken)
     {
-        var created = Stage.Create(command.Name);
+        // A new stage goes to the end of the work; the operator drags it into place (ADR 0022).
+        var lastPosition = await db.Stages.MaxAsync(x => (int?)x.Position, cancellationToken) ?? 0;
+
+        var created = Stage.Create(command.Name, lastPosition + 1);
         if (created.IsFailure)
         {
             return created.Error;
@@ -39,6 +42,6 @@ internal sealed class CreateStageHandler(IAppDbContext db) : ICommandHandler<Cre
         db.Stages.Add(stage);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new StageSummary(stage.Id, stage.Name);
+        return StageSummary.Of(stage);
     }
 }

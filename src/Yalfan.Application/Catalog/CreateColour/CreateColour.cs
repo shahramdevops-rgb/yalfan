@@ -17,9 +17,9 @@ public sealed class CreateColourValidator : AbstractValidator<CreateColourComman
     }
 }
 
-internal sealed class CreateColourHandler(IAppDbContext db) : ICommandHandler<CreateColourCommand, CatalogOptionSummary>
+internal sealed class CreateColourHandler(IAppDbContext db) : ICommandHandler<CreateColourCommand, CatalogListItem>
 {
-    public async Task<Result<CatalogOptionSummary>> Handle(CreateColourCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CatalogListItem>> Handle(CreateColourCommand command, CancellationToken cancellationToken)
     {
         var created = Colour.Create(command.Name);
         if (created.IsFailure)
@@ -40,6 +40,6 @@ internal sealed class CreateColourHandler(IAppDbContext db) : ICommandHandler<Cr
         db.Colours.Add(colour);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CatalogOptionSummary(colour.Id, name);
+        return new CatalogListItem(colour.Id, name, colour.IsActive);
     }
 }

@@ -51,9 +51,10 @@ internal sealed class CreateContractorHandler(IAppDbContext db, IClock clock)
             contractor.ChangeIban(Iban.Create(command.Iban).Value);
         }
 
-        if (!await PartyStages.ExistAsync(db, stageIds, cancellationToken))
+        var stages = await PartyStages.CheckAsync(db, stageIds, [], cancellationToken);
+        if (stages.IsFailure)
         {
-            return PartiesErrors.StageNotFound;
+            return stages.Error;
         }
 
         // Checked here for a coded answer; the unique index stops a duplicate saved at the same moment.

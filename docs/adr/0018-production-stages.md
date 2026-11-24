@@ -41,12 +41,16 @@ open questions O.2 and Q.1 on 1405/09/01:
   last digits, so the list, ordered by id like the catalog lists, shows them in the order of the
   work and before any stage the operator adds. Being written by the migration, they have no audit
   entry; every later change does (ADR 0013).
+  **Changed 1405/09/03 (task 1.6.1, ADR 0022):** the order is now a position the operator drags,
+  not the id; the migration gave the existing stages their positions in id order.
 - **The name is one Persian column, not translation rows.** Stages appear only in the Persian
   panels and never in the store, and ADR 0006 puts only catalog text, which the store shows, in
   translation rows. The name is normalized like catalog names (`PersianText.Normalize`) before it
   is checked or stored, so «ي» typed on an Arabic keyboard is not a second stage.
 - **No delete.** Work orders will point at stages. Deactivation comes with the screens in 1.6,
   together with the catalog lists, which do not have it yet either.
+  **Done 1405/09/03 (task 1.6.1, ADR 0022):** stages and the catalog lists are deactivated and
+  activated; nothing new can point at an inactive one.
 - **Panel API:** `/panel/production/stages`, list, add and rename, for every staff role, like the
   catalog lists, because the operator enters the master data. Error codes:
   `production.name_required`, `production.name_too_long`, `production.name_taken`,

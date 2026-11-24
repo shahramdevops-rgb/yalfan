@@ -44,9 +44,10 @@ internal sealed class UpdateWorkerHandler(IAppDbContext db, IClock clock) : ICom
         var mobile = MobileNumber.Create(command.MobileNumber).Value;
         var stageIds = command.StageIds ?? [];
 
-        if (!await PartyStages.ExistAsync(db, stageIds, cancellationToken))
+        var stages = await PartyStages.CheckAsync(db, stageIds, worker.StageIds, cancellationToken);
+        if (stages.IsFailure)
         {
-            return PartiesErrors.StageNotFound;
+            return stages.Error;
         }
 
         if (await WorkerViews.MobileTakenAsync(db, mobile, worker.Id, cancellationToken))

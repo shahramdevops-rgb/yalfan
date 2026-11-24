@@ -17,9 +17,9 @@ public sealed class RenameColourValidator : AbstractValidator<RenameColourComman
     }
 }
 
-internal sealed class RenameColourHandler(IAppDbContext db) : ICommandHandler<RenameColourCommand, CatalogOptionSummary>
+internal sealed class RenameColourHandler(IAppDbContext db) : ICommandHandler<RenameColourCommand, CatalogListItem>
 {
-    public async Task<Result<CatalogOptionSummary>> Handle(RenameColourCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CatalogListItem>> Handle(RenameColourCommand command, CancellationToken cancellationToken)
     {
         var colour = await db.Colours.SingleOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
         if (colour is null)
@@ -43,6 +43,6 @@ internal sealed class RenameColourHandler(IAppDbContext db) : ICommandHandler<Re
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CatalogOptionSummary(colour.Id, name);
+        return new CatalogListItem(colour.Id, name, colour.IsActive);
     }
 }

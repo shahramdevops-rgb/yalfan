@@ -19,6 +19,8 @@ const messages = {
   'login.codeFormat': 'کد باید ۶ رقم باشد.',
 
   'nav.dashboard': 'داشبورد',
+  'nav.lists': 'فهرست‌ها',
+  'nav.stages': 'مراحل کار',
   'nav.openMenu': 'باز کردن منو',
   'nav.closeMenu': 'بستن منو',
 
@@ -38,6 +40,39 @@ const messages = {
   'role.operator': 'اپراتور دفتر',
 
   'money.rial': 'ریال',
+
+  'list.add': 'افزودن',
+  'list.sending': 'در حال ثبت…',
+  'list.columnName': 'نام',
+  'list.columnActive': 'فعال',
+  'list.inactive': 'غیرفعال',
+  'list.renameHint': 'برای تغییر نام بزنید',
+  'list.renameLabel': 'نام تازه به جای «{name}»',
+  'list.renameButton': 'تغییر نام «{name}»',
+  'list.activeLabel': 'فعال بودن «{name}»',
+  'list.retry': 'دوباره امتحان کنید',
+
+  'sortable.handle': 'جابه‌جا کردن «{name}»؛ با کلیدهای بالا و پایین هم می‌شود',
+  'sortable.moved': '«{name}» به جای {place} رفت.',
+
+  'lists.title': 'فهرست‌ها',
+  'lists.hint':
+    'برای تغییر نام، روی نام بزنید. مورد غیرفعال در انتخاب‌های تازه نمی‌آید، ولی هر چه قبلاً با آن ثبت شده دست نمی‌خورد.',
+  'lists.tab.fabrics': 'پارچه‌ها',
+  'lists.tab.colours': 'رنگ‌ها',
+  'lists.tab.categories': 'دسته‌بندی‌ها',
+  'lists.add.fabrics': 'پارچهٔ تازه',
+  'lists.add.colours': 'رنگ تازه',
+  'lists.add.categories': 'دسته‌بندی تازه',
+  'lists.empty.fabrics': 'هنوز پارچه‌ای ثبت نشده است.',
+  'lists.empty.colours': 'هنوز رنگی ثبت نشده است.',
+  'lists.empty.categories': 'هنوز دسته‌بندی‌ای ثبت نشده است.',
+
+  'stages.title': 'مراحل کار',
+  'stages.hint':
+    'مراحل همه‌جا به همین ترتیب دیده می‌شوند. برای جابه‌جا کردن، دستگیرهٔ کنار مرحله را بکشید. برای تغییر نام، روی نام بزنید.',
+  'stages.add': 'مرحلهٔ تازه',
+  'stages.empty': 'هنوز مرحله‌ای ثبت نشده است.',
 } as const;
 
 // API error codes (ADR 0011) in the panel's words. A code that is missing here falls back to
@@ -49,6 +84,24 @@ const errorMessages: Record<string, string> = {
   'mobile.invalid': 'شمارهٔ موبایل درست نیست. شمارهٔ ۱۱ رقمی را مثل ۰۹۱۲۱۲۳۴۵۶۷ بنویسید.',
   'validation.required': 'این خانه را پر کنید.',
   'validation.invalid_format': 'قالب این مقدار درست نیست.',
+  'validation.too_long': 'این متن بیش از اندازه بلند است.',
+  'catalog.name_required': 'نام را بنویسید.',
+  'catalog.name_too_long': 'این نام بیش از اندازه بلند است.',
+  'catalog.name_taken': 'این نام قبلاً ثبت شده است.',
+  'catalog.category_not_found': 'این دسته‌بندی پیدا نشد. صفحه را دوباره باز کنید.',
+  'catalog.fabric_not_found': 'این پارچه پیدا نشد. صفحه را دوباره باز کنید.',
+  'catalog.colour_not_found': 'این رنگ پیدا نشد. صفحه را دوباره باز کنید.',
+  'catalog.category_inactive': 'این دسته‌بندی غیرفعال است. اول آن را در «فهرست‌ها» فعال کنید.',
+  'catalog.fabric_inactive': 'این پارچه غیرفعال است. اول آن را در «فهرست‌ها» فعال کنید.',
+  'catalog.colour_inactive': 'این رنگ غیرفعال است. اول آن را در «فهرست‌ها» فعال کنید.',
+  'production.name_required': 'نام مرحله را بنویسید.',
+  'production.name_too_long': 'این نام بیش از اندازه بلند است.',
+  'production.name_taken': 'مرحله‌ای با این نام هست.',
+  'production.stage_not_found': 'این مرحله پیدا نشد. صفحه را دوباره باز کنید.',
+  'production.stage_inactive': 'این مرحله غیرفعال است. اول آن را در «مراحل کار» فعال کنید.',
+  'production.stage_order_outdated':
+    'فهرست مراحل در این فاصله عوض شده بود. فهرست تازه آمد؛ مرحله را دوباره جابه‌جا کنید.',
+  'parties.stage_inactive': 'یکی از مراحل تیک‌خورده غیرفعال است. اول آن را در «مراحل کار» فعال کنید.',
   'request.unauthenticated': 'زمان ورود شما تمام شده است. دوباره وارد شوید.',
   'request.forbidden': 'اجازهٔ این کار را ندارید.',
   'request.not_found': 'پیدا نشد.',

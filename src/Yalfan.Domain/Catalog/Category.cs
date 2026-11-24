@@ -19,6 +19,12 @@ public sealed class Category : Entity
 
     public IReadOnlyCollection<NameTranslation> Names => _names.AsReadOnly();
 
+    /// <summary>
+    /// An inactive item is left out of the pickers for new work; what already points at it keeps
+    /// it (ADR 0022). There is no delete: models and variants point at it.
+    /// </summary>
+    public bool IsActive { get; private set; }
+
     /// <summary>The name the panel shows.</summary>
     public string PersianName => CatalogText.PersianOf(_names);
 
@@ -30,10 +36,14 @@ public sealed class Category : Entity
             return persian.Error;
         }
 
-        var category = new Category();
+        var category = new Category { IsActive = true };
         category._names.Add(new NameTranslation(Locale.Fa, persian.Value));
         return category;
     }
 
     public Result Rename(string? name) => CatalogText.Rename(_names, name, NameMaxLength);
+
+    public void Deactivate() => IsActive = false;
+
+    public void Activate() => IsActive = true;
 }

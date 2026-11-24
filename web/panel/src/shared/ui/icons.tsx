@@ -52,3 +52,28 @@ export function BagMark({ className = 'size-9' }: { className?: string }) {
     </svg>
   );
 }
+
+export function ListIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
+    </svg>
+  );
+}
+
+export function StagesIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M4 7h4v4H4zM10 13h4v4h-4zM16 7h4v4h-4zM8 9h2.5a1.5 1.5 0 0 1 1.5 1.5V13M14 15h.5a1.5 1.5 0 0 0 1.5-1.5V11" />
+    </svg>
+  );
+}
+
+/** The handle a row is dragged by. */
+export function GripIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className} strokeWidth={3}>
+      <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" />
+    </svg>
+  );
+}

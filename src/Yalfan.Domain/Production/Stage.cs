@@ -23,15 +23,31 @@ public sealed class Stage : Entity
 
     public string Name { get; private set; } = null!;
 
-    public static Result<Stage> Create(string? name)
+    /// <summary>
+    /// The stage's place in the order of the work, from 1. The operator drags the stages into
+    /// that order (ADR 0022); every list of stages is shown in it, never sorted by name.
+    /// </summary>
+    public int Position { get; private set; }
+
+    /// <summary>
+    /// An inactive stage is left out of the pickers for new work and of the rate card; the
+    /// contractors, workers and rates that already point at it keep it (ADR 0022). There is no
+    /// delete: work orders will point at stages.
+    /// </summary>
+    public bool IsActive { get; private set; }
+
+    /// <summary>A new stage at <paramref name="position"/>, which is the end of the list when it is added.</summary>
+    public static Result<Stage> Create(string? name, int position)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(position, 1);
+
         var checkedName = CheckName(name);
         if (checkedName.IsFailure)
         {
             return checkedName.Error;
         }
 
-        return new Stage { Name = checkedName.Value };
+        return new Stage { Name = checkedName.Value, Position = position, IsActive = true };
     }
 
     public Result Rename(string? name)
@@ -43,6 +59,37 @@ public sealed class Stage : Entity
         }
 
         Name = checkedName.Value;
+        return Result.Success();
+    }
+
+    public void Deactivate() => IsActive = false;
+
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Puts every stage in the order of <paramref name="orderedIds"/>, the whole list as the
+    /// operator left it after dragging. The list must name each stage exactly once: a list that
+    /// misses a stage or names an unknown one was made from an old copy (another user added a
+    /// stage meanwhile), and applying it would leave two stages at one place.
+    /// </summary>
+    public static Result Reorder(IReadOnlyCollection<Stage> stages, IReadOnlyList<Guid> orderedIds)
+    {
+        ArgumentNullException.ThrowIfNull(stages);
+        ArgumentNullException.ThrowIfNull(orderedIds);
+
+        var byId = stages.ToDictionary(stage => stage.Id);
+        if (orderedIds.Count != byId.Count
+            || orderedIds.Distinct().Count() != orderedIds.Count
+            || !orderedIds.All(byId.ContainsKey))
+        {
+            return ProductionErrors.StageOrderOutdated;
+        }
+
+        for (var index = 0; index < orderedIds.Count; index++)
+        {
+            byId[orderedIds[index]].Position = index + 1;
+        }
+
         return Result.Success();
     }
 

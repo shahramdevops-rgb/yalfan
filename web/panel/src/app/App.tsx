@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { LoginPage } from '../features/auth/LoginPage';
+import { CatalogListsPage } from '../features/catalog/CatalogListsPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
+import { StagesPage } from '../features/production/StagesPage';
 import { sessionStore } from '../shared/api/client';
 import { AppLayout } from './AppLayout';
 import { ErrorPage } from './ErrorPage';
@@ -21,6 +23,9 @@ const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { index: true, element: <DashboardPage /> },
+          { path: 'lists', element: <Navigate to="/lists/fabrics" replace /> },
+          { path: 'lists/:kind', element: <CatalogListsPage /> },
+          { path: 'stages', element: <StagesPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

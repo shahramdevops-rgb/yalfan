@@ -3,7 +3,8 @@
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
 red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
-and 1.5 on 1405/09/02. Next: 1.6 (the Phase 1 panel screens). Read `docs/ARCHITECTURE.md` first.
+and 1.5 on 1405/09/02, 1.6.1 on 1405/09/03. Next: 1.6.2 (the model screens). Read
+`docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -258,6 +259,29 @@ accepted as written):
   its words in Toman go under it, so nobody confuses Rial and Toman (ADR 0002 point 9, built in
   1.6).
 
+Decided with the developer on 1405/09/03, before 1.6: **1.6 is split into five tasks**
+(1.6.1 to 1.6.5 below), because nearly every screen also needs something new in the API
+(deactivating the lists, editing a model, the users, reading the audit) and the whole is far
+more than one session. Models and rates come before contractors and workers, so the check of
+1.6 ("the operator enters a real model with its rates without help") can be made after three
+of them. Each task's questions are asked when it starts.
+
+Answered by the developer on 1405/09/03, for 1.6.1 (ADR 0022; the proposals he did not change
+were accepted as written):
+- **The stages are shown in the order of the work**, never «دوخت» and «برش» after
+  «بسته‌بندی», and **the operator drags a stage up or down** to change it. A new stage goes to
+  the end.
+- **No needless buttons** when a simpler action does the job: the name is edited by tapping it,
+  a switch turns an item on and off, a stage is dragged by its handle.
+- **Deactivating** a category, fabric, colour or stage leaves it out of the pickers for new
+  work; whatever already points at it keeps it and shows it marked inactive. The API itself
+  refuses a new link to an inactive item; a stage ticked on a contractor or worker before it was
+  deactivated stays ticked. The rate card leaves inactive stages out; their history stays.
+- **Fabrics, colours and categories on one page with a tab each**, the stages on their own page,
+  because the three catalog lists work alike and the sidebar stays short.
+- **Before and after building, three questions** are asked and answered in the report: is
+  security complete, is this the best that could be done, and is nothing else broken.
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -326,7 +350,43 @@ accepted as written):
   by name (ADR 0018). Added 1405/09/02 (ADR 0002 point 9): the first amounts on screen are the
   rates, so this task builds the money display used everywhere after it: the Rial figure, and
   under it a quieter line with the Toman equivalent and its words («۱۲٬۰۰۰ تومان · دوازده هزار
-  تومان»), following the typing under an amount field.
+  تومان»), following the typing under an amount field. Split on 1405/09/03 into:
+  - **1.6.1 Lists and stages.** The panel's shared list parts; fabrics, colours and categories
+    on one page with tabs, the stages on their own: add, rename, deactivate and activate; the
+    stages dragged into the order of the work. API: an active flag on the four lists, refusing
+    new links to inactive items, a stage position. *Done when:* the operator adds, renames,
+    deactivates and activates a category, fabric, colour and stage, and drags a stage into
+    place, and the API refuses a new link to an inactive item (with tests).
+    **Done 1405/09/03:** 446 .NET tests pass (34 new: 13 domain, 21 integration on
+    PostgreSQL), 42 panel tests pass (16 new), build has 0 warnings. ADR 0022. API: `…/deactivate`
+    and `…/activate` for categories, fabrics, colours and stages; `PUT
+    /panel/production/stages/order` with the whole list (a list made from an old copy is
+    refused with `production.stage_order_outdated` and changes nothing); `catalog.*_inactive`,
+    `parties.stage_inactive`, `production.stage_inactive` for new links to inactive items. Every
+    list of stages (stage list, contractors, workers, rate card, rate history) now follows the
+    position instead of the id. Panel: «فهرست‌ها» (`/lists/fabrics|colours|categories`) and
+    «مراحل کار» (`/stages`) in the sidebar; names edited where they stand, a switch for active,
+    stages dragged by a handle (mouse, finger, or arrow keys) on Pointer Events, no library.
+    Changed while building: inactive rows stay in place, greyed, instead of moving to the end,
+    so the switch stays under the finger and the stage list never misstates the order.
+    Checked in Chrome against a throwaway database (dropped afterwards): adding, the duplicate
+    name message, renaming in place and Escape, the switch, the tabs, a stage dragged with the
+    mouse and moved with the arrow keys, the order kept after a reload, no console errors.
+    Found on the way: an add that took two seconds left the button disabled, so a second Enter
+    was lost and the next name typed meanwhile was erased; the field now empties when a name is
+    sent and a refused one comes back. Not checked by eye: the phone width (the browser window
+    was minimized), so the drag by finger waits for a check on a real phone.
+  - **1.6.2 Models.** Search and pages; create a model with its sizes and variants; the model
+    page. API: rename a model, change its description and category, deactivate models and
+    variants, add a size to an existing model.
+  - **1.6.3 Rates and the money display.** The Rial figure with the Toman line and words; the
+    amount field with its live line; the Jalali date field; a model's rate card, a new rate, the
+    rate history. Ends with the check of 1.6: a real model entered with its rates without help.
+  - **1.6.4 Contractors and workers.** Search with the active filter and pages; the profile
+    form with stages; the IBAN (last four digits; the whole number only for the owner).
+  - **1.6.5 Users and change history.** The owner's users screen; a «تاریخچه» on the records,
+    for the owner. API: list users, deactivate and activate, change a mobile (ending the user's
+    sessions), read the audit of a record with names instead of ids.
 
 ## Phase 2 — Contractor work and accounts
 

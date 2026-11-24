@@ -72,14 +72,14 @@ internal sealed class SearchWorkersHandler(IAppDbContext db)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        var names = await PartyStages.NamesAsync(db, found.SelectMany(w => w.StageIds), cancellationToken);
+        var stages = await PartyStages.InOrderAsync(db, found.SelectMany(w => w.StageIds), cancellationToken);
 
         var items = found
             .Select(w => new WorkerListItem(
                 w.Id,
                 w.FullName,
                 w.MobileNumber.Value,
-                PartyStages.Of(w.StageIds, names),
+                PartyStages.Of(w.StageIds, stages),
                 w.StartDate,
                 w.Iban?.Masked,
                 w.IsActive))

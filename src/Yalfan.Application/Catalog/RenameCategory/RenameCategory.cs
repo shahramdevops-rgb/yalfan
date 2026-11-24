@@ -17,9 +17,9 @@ public sealed class RenameCategoryValidator : AbstractValidator<RenameCategoryCo
     }
 }
 
-internal sealed class RenameCategoryHandler(IAppDbContext db) : ICommandHandler<RenameCategoryCommand, CatalogOptionSummary>
+internal sealed class RenameCategoryHandler(IAppDbContext db) : ICommandHandler<RenameCategoryCommand, CatalogListItem>
 {
-    public async Task<Result<CatalogOptionSummary>> Handle(RenameCategoryCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CatalogListItem>> Handle(RenameCategoryCommand command, CancellationToken cancellationToken)
     {
         var category = await db.Categories.SingleOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
         if (category is null)
@@ -43,6 +43,6 @@ internal sealed class RenameCategoryHandler(IAppDbContext db) : ICommandHandler<
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CatalogOptionSummary(category.Id, name);
+        return new CatalogListItem(category.Id, name, category.IsActive);
     }
 }

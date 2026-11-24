@@ -126,7 +126,7 @@ Each module is a folder with the same name in Domain, Application and Api.
 | **Identity** | User, OtpCode, RefreshToken | Everyone logs in with mobile + SMS code, no passwords (ADR 0012). Permissions come later |
 | **Catalog** | Product (model, numbered by the system), Variant (fabric × colour × optional size → SKU), Category, Fabric, Colour, Size, ProductTranslation, PriceList, ProductImage | One catalog feeds production, stock and the store. Colours are one shared list; some models have sizes (answered 1405/09/01, roadmap Phase 1) |
 | **Parties** | Contractor, Worker, Customer, Supplier | Every party that can owe or be owed has a ledger. Contractors do one or more stages; IBANs are stored encrypted and shown masked (ADR 0019). Workers do none or more stages and have a start date (ADR 0020). In-house workers are paid a day wage, contractors by the piece (answered 1405/09/02) |
-| **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, PieceRate | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018). Piece rates are an append-only rate card per model and stage, with start dates (ADR 0021) |
+| **Production** | Stage, ProductionOrder, WorkOrder, WorkOrderDelivery, QcResult, PieceRate | The heart of the system. See 7.1. Stages are one shared list with no route per model (ADR 0018), in an order the operator drags (ADR 0022). Piece rates are an append-only rate card per model and stage, with start dates (ADR 0021) |
 | **Inventory** | Material, Bom, Warehouse, StockMovement, StockCount | Stock is a ledger of movements. See 7.3 |
 | **Ledger** | LedgerEntry, CashAccount, Payment, Cheque, Expense | All money. See 7.2 |
 | **Attendance** | Device, Punch, Shift, AttendanceDay, Leave | Live board. See 8 |
@@ -168,7 +168,8 @@ ProductionOrder (model, colours, quantity, due date)
   sewing (contractors or in-house day-wage workers), packing; the operator can add more, such as
   a part of a job given out on its own ("sewing the handles"). There is **no route per model**:
   a work order names the variant and the stage directly, and progress is counted per stage from
-  the work orders.
+  the work orders. The list has **one order, the order of the work**, which the operator changes
+  by dragging a stage, and every list of stages follows it (ADR 0022).
 
 ### 7.2 Money
 
@@ -336,6 +337,10 @@ Decisions:
   `src/shared/i18n/fa.ts`.
 - `web/panel/src` is organized by feature like the backend: `app/` (router, frame, guards),
   `features/<module>/`, and `shared/` (API client, session, formatting, texts, small UI parts).
+- **Few controls, all direct** (decided 1405/09/03): a name is edited by tapping it, a switch
+  turns an item on and off, a list whose order matters is put in order by dragging a handle; no
+  button where a direct action does the job. The shared parts are `NameList`, `SortableList`
+  (Pointer Events, no library), `InlineName`, `Switch` and `AddNameForm` (ADR 0022).
 - `web/shared` is created with the second app (Phase 10), not before.
 
 ## 10. Three languages
@@ -452,6 +457,9 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 - **Persian order:** a column people read as a sorted list of Persian names gets the ICU
   collation `fa-x-icu` (contractor and worker names, ADR 0019), so the order does not depend on
   the server's locale.
+- **Master data is deactivated, never deleted** (ADR 0022): categories, fabrics, colours,
+  stages, contractors and workers have an active flag. An inactive item is left out of pickers,
+  the API refuses a new link to it, and whatever already points at it keeps it.
 
 ## 13. Deployment (to be settled in Phase 3)
 
@@ -561,3 +569,4 @@ server in the developer's.
 | 0019 | Contractors; IBANs stored encrypted, shown masked | 1.3 (written) |
 | 0020 | In-house workers: stages as the job, start date, mobile unique among workers | 1.4 (written) |
 | 0021 | Piece rates: an append-only rate card per model and stage | 1.5 (written) |
+| 0022 | Inactive master data; the stages in an order dragged by the operator | 1.6.1 (written) |

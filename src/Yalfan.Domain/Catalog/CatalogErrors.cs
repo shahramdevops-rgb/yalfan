@@ -36,6 +36,15 @@ public static class CatalogErrors
 
     public static readonly Error ColourNotFound = Error.NotFound("catalog.colour_not_found");
 
+    /// <summary>A new model in a deactivated category (ADR 0022).</summary>
+    public static readonly Error CategoryInactive = Error.Rule("catalog.category_inactive");
+
+    /// <summary>A new variant in a deactivated fabric; the variants already in it stay (ADR 0022).</summary>
+    public static readonly Error FabricInactive = Error.Rule("catalog.fabric_inactive");
+
+    /// <summary>A new variant in a deactivated colour; the variants already in it stay (ADR 0022).</summary>
+    public static readonly Error ColourInactive = Error.Rule("catalog.colour_inactive");
+
     /// <summary>The size is not one of this model's sizes.</summary>
     public static readonly Error SizeNotFound = Error.NotFound("catalog.size_not_found");
 }

@@ -27,13 +27,13 @@ internal static class WorkerViews
         Worker worker,
         CancellationToken cancellationToken)
     {
-        var names = await PartyStages.NamesAsync(db, worker.StageIds, cancellationToken);
+        var stages = await PartyStages.InOrderAsync(db, worker.StageIds, cancellationToken);
 
         return new WorkerDetails(
             worker.Id,
             worker.FullName,
             worker.MobileNumber.Value,
-            PartyStages.Of(worker.StageIds, names),
+            PartyStages.Of(worker.StageIds, stages),
             worker.StartDate,
             worker.Notes,
             worker.Iban?.Masked,

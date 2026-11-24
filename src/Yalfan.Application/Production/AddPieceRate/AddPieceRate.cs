@@ -38,13 +38,15 @@ internal sealed class AddPieceRateHandler(IAppDbContext db, IClock clock)
             return ProductionErrors.ProductNotFound;
         }
 
-        var stageName = await db.Stages
-            .Where(stage => stage.Id == stageId)
-            .Select(stage => stage.Name)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (stageName is null)
+        var stage = await db.Stages.AsNoTracking().SingleOrDefaultAsync(s => s.Id == stageId, cancellationToken);
+        if (stage is null)
         {
             return ProductionErrors.StageNotFound;
+        }
+
+        if (!stage.IsActive)
+        {
+            return ProductionErrors.StageInactive;
         }
 
         var created = PieceRate.Create(
@@ -64,7 +66,7 @@ internal sealed class AddPieceRateHandler(IAppDbContext db, IClock clock)
 
         return new PieceRateEntry(
             rate.Id,
-            new StageSummary(stageId, stageName),
+            StageSummary.Of(stage),
             rate.Amount.Amount,
             rate.StartsOn,
             rate.EnteredAt,

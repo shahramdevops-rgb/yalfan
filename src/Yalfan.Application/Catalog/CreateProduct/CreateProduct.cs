@@ -56,10 +56,10 @@ internal sealed class CreateProductHandler(IAppDbContext db, IProductNumbers num
     {
         var variants = command.Variants ?? [];
 
-        if (command.CategoryId is { } categoryId
-            && !await db.Categories.AnyAsync(c => c.Id == categoryId, cancellationToken))
+        var category = await CatalogReferences.CheckCategoryAsync(db, command.CategoryId, cancellationToken);
+        if (category.IsFailure)
         {
-            return CatalogErrors.CategoryNotFound;
+            return category.Error;
         }
 
         var references = await CatalogReferences.CheckAsync(

@@ -40,6 +40,6 @@ internal sealed class RenameStageHandler(IAppDbContext db) : ICommandHandler<Ren
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return new StageSummary(stage.Id, stage.Name);
+        return StageSummary.Of(stage);
     }
 }

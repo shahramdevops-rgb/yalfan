@@ -6,7 +6,8 @@ using Yalfan.Domain.Common;
 namespace Yalfan.Application.Catalog;
 
 /// <summary>
-/// Checks that the fabrics and colours a request names exist, in two queries for any number of
+/// Checks the category, fabrics and colours a request names: each must exist and be active,
+/// because a deactivated one is not used for new work (ADR 0022). Two queries for any number of
 /// variants. A product keeps only their ids, so the check cannot be left to the Domain.
 /// </summary>
 internal static class CatalogReferences
@@ -18,20 +19,57 @@ internal static class CatalogReferences
         CancellationToken cancellationToken)
     {
         var distinctFabrics = fabricIds.Distinct().ToList();
-        var foundFabrics = await db.Fabrics.CountAsync(f => distinctFabrics.Contains(f.Id), cancellationToken);
-        if (foundFabrics != distinctFabrics.Count)
+        var fabrics = await db.Fabrics.AsNoTracking()
+            .Where(f => distinctFabrics.Contains(f.Id))
+            .Select(f => f.IsActive)
+            .ToListAsync(cancellationToken);
+        if (fabrics.Count != distinctFabrics.Count)
         {
             return CatalogErrors.FabricNotFound;
         }
 
+        if (fabrics.Contains(false))
+        {
+            return CatalogErrors.FabricInactive;
+        }
+
         var distinctColours = colourIds.Distinct().ToList();
-        var foundColours = await db.Colours.CountAsync(c => distinctColours.Contains(c.Id), cancellationToken);
-        if (foundColours != distinctColours.Count)
+        var colours = await db.Colours.AsNoTracking()
+            .Where(c => distinctColours.Contains(c.Id))
+            .Select(c => c.IsActive)
+            .ToListAsync(cancellationToken);
+        if (colours.Count != distinctColours.Count)
         {
             return CatalogErrors.ColourNotFound;
         }
 
+        if (colours.Contains(false))
+        {
+            return CatalogErrors.ColourInactive;
+        }
+
         return Result.Success();
+    }
+
+    /// <summary>The model's category, when it has one: it must exist and be active.</summary>
+    public static async Task<Result> CheckCategoryAsync(IAppDbContext db, Guid? categoryId, CancellationToken cancellationToken)
+    {
+        if (categoryId is not { } id)
+        {
+            return Result.Success();
+        }
+
+        var isActive = await db.Categories.AsNoTracking()
+            .Where(c => c.Id == id)
+            .Select(c => (bool?)c.IsActive)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return isActive switch
+        {
+            null => CatalogErrors.CategoryNotFound,
+            false => CatalogErrors.CategoryInactive,
+            true => Result.Success(),
+        };
     }
 
     public static Task<bool> ProductNameTakenAsync(IAppDbContext db, string persianName, CancellationToken cancellationToken) =>

@@ -17,9 +17,9 @@ public sealed class CreateCategoryValidator : AbstractValidator<CreateCategoryCo
     }
 }
 
-internal sealed class CreateCategoryHandler(IAppDbContext db) : ICommandHandler<CreateCategoryCommand, CatalogOptionSummary>
+internal sealed class CreateCategoryHandler(IAppDbContext db) : ICommandHandler<CreateCategoryCommand, CatalogListItem>
 {
-    public async Task<Result<CatalogOptionSummary>> Handle(CreateCategoryCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CatalogListItem>> Handle(CreateCategoryCommand command, CancellationToken cancellationToken)
     {
         var created = Category.Create(command.Name);
         if (created.IsFailure)
@@ -40,6 +40,6 @@ internal sealed class CreateCategoryHandler(IAppDbContext db) : ICommandHandler<
         db.Categories.Add(category);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CatalogOptionSummary(category.Id, name);
+        return new CatalogListItem(category.Id, name, category.IsActive);
     }
 }

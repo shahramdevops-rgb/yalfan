@@ -21,5 +21,11 @@ internal sealed class StageConfiguration : IEntityTypeConfiguration<Stage>
         // Unique names, also in the database: the handler's check cannot see a duplicate saved
         // at the same moment.
         builder.HasIndex(x => x.Name).IsUnique();
+
+        // Not unique: dragging rewrites every position in one save, and PostgreSQL checks a
+        // unique index row by row, so the swap of two stages would fail half way. Every list
+        // orders by position and then id, so a tie (two stages added at the same moment) still
+        // reads the same everywhere (ADR 0022).
+        builder.Property(x => x.Position);
     }
 }

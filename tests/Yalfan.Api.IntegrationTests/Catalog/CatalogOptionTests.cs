@@ -93,4 +93,59 @@ public sealed class CatalogOptionTests(ApiFactory factory) : IClassFixture<ApiFa
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Theory]
+    [InlineData("categories")]
+    [InlineData("fabrics")]
+    [InlineData("colours")]
+    public async Task An_operator_deactivates_an_option_and_activates_it_again(string kind)
+    {
+        using var client = await factory.CreateClientAsAsync(Role.Operator);
+        var created = await client.PostAsJsonAsync($"/panel/catalog/{kind}", new { name = CatalogApi.UniqueName("گزینه") }, Cancel);
+        var id = (await created.Body()).GetProperty("id").GetGuid();
+        Assert.True((await created.Body()).GetProperty("isActive").GetBoolean());
+
+        var deactivated = await client.PostAsync($"/panel/catalog/{kind}/{id}/deactivate", null, Cancel);
+        Assert.Equal(HttpStatusCode.OK, deactivated.StatusCode);
+        Assert.False((await deactivated.Body()).GetProperty("isActive").GetBoolean());
+        Assert.False(await IsActiveInList(client, kind, id));
+
+        var activated = await client.PostAsync($"/panel/catalog/{kind}/{id}/activate", null, Cancel);
+        Assert.Equal(HttpStatusCode.OK, activated.StatusCode);
+        Assert.True(await IsActiveInList(client, kind, id));
+    }
+
+    [Theory]
+    [InlineData("categories", "catalog.category_not_found")]
+    [InlineData("fabrics", "catalog.fabric_not_found")]
+    [InlineData("colours", "catalog.colour_not_found")]
+    public async Task Deactivating_a_missing_option_is_not_found(string kind, string code)
+    {
+        using var client = await factory.CreateClientAsAsync(Role.Operator);
+
+        var response = await client.PostAsync($"/panel/catalog/{kind}/{Guid.CreateVersion7()}/deactivate", null, Cancel);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(code, await response.ErrorCode());
+    }
+
+    [Fact]
+    public async Task An_anonymous_caller_cannot_deactivate_an_option()
+    {
+        using var operatorClient = await factory.CreateClientAsAsync(Role.Operator);
+        var id = await operatorClient.CreateColourAsync();
+        using var anonymous = factory.CreateBrowserClient();
+
+        var response = await anonymous.PostAsync($"/panel/catalog/colours/{id}/deactivate", null, Cancel);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.True(await IsActiveInList(operatorClient, "colours", id));
+    }
+
+    private static async Task<bool> IsActiveInList(HttpClient client, string kind, Guid id)
+    {
+        var list = await (await client.GetAsync($"/panel/catalog/{kind}", Cancel)).Body();
+        return Assert.Single(list.EnumerateArray(), item => item.GetProperty("id").GetGuid() == id)
+            .GetProperty("isActive").GetBoolean();
+    }
 }

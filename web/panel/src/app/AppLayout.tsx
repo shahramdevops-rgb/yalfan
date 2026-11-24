@@ -5,11 +5,13 @@ import { logout } from '../features/auth/authApi';
 import { useSession } from '../features/auth/useSession';
 import { formatWeekdayDate } from '../shared/format/dates';
 import { t, type MessageKey } from '../shared/i18n/fa';
-import { BagMark, CloseIcon, HomeIcon, LogoutIcon, MenuIcon } from '../shared/ui/icons';
+import { BagMark, CloseIcon, HomeIcon, ListIcon, LogoutIcon, MenuIcon, StagesIcon } from '../shared/ui/icons';
 
 // The sidebar grows one item per module as the phases land (docs/ROADMAP.md).
 const navigation: { to: string; label: MessageKey; icon: typeof HomeIcon }[] = [
   { to: '/', label: 'nav.dashboard', icon: HomeIcon },
+  { to: '/lists', label: 'nav.lists', icon: ListIcon },
+  { to: '/stages', label: 'nav.stages', icon: StagesIcon },
 ];
 
 /**
@@ -79,7 +81,8 @@ function Sidebar() {
           <li key={to}>
             <NavLink
               to={to}
-              end
+              // Only the dashboard needs an exact match; a module stays marked on its inner pages.
+              end={to === '/'}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2.5 text-base transition-colors ${
                   isActive ? 'bg-brand-50 font-medium text-brand-800' : 'text-stone-700 hover:bg-stone-100'

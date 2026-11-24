@@ -17,9 +17,9 @@ public sealed class CreateFabricValidator : AbstractValidator<CreateFabricComman
     }
 }
 
-internal sealed class CreateFabricHandler(IAppDbContext db) : ICommandHandler<CreateFabricCommand, CatalogOptionSummary>
+internal sealed class CreateFabricHandler(IAppDbContext db) : ICommandHandler<CreateFabricCommand, CatalogListItem>
 {
-    public async Task<Result<CatalogOptionSummary>> Handle(CreateFabricCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CatalogListItem>> Handle(CreateFabricCommand command, CancellationToken cancellationToken)
     {
         var created = Fabric.Create(command.Name);
         if (created.IsFailure)
@@ -40,6 +40,6 @@ internal sealed class CreateFabricHandler(IAppDbContext db) : ICommandHandler<Cr
         db.Fabrics.Add(fabric);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CatalogOptionSummary(fabric.Id, name);
+        return new CatalogListItem(fabric.Id, name, fabric.IsActive);
     }
 }

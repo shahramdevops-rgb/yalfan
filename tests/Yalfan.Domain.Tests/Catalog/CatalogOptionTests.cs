@@ -52,4 +52,38 @@ public class CatalogOptionTests
         Assert.Equal(CatalogErrors.NameRequired, category.Rename(" ").Error);
         Assert.Equal("کوله", category.PersianName);
     }
+
+    [Fact]
+    public void A_new_category_fabric_or_colour_is_active()
+    {
+        Assert.True(Category.Create("کوله").Value.IsActive);
+        Assert.True(Fabric.Create("برزنت").Value.IsActive);
+        Assert.True(Colour.Create("مشکی").Value.IsActive);
+    }
+
+    [Fact]
+    public void A_colour_is_deactivated_and_activated_again_keeping_its_name()
+    {
+        var colour = Colour.Create("سرمه‌ای").Value;
+
+        colour.Deactivate();
+        Assert.False(colour.IsActive);
+
+        colour.Activate();
+        Assert.True(colour.IsActive);
+        Assert.Equal("سرمه‌ای", colour.PersianName);
+    }
+
+    [Fact]
+    public void A_category_and_a_fabric_are_deactivated_the_same_way()
+    {
+        var category = Category.Create("کوله").Value;
+        var fabric = Fabric.Create("برزنت").Value;
+
+        category.Deactivate();
+        fabric.Deactivate();
+
+        Assert.False(category.IsActive);
+        Assert.False(fabric.IsActive);
+    }
 }

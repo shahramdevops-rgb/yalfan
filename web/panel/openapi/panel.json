@@ -126,7 +126,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CatalogOptionSummary"
+                    "$ref": "#/components/schemas/CatalogListItem"
                   }
                 }
               }
@@ -154,7 +154,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CatalogOptionSummary"
+                  "$ref": "#/components/schemas/CatalogListItem"
                 }
               }
             }
@@ -194,7 +194,67 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CatalogOptionSummary"
+                  "$ref": "#/components/schemas/CatalogListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/categories/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/categories/{id}/activate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListItem"
                 }
               }
             }
@@ -215,7 +275,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CatalogOptionSummary"
+                    "$ref": "#/components/schemas/CatalogListItem"
                   }
                 }
               }
@@ -243,7 +303,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CatalogOptionSummary"
+                  "$ref": "#/components/schemas/CatalogListItem"
                 }
               }
             }
@@ -283,7 +343,67 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CatalogOptionSummary"
+                  "$ref": "#/components/schemas/CatalogListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/fabrics/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/fabrics/{id}/activate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListItem"
                 }
               }
             }
@@ -304,7 +424,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CatalogOptionSummary"
+                    "$ref": "#/components/schemas/CatalogListItem"
                   }
                 }
               }
@@ -332,7 +452,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CatalogOptionSummary"
+                  "$ref": "#/components/schemas/CatalogListItem"
                 }
               }
             }
@@ -372,7 +492,67 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CatalogOptionSummary"
+                  "$ref": "#/components/schemas/CatalogListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/colours/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/catalog/colours/{id}/activate": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListItem"
                 }
               }
             }
@@ -1214,6 +1394,98 @@
         }
       }
     },
+    "/panel/production/stages/order": {
+      "put": {
+        "tags": [
+          "Production"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderStagesCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StageSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/production/stages/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Production"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StageSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/production/stages/{id}/activate": {
+      "post": {
+        "tags": [
+          "Production"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StageSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/production/rates": {
       "get": {
         "tags": [
@@ -1433,6 +1705,26 @@
           },
           "sku": {
             "type": "string"
+          }
+        }
+      },
+      "CatalogListItem": {
+        "required": [
+          "id",
+          "name",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -2166,6 +2458,24 @@
           }
         }
       },
+      "ReorderStagesCommand": {
+        "required": [
+          "stageIds"
+        ],
+        "type": "object",
+        "properties": {
+          "stageIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "RequestLoginCodeCommand": {
         "required": [
           "mobileNumber"
@@ -2237,7 +2547,8 @@
       "StageSummary": {
         "required": [
           "id",
-          "name"
+          "name",
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -2247,6 +2558,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },

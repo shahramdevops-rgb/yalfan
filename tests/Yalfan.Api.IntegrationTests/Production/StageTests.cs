@@ -141,6 +141,72 @@ public sealed class StageTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var changes = JsonDocument.Parse(entry.Changes);
         Assert.Equal(name, changes.RootElement.GetProperty("name").GetProperty("new").GetString());
     }
+
+    [Fact]
+    public async Task A_new_stage_goes_to_the_end_of_the_work()
+    {
+        using var client = await factory.CreateClientAsAsync(Role.Operator);
+
+        var id = await client.CreateStageAsync(CatalogApi.UniqueName("بسته‌بندی هدیه"));
+
+        var list = await (await client.GetAsync("/panel/production/stages", Cancel)).Body();
+        Assert.Equal(id, list.EnumerateArray().Last().GetProperty("id").GetGuid());
+    }
+
+    [Fact]
+    public async Task An_operator_deactivates_a_stage_and_activates_it_again_in_the_same_place()
+    {
+        using var client = await factory.CreateClientAsAsync(Role.Operator);
+        var id = await client.CreateStageAsync(CatalogApi.UniqueName("سوراخ‌کاری"));
+        var placeBefore = await PlaceOf(client, id);
+
+        var deactivated = await client.PostAsync($"/panel/production/stages/{id}/deactivate", null, Cancel);
+        Assert.Equal(HttpStatusCode.OK, deactivated.StatusCode);
+        Assert.False((await deactivated.Body()).GetProperty("isActive").GetBoolean());
+
+        var activated = await client.PostAsync($"/panel/production/stages/{id}/activate", null, Cancel);
+        Assert.True((await activated.Body()).GetProperty("isActive").GetBoolean());
+        Assert.Equal(placeBefore, await PlaceOf(client, id));
+    }
+
+    [Fact]
+    public async Task Deactivating_a_missing_stage_is_not_found()
+    {
+        using var client = await factory.CreateClientAsAsync(Role.Operator);
+
+        var response = await client.PostAsync($"/panel/production/stages/{Guid.CreateVersion7()}/deactivate", null, Cancel);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("production.stage_not_found", await response.ErrorCode());
+    }
+
+    [Fact]
+    public async Task Deactivating_a_stage_is_audited_as_a_change_of_its_flag()
+    {
+        using var client = factory.CreateBrowserClient();
+        var operatorSession = await factory.LoginAsync(client, await factory.CreateUserAsync(Role.Operator));
+        var id = await client.CreateStageAsync(CatalogApi.UniqueName("لبه‌دوزی"));
+
+        await client.PostAsync($"/panel/production/stages/{id}/deactivate", null, Cancel);
+
+        await using var scope = factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var stageId = id.ToString();
+        var entry = Assert.Single(await db.AuditEntries.AsNoTracking()
+            .Where(e => e.EntityType == "stages" && e.EntityId == stageId && e.Action == AuditAction.Updated)
+            .ToListAsync(Cancel));
+
+        Assert.Equal(operatorSession.User.Id, entry.UserId);
+        using var changes = JsonDocument.Parse(entry.Changes);
+        Assert.True(changes.RootElement.GetProperty("isActive").GetProperty("old").GetBoolean());
+        Assert.False(changes.RootElement.GetProperty("isActive").GetProperty("new").GetBoolean());
+    }
+
+    private static async Task<int> PlaceOf(HttpClient client, Guid id)
+    {
+        var list = await (await client.GetAsync("/panel/production/stages", Cancel)).Body();
+        return list.EnumerateArray().Select(item => item.GetProperty("id").GetGuid()).ToList().IndexOf(id);
+    }
 }
 
 internal static class StageApi
