@@ -38,8 +38,8 @@ works alone; the workshop owner is his brother and is treated as a client.
   ones, because fa and ar are right-to-left and en is left-to-right.
 - The backend stores Gregorian UTC only. Jalali, Hijri or Gregorian is a display choice.
 - Money is Rial: stored, in the API, typed and shown (ADR 0002), and every amount shown is
-  labelled «ریال». Under every Rial amount shown, a quieter line gives its Toman equivalent and
-  its words in Toman («۱۲٬۰۰۰ تومان · دوازده هزار تومان»; ADR 0002 point 9). Toman is never
+  labelled «ریال». Under every Rial amount shown, a quieter line says it in words, in Toman,
+  with no Toman figure («دوازده هزار تومان»; ADR 0002 point 9, ADR 0024). Toman is never
   stored, sent by the API or typed.
 - The office operator is not technical: few fields per screen, workshop words, safe defaults.
 

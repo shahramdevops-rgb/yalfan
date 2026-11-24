@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDay, formatWeekdayDate } from './dates';
+import { formatDate, formatDay, formatWeekdayDate, formatWeekdayDay } from './dates';
 import { digitsOnly, formatCountdown, toLatinDigits, toPersianDigits } from './digits';
-import { formatRial } from './money';
+import { formatRial, tomanLine } from './money';
 
 // These run with TZ=America/Los_Angeles (vite.config.ts), so a formatter that used the
 // machine's zone instead of Tehran's would fail.
@@ -35,6 +35,10 @@ describe('formatDay', () => {
   it('refuses a moment where a calendar day is expected', () => {
     expect(() => formatDay('2026-11-19T00:00:00Z')).toThrow(RangeError);
   });
+
+  it('adds the weekday of the day itself, whatever the browser zone', () => {
+    expect(formatWeekdayDay('2026-11-25')).toBe('چهارشنبه ۴ آذر ۱۴۰۵');
+  });
 });
 
 describe('formatRial', () => {
@@ -45,6 +49,35 @@ describe('formatRial', () => {
 
   it('formats a decimal string from the API exactly, beyond what a double can hold', () => {
     expect(formatRial('98765432109876543')).toBe('۹۸٬۷۶۵٬۴۳۲٬۱۰۹٬۸۷۶٬۵۴۳ ریال');
+  });
+});
+
+describe('tomanLine', () => {
+  it('says the amount in words, in Toman, with no second figure (ADR 0024)', () => {
+    expect(tomanLine(120_000)).toBe('دوازده هزار تومان');
+    expect(tomanLine(12_500_000)).toBe('یک میلیون و دویست و پنجاه هزار تومان');
+  });
+
+  it('never rounds: a Rial amount that is not a multiple of ten keeps its last Rial', () => {
+    expect(tomanLine(12_345)).toBe('هزار و دویست و سی و چهار تومان و پنج ریال');
+    expect(tomanLine(5)).toBe('پنج ریال');
+  });
+
+  it('reads zero and a negative amount, for the ledgers to come', () => {
+    expect(tomanLine(0)).toBe('صفر تومان');
+    expect(tomanLine(-120_000)).toBe('منفی دوازده هزار تومان');
+    expect(tomanLine(-5)).toBe('منفی پنج ریال');
+  });
+
+  it('reads a decimal string from the API exactly', () => {
+    expect(tomanLine('98765432109876540')).toBe(
+      'نه میلیون و هشتصد و هفتاد و شش هزار و پانصد و چهل و سه میلیارد و دویست و ده میلیون و نهصد و هشتاد و هفت هزار و ششصد و پنجاه و چهار تومان',
+    );
+  });
+
+  it('refuses a fraction of a Rial or a number too large to hold exactly', () => {
+    expect(() => tomanLine(1.5)).toThrow(RangeError);
+    expect(() => tomanLine(2 ** 60)).toThrow(RangeError);
   });
 });
 

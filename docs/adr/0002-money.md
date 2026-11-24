@@ -6,6 +6,8 @@
   balances) is extended in task 2.4.
 - Amended: 2026-11-23 (1405/09/02), before task 1.5: every amount shown carries a helper line
   in Toman and in words (point 9). Storage, the API and typed amounts stay Rial.
+- Amended: 2026-11-25 (1405/09/04), in task 1.6.3: the helper line keeps only the words in
+  Toman; the Toman figure is dropped (point 9, ADR 0024).
 
 ## Context
 
@@ -21,8 +23,8 @@ In Iran people speak in Toman and the banks, cheques and official papers are in 
 1. **The unit is Rial, everywhere.** Decided by the developer on 1405/08/24 ("Rial everywhere"):
    amounts are stored in Rial, the API sends and receives Rial, amounts are typed in Rial, and
    the panels, the contractor app, the store, print-outs and SMS show the amount in Rial. Toman
-   exists only as the display-only helper line of point 9: it is never stored, sent by the API
-   or typed.
+   exists only as the display-only helper line of point 9, in words: it is never stored, sent by
+   the API or typed.
    Why: one unit means no conversion step that can be forgotten, and it is the unit of the
    bank transfers, cheques and payout files the system must match.
 
@@ -57,28 +59,33 @@ In Iran people speak in Toman and the banks, cheques and official papers are in 
 8. **In the database** an amount is a `bigint` column and its currency a 3-letter code column.
    The mapping is added with the first entity that holds money.
 
-9. **Every Rial amount shown also shows its Toman equivalent and its words**, on a smaller,
-   quieter line under it (added by the developer on 1405/09/02: "wherever an amount is written,
-   write it in Toman and in words under it, so the person is not confused"):
+9. **Every Rial amount shown also says the amount in words, in Toman**, on a smaller, quieter
+   line under it (added by the developer on 1405/09/02: "wherever an amount is written, write it
+   in Toman and in words under it, so the person is not confused"; the Toman figure was dropped
+   from the line on 1405/09/04, see below):
 
    ```
    ۱۲۰٬۰۰۰ ریال
-   ۱۲٬۰۰۰ تومان · دوازده هزار تومان
+   دوازده هزار تومان
    ```
 
-   - The Rial figure stays first and is the amount; the line under it is a reading aid.
-   - The words are the Toman amount, because that is how people say amounts aloud; the
-     developer confirmed this sample.
+   - The Rial figure stays first and is the only figure; the line under it is a reading aid.
+   - The words are the Toman amount, because that is how people say amounts aloud.
+   - **Only the words, no Toman figure** (changed by the developer on 1405/09/04, when he saw
+     the first screen: «اون رو پاک کن و همون حروف به تومن بمونه»). Why: a second figure next to
+     the Rial one gave the eye two numbers to choose from; the words still make a factor-of-ten
+     mistake visible. A Rial amount that is not a multiple of ten is not rounded: 12,345 Rial
+     reads «هزار و دویست و سی و چهار تومان و پنج ریال» (ADR 0024).
    - Under a field where an amount is typed, the line follows the typing, because a Toman
      typed by habit into a Rial field is the usual mistake and must show at that moment.
    - It applies to screens and print-outs: the panel, the contractor app and the Persian store.
      **SMS is decided in 10.5**, because every extra character can split a message into
      two paid parts. A dollar amount has no Toman line.
    - Why this changes point 1 ("no Toman anywhere"): the operator and the owner think in Toman,
-     so a Rial figure alone is read one way and meant another; showing both side by side, with
-     the words, turns a factor-of-ten mistake into something visible. Storage, the API and
-     typed input stay Rial, so the data still has one unit.
-   - Built in the panel with the first screen that shows an amount (task 1.6).
+     so a Rial figure alone is read one way and meant another; the Toman words under it turn a
+     factor-of-ten mistake into something visible. Storage, the API and typed input stay Rial,
+     so the data still has one unit.
+   - Built in the panel with the first screen that shows an amount (task 1.6.3, ADR 0024).
 
 ## Not decided here
 
@@ -93,7 +100,7 @@ In Iran people speak in Toman and the banks, cheques and official papers are in 
 
 - The operator types and reads Rial. The panel must make the unit impossible to miss: every
   amount field and column is labelled «ریال», large numbers are grouped in threes, and the
-  Toman-and-words line of point 9 sits under every amount, because an amount typed in Toman by
+  Toman words of point 9 sit under every amount, because an amount typed in Toman by
   habit is wrong by a factor of ten and looks plausible.
 - Roadmap wording that said "to the last Toman" now reads Rial (task 5.4).
 - Reports never accumulate rounding error: totals are sums of integers.

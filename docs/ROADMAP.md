@@ -3,9 +3,9 @@
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
 red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
-and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03. Next: 1.6.3 (rates and the money
-display). Read
-`docs/ARCHITECTURE.md` first.
+and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03, 1.6.3 on 1405/09/04 (the check of 1.6
+waits for the developer, who does the operator's work for now). Next: 1.6.4 (contractors and
+workers). Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -46,7 +46,7 @@ developer runs and maintains it. Phases wait for these.
 | O.1 | Register `yalfan.ir` (IRNIC handle in the owner's name) and `yalfan.com`. Both are free today and anyone can take them | Now |
 | O.2 | Write down the real production stages and which contractors do which stage. **Stages answered 1405/09/01** (cutting, sewing, packing; ADR 0018). Which contractor does which stage is ticked per contractor by the operator (1.3, ADR 0019); the owner gives the list when the contractors are entered | Phase 1 |
 | O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates. **How, answered 1405/09/02:** by the piece (کنترات), per model and stage (ADR 0021). Today's rates are still to be listed; the operator enters them in the 1.6 screens | Phase 2 |
-| O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator | Phase 3 |
+| O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator. **1405/09/04:** until then the developer does the operator's work himself, including the check of 1.6 | Phase 3 |
 | O.5 | Collect from the paper books: each contractor's balance, work still out with contractors | Phase 3 |
 | O.6 | Buy a server (ParsPack or another provider) in the developer's name: Iranian VPS, 2 cores, 4 GB, ~80 GB SSD, upgradable to 4 cores and 8 GB for Phase 11. Criteria in docs/ARCHITECTURE.md 13.1; confirmed in task 3.1 | Phase 3 |
 | O.7 | Buy the attendance device **only after** task 4.0 names the model | Phase 4 |
@@ -297,6 +297,16 @@ accepted as written):
   on the model's page, not on the new-model form; inactive models stay in the list, greyed, with
   no filter. In the screens a variant is a «کیف» and its SKU its «کد».
 
+Answered by the developer on 1405/09/04, for 1.6.3 (ADR 0024; the proposals he did not change
+were accepted as written):
+- **The developer does the operator's work for now**, so the check of 1.6 ("the operator enters
+  a real model with its rates without help") is his to make.
+- **A Rial amount that is not a multiple of ten is not rounded** on the line under it: 12,345
+  Rial reads «هزار و دویست و سی و چهار تومان و پنج ریال».
+- **Changed while building (ADR 0002 point 9):** under a Rial amount only the words in Toman
+  stay; the Toman figure is dropped («دوازده هزار تومان», not «۱۲٬۰۰۰ تومان · دوازده هزار
+  تومان»), so the screen shows one figure.
+
 - **1.1 Catalog core.** Product (model: system number + name), Variant (fabric × colour ×
   optional size → SKU), Category, Fabric, Colour, Size, `ProductTranslation` with locale
   (Persian filled, others empty). *Done when:* a product with three colours can be created and
@@ -364,8 +374,9 @@ accepted as written):
   without help. The stage list is shown in its stored order (the order of the work), not sorted
   by name (ADR 0018). Added 1405/09/02 (ADR 0002 point 9): the first amounts on screen are the
   rates, so this task builds the money display used everywhere after it: the Rial figure, and
-  under it a quieter line with the Toman equivalent and its words («۱۲٬۰۰۰ تومان · دوازده هزار
-  تومان»), following the typing under an amount field. Split on 1405/09/03 into:
+  under it a quieter line with the amount in words, in Toman («دوازده هزار تومان»; the Toman
+  figure was dropped on 1405/09/04, ADR 0024), following the typing under an amount field.
+  Split on 1405/09/03 into:
   - **1.6.1 Lists and stages.** The panel's shared list parts; fabrics, colours and categories
     on one page with tabs, the stages on their own: add, rename, deactivate and activate; the
     stages dragged into the order of the work. API: an active flag on the four lists, refusing
@@ -422,6 +433,27 @@ accepted as written):
   - **1.6.3 Rates and the money display.** The Rial figure with the Toman line and words; the
     amount field with its live line; the Jalali date field; a model's rate card, a new rate, the
     rate history. Ends with the check of 1.6: a real model entered with its rates without help.
+    **Done 1405/09/04** (except the check of 1.6, which waits for the developer): 475 .NET tests
+    pass (none new: the API did not change), 101 panel tests pass (45 new), build has 0
+    warnings. ADR 0024. Panel: the «نرخ کنترات» card on the model's page, under the name: each
+    active stage in the order of the work with today's rate, its start date, a raise entered for
+    later, and its history (today's, still to start, past, corrected); a tap on a rate opens a
+    form for a new one, a tap on an entry of the history corrects it on its date, and the form
+    says what saving will do. Shared parts: `Money` (the Rial figure and the Toman words under
+    it), `AmountField` (grouped in threes while typed, Persian, Arabic and Latin digits, the
+    caret kept in place, 15 digits at most), `JalaliDateField` (day, month and year lists through
+    the browser's own Persian calendar, Esfand 30 only in a leap year), and the Persian number
+    words. Checked in Chrome against a throwaway database (dropped afterwards): a new model with
+    no rate; a rate typed in Persian digits; a zero refused with its message; a raise from 1 Dey
+    shown on the card; a correction from the history, the old entry marked corrected; a rate
+    from 1404 that only joins the history, whose history opened by itself; a digit typed in the
+    middle of an amount and deleted, a letter and a comma dropped, the caret in place each time;
+    Esfand 30 in 1403 and not in 1404; Escape; an inactive model with no new rate; a deactivated
+    stage left out of the card; the lists, stages and models pages again; no console errors.
+    The phone width was a 390 px frame inside the page, measured through the DOM (no sideways
+    scrolling; the three date lists on one row) and seen in a screenshot. Found on the way and
+    fixed: the «اصلاح‌شده» label was struck through and hard to read; the year list fell to a
+    second line on a phone.
   - **1.6.4 Contractors and workers.** Search with the active filter and pages; the profile
     form with stages; the IBAN (last four digits; the whole number only for the owner).
   - **1.6.5 Users and change history.** The owner's users screen; a «تاریخچه» on the records,
@@ -847,7 +879,7 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 |---|---|---|
 | Q.1 | Real stages of making a bag, and which are done outside. **Answered 1405/09/01:** cutting (in-house only), sewing (contractors or in-house day-wage workers), packing; one shared list, no route per model (ADR 0018) | Phase 1 |
 | Q.2 | Contractor pay method and rates; what happens to rejects. **Method answered 1405/09/02:** by the piece, per model and stage (ADR 0021); rejects still open | Phase 2 |
-| Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002. **Added 1405/09/02:** under every Rial amount shown, its Toman equivalent and its words in Toman (ADR 0002 point 9) | 0.3 |
+| Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002. **Added 1405/09/02:** under every Rial amount shown, its Toman equivalent and its words in Toman (ADR 0002 point 9). **Changed 1405/09/04:** only the words in Toman, no Toman figure (ADR 0024) | 0.3 |
 | Q.4 | Do contractors receive raw material or cut pieces | Phase 2 / 6 |
 | Q.5 | Shift hours, grace period, overtime, leave rules | Phase 4 |
 | Q.6 | In-house pay types; legal deductions in scope or not. **Pay type answered 1405/09/02: a day wage**; legal deductions still open | Phase 5 |

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState, type ReactNode } from 'react';
+import { useId, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { fieldCode, toProblem } from '../../shared/api/problem';
 import { attempt, refusalMessage } from '../../shared/api/refusal';
@@ -7,11 +7,13 @@ import { toPersianDigits } from '../../shared/format/digits';
 import { t } from '../../shared/i18n/fa';
 import { AddNameForm } from '../../shared/ui/AddNameForm';
 import { Button } from '../../shared/ui/Button';
+import { Card } from '../../shared/ui/Card';
 import { InlineName } from '../../shared/ui/InlineName';
 import { NameList } from '../../shared/ui/NameList';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { moveItem } from '../../shared/ui/sortable';
 import { Switch } from '../../shared/ui/Switch';
+import { RateCardSection } from '../production/RateCardSection';
 import { BagPicker } from './BagPicker';
 import { bagsToAdd, existingPicks, type Picks } from './bags';
 import { catalogListKey, catalogLists, type CatalogListItem } from './catalogListsApi';
@@ -31,7 +33,9 @@ const sizeMaxLength = 30;
 /**
  * One model: its number, which never changes; its name, category and description, each saved as
  * soon as it is changed, with no save button (decided 1405/09/03); a switch for the model and one
- * for each bag; its sizes, renamed in place and dragged into order; and more bags (ADR 0023).
+ * for each bag; its contractors' piece rates, right under the name, because they are what a new
+ * model still lacks when the operator lands here (ADR 0024); its sizes, renamed in place and
+ * dragged into order; and more bags (ADR 0023).
  */
 export function ModelPage() {
   const { id = '' } = useParams();
@@ -67,6 +71,7 @@ export function ModelPage() {
     <div className="flex max-w-3xl flex-col gap-6">
       <BackLink />
       <Profile product={model} put={put} />
+      <RateCardSection productId={model.id} productIsActive={model.isActive} />
       <Sizes product={model} put={put} />
       <Bags product={model} put={put} />
     </div>
@@ -78,17 +83,6 @@ function BackLink() {
     <Link to="/models" className="self-start text-sm text-brand-700 hover:underline">
       {t('models.back')}
     </Link>
-  );
-}
-
-function Card({ children, labelledBy }: { children: ReactNode; labelledBy?: string }) {
-  return (
-    <section
-      aria-labelledby={labelledBy}
-      className="flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6"
-    >
-      {children}
-    </section>
   );
 }
 

@@ -17,6 +17,7 @@ const dateInTehran = new Intl.DateTimeFormat('fa-IR', { ...jalaliDate, timeZone:
 const weekdayInTehran = new Intl.DateTimeFormat('fa-IR', { weekday: 'long', timeZone: workshopTimeZone });
 // A calendar day has no time and no zone; it is read and shown in UTC so it never shifts.
 const calendarDay = new Intl.DateTimeFormat('fa-IR', { ...jalaliDate, timeZone: 'UTC' });
+const calendarWeekday = new Intl.DateTimeFormat('fa-IR', { weekday: 'long', timeZone: 'UTC' });
 
 /** The Jalali date of a moment, in Tehran: "2026-11-18T20:30:00Z" is "۲۸ آبان ۱۴۰۵". */
 export function formatDate(instant: string | Date): string {
@@ -31,13 +32,23 @@ export function formatWeekdayDate(instant: string | Date): string {
 
 /** A calendar day from the API ("2026-11-19", a DateOnly) in Jalali, whatever the browser's zone. */
 export function formatDay(day: string): string {
+  return calendarDay.format(dayToDate(day));
+}
+
+/** The same, with the weekday: "2026-11-25" is "چهارشنبه ۴ آذر ۱۴۰۵". */
+export function formatWeekdayDay(day: string): string {
+  const date = dayToDate(day);
+  return `${calendarWeekday.format(date)} ${calendarDay.format(date)}`;
+}
+
+function dayToDate(day: string): Date {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
   if (!match) {
     throw new RangeError(`Not a calendar day: ${day}`);
   }
 
   const [, year, month, date] = match;
-  return calendarDay.format(new Date(Date.UTC(Number(year), Number(month) - 1, Number(date))));
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(date)));
 }
 
 function toDate(instant: string | Date): Date {

@@ -182,8 +182,8 @@ ProductionOrder (model, colours, quantity, due date)
 - **Opening balances** are ordinary entries dated on the go-live day, so paper history ends and
   system history begins at one clear point.
 - Amounts are whole numbers with a currency code, in **Rial**: stored, sent by the API, typed
-  and shown on every screen and print-out. Under every Rial amount shown, a quieter line gives
-  its Toman equivalent and its words; Toman is display-only and never stored (ADR 0002).
+  and shown on every screen and print-out. Under every Rial amount shown, a quieter line says
+  it in words, in Toman; Toman is display-only and never stored (ADR 0002, ADR 0024).
 
 ### 7.3 Stock
 
@@ -553,7 +553,7 @@ server in the developer's.
 | # | Decision | Written in |
 |---|---|---|
 | 0001 | Modular monolith with Clean Architecture | 0.1 |
-| 0002 | Money: stored unit, currency code, no deletion, calculated balances; Toman and words shown under every amount | 0.3 (amended 1405/09/02) / 2.4 |
+| 0002 | Money: stored unit, currency code, no deletion, calculated balances; the Toman words shown under every amount | 0.3 (amended 1405/09/02 and 1405/09/04) / 2.4 |
 | 0003 | Rates and prices are snapshotted on the document | 2.2 |
 | 0004 | Stock as a movement ledger; a contractor is a warehouse | 6.2 |
 | 0005 | Gregorian UTC storage, localized display | 0.3 |
@@ -575,3 +575,4 @@ server in the developer's.
 | 0021 | Piece rates: an append-only rate card per model and stage | 1.5 (written) |
 | 0022 | Inactive master data; the stages in an order dragged by the operator | 1.6.1 (written) |
 | 0023 | The model screens: bags per fabric, every size, sizes added later | 1.6.2 (written) |
+| 0024 | The rate card screen; the money display, the amount and the Jalali date fields | 1.6.3 (written) |
