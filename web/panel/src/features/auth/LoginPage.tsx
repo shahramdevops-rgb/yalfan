@@ -7,7 +7,7 @@ import { Button } from '../../shared/ui/Button';
 import { BagMark } from '../../shared/ui/icons';
 import { TextField } from '../../shared/ui/TextField';
 import { SplashScreen } from '../../app/SplashScreen';
-import { login, requestLoginCode } from './authApi';
+import { developmentLoginCode, login, requestLoginCode } from './authApi';
 import { useSession } from './useSession';
 
 type Step = { name: 'mobile' } | { name: 'code'; mobile: string; resendAt: number };
@@ -30,6 +30,8 @@ export function LoginPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  // Development only, until the SMS provider is connected: the code, shown at the top.
+  const [shownCode, setShownCode] = useState<string>();
 
   if (session.status === 'loading') {
     return <SplashScreen />;
@@ -52,6 +54,9 @@ export function LoginPage() {
 
     setCode('');
     setStep({ name: 'code', mobile: number, resendAt: Date.now() + result.value.resendAfterSeconds * 1000 });
+    if (import.meta.env.DEV) {
+      setShownCode(await developmentLoginCode(number));
+    }
   }
 
   async function submitCode(event: FormEvent, number: string) {
@@ -77,6 +82,14 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-dvh items-center justify-center px-4 py-10">
+      {import.meta.env.DEV && step.name === 'code' && shownCode && (
+        <div role="status" className="fixed inset-x-0 top-0 z-10 bg-amber-100 px-4 py-3 text-center text-amber-950">
+          <p className="text-lg font-bold">
+            {t('login.devCode')} <span dir="ltr">{toPersianDigits(shownCode)}</span>
+          </p>
+          <p className="text-xs">{t('login.devCodeNote')}</p>
+        </div>
+      )}
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <BagMark className="size-14" />
@@ -139,6 +152,7 @@ export function LoginPage() {
                   variant="link"
                   onClick={() => {
                     setError(undefined);
+                    setShownCode(undefined);
                     setStep({ name: 'mobile' });
                   }}
                 >

@@ -13,6 +13,30 @@ export async function requestLoginCode(mobileNumber: string): Promise<ApiResult<
   });
 }
 
+/**
+ * Development only: the login code the API kept instead of sending an SMS, shown on the login
+ * page until the SMS provider is connected (task 3.0, ADR 0012). The route exists only in a
+ * Development API and is not in the contract, so this is a plain fetch; in a production build
+ * `import.meta.env.DEV` is false and the call is dropped from the bundle.
+ */
+export async function developmentLoginCode(mobileNumber: string): Promise<string | undefined> {
+  if (!import.meta.env.DEV) {
+    return undefined;
+  }
+
+  try {
+    const response = await fetch('/panel/auth/dev/otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobileNumber }),
+    });
+    const body = response.ok ? ((await response.json()) as { code?: unknown }) : undefined;
+    return typeof body?.code === 'string' ? body.code : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Logs in with the code; on success the session store holds the new session. */
 export async function login(mobileNumber: string, code: string): Promise<ApiResult<void>> {
   return call(async () => {

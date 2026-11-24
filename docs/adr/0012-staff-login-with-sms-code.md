@@ -110,6 +110,17 @@ Decided by the developer on 1405/08/27.
   included, to the log (console and Seq).
 - `Sms:Provider` has no default. The log provider is refused outside Development and Testing,
   because a login code in a production log lets anyone who reads the log log in.
+- **The Development login page shows the code at its top** (asked by the developer on
+  1405/09/04, until the SMS provider is connected in task 3.0: «کد رو بذار بالای صفحه فعلا»).
+  The log provider keeps the last message per number (`ISmsOutbox`), and
+  `POST /panel/auth/dev/otp` returns the code while it is still valid. Why it stays safe: the
+  route is mapped only in Development, where the API, Seq and the database listen on this
+  machine only, so it shows nothing that the log did not already show; it is left out of the
+  OpenAPI contract; a real provider has no outbox; and the panel calls it only when
+  `import.meta.env.DEV` is true, so a production build does not contain the call. A POST, so the
+  mobile stays out of the address and the request log. Tested: the code shown logs in, nothing
+  is shown for an expired code or a number that got none, and the route does not exist in
+  Testing.
 
 ### Tests
 

@@ -507,7 +507,9 @@ Open questions: O.4, O.5, O.6, O.11; server in Iran, size and provider; panel ad
 - **3.0 SMS provider (moved from 10.1 on 1405/08/27).** Adapter for the chosen provider behind
   `ISmsSender`, the login-code template on the service line, delivery status recorded. Staff
   cannot log in without it (ADR 0012). *Done when:* a real login code reaches a real phone and
-  the log provider is no longer configured outside Development.
+  the log provider is no longer configured outside Development. Added 1405/09/04: until then
+  the Development login page shows the code at its top (ADR 0012); the real adapter has no
+  outbox, so with it the page shows nothing, and the route never exists outside Development.
 - **3.1 Production images.** Dockerfiles, production compose, reverse proxy with HTTPS, secrets
   outside the repository. ADR on deployment. *Done when:* the stack runs from images on a clean
   machine, and from outside: the security headers are on every response, plain HTTP redirects to

@@ -105,7 +105,10 @@ public static class DependencyInjection
         services.AddSingleton<IValidateOptions<SmsOptions>, SmsOptionsValidator>();
 
         // The only provider until the real adapter is added before go-live; the validator
-        // allows it only in Development and Testing.
-        services.AddSingleton<ISmsSender, LoggingSmsSender>();
+        // allows it only in Development and Testing. The same instance is the outbox the
+        // Development login page reads its code from (ADR 0012).
+        services.AddSingleton<LoggingSmsSender>();
+        services.AddSingleton<ISmsSender>(provider => provider.GetRequiredService<LoggingSmsSender>());
+        services.AddSingleton<ISmsOutbox>(provider => provider.GetRequiredService<LoggingSmsSender>());
     }
 }

@@ -17,6 +17,8 @@ const messages = {
   'login.resendIn': 'ارسال دوباره تا {time} دیگر',
   'login.changeMobile': 'تغییر شماره',
   'login.codeFormat': 'کد باید ۶ رقم باشد.',
+  'login.devCode': 'کد ورود:',
+  'login.devCodeNote': 'فقط در حالت توسعه، تا وقتی پنل پیامک وصل شود.',
 
   'nav.dashboard': 'داشبورد',
   'nav.models': 'مدل‌ها',
