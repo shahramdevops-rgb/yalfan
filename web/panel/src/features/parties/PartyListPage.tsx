@@ -26,7 +26,10 @@ export function PartyListPage({ kind }: { kind: PartyKind }) {
   });
 
   const data = results.data;
-  const outOfRange = usePageWithin(page, data && pageCount(data.totalCount, data.pageSize), list.replacePage);
+  // Data kept from the last search while this one loads belongs to another address: no page is
+  // judged out of range by it.
+  const pages = data && !results.isPlaceholderData ? pageCount(data.totalCount, data.pageSize) : undefined;
+  const outOfRange = usePageWithin(page, pages, list.replacePage);
   const emptyText = search
     ? t(`parties.${kind}.notFound`, { search })
     : withInactive

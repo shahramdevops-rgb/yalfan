@@ -21,7 +21,7 @@ import {
   partiesApi,
   partyKey,
   partySearchesKey,
-  profileOf,
+  profileChange,
   startDateOf,
   type PartyDetails,
   type PartyKind,
@@ -30,6 +30,7 @@ import {
 } from './partiesApi';
 import { startYearsBack } from './partyForm';
 import { StagePicker } from './StagePicker';
+import { keepsOneStage } from './stagePicks';
 
 /** The longest name and notes the API takes (PartyProfile). */
 const nameMaxLength = 100;
@@ -72,8 +73,10 @@ export function PartyPage({ kind }: { kind: PartyKind }) {
     );
   }
 
+  // Keyed by the person: the owner's whole IBAN, a half-typed IBAN or start date belong to this
+  // person and must not stay on the page when it goes straight to another person.
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    <div key={party.data.id} className="flex max-w-3xl flex-col gap-6">
       <BackLink kind={kind} />
       <Profile kind={kind} party={party.data} write={write} />
       <IbanSection kind={kind} party={party.data} write={write} />
@@ -95,8 +98,7 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
   const [error, setError] = useState<string>();
   const [stagesError, setStagesError] = useState<string>();
 
-  const update = (change: Partial<PartyProfile>) =>
-    write((current) => partiesApi[kind].update(current.id, profileOf(current, change)));
+  const update = (change: Partial<PartyProfile>) => write(profileChange(kind, change));
   const save = (change: Partial<PartyProfile>, field: string) => attempt(() => update(change), ignore, field);
 
   async function run(send: () => Promise<PartyDetails>, showError: (message: string | undefined) => void) {
@@ -167,7 +169,7 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
             stages={stages.data}
             ticked={party.stages.map((stage) => stage.id)}
             onChange={(stageIds) => void run(() => update({ stageIds }), setStagesError)}
-            keepOne={kind === 'contractors'}
+            keepOne={keepsOneStage(kind)}
             disabled={busy}
           />
         )}

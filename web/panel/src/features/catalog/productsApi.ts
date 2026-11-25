@@ -63,6 +63,15 @@ export const productSearchesKey = ['catalog', 'products'] as const;
 export const productSearchKey = (search: string, page: number) => [...productSearchesKey, search, page] as const;
 export const productKey = (id: string) => ['catalog', 'product', id] as const;
 
+/**
+ * Saving one part of the profile, built from the model as the last change left it: the page sends
+ * it through its queue of writes, which hands it that model (ADR 0025).
+ */
+export const profileChange =
+  (change: Partial<ProductProfile>) =>
+  (current: ProductDetails): Promise<ProductDetails> =>
+    productsApi.update(current.id, profileOf(current, change));
+
 /** The profile as it is now, with one part changed: the page saves one field at a time. */
 export const profileOf = (product: ProductDetails, change: Partial<ProductProfile>): ProductProfile => ({
   name: product.name,

@@ -109,6 +109,19 @@ The developer accepted the plan on 1405/09/04 with one change: the in-house work
 - **A stage filter on the contractor list** («who sews»): the first screen that needs it is the
   work order (2.2), where a contractor is picked by stage.
 - **Calling a person from his page** (`tel:`): not asked for; one link if it is wanted.
+- **Two users editing the same record** (found by the review of 1.6.4): the queue only orders
+  the changes of one page. Each save sends the whole profile from that page's copy, and the
+  contractor, worker and product rows have no version column, so the last save wins: the owner's
+  page opened in the morning can put back a mobile the manager changed at noon, visible only in
+  the audit. Whether that is accepted for three office users, or every edit carries the row's
+  version and a stale one is refused (like `catalog.size_order_outdated`), is open question
+  Q.13.
+- **A test for the page key** (found by the second review): a person's page and a model's page
+  are keyed by the record's id, so the owner's whole IBAN, an open form or a half-typed field
+  never stays on the page when it goes straight to another record (seen in Chrome). No test
+  guards that key, because the panel has no component tests: adding them means a new package
+  (a DOM for Vitest and a component testing library, ADR 0014's package rule), which the
+  developer decides.
 
 ## Consequences
 

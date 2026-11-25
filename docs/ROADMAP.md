@@ -505,6 +505,13 @@ were accepted as written):
     one said the list was empty. Checked again: the model's description and category together,
     sizes added and moved, the model's and a bag's switch, new bags; the notes and a stage on a
     contractor; the back button and a space typed in the middle of a search.
+    Reviewed the same day by the `reviewer` agent (twice), and fixed: a person's or a model's page
+    kept its state when it went straight to another record (now keyed by the id; seen in Chrome
+    with an open IBAN form); the contractor's last-stage lock tested through the code the page
+    runs; tests for "each change from the last answer"; the search box no longer erases a letter
+    typed while its own search reaches the address; placeholder data no longer moves a valid
+    page. Left open for the developer: Q.13 (two users saving the same record) and whether the
+    panel gets component tests (ADR 0025, "Not decided here"). 135 panel tests pass.
   - **1.6.5 Users and change history.** The owner's users screen; a «تاریخچه» on the records,
     for the owner. API: list users, deactivate and activate, change a mobile (ending the user's
     sessions), read the audit of a record with names instead of ids.
@@ -972,3 +979,4 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 | Q.10 | Number of models and colours today. **Answered 1405/09/01: many** (no exact count); models have no codes today; a bag is model + fabric + colour + optional size (see Phase 1) | Phase 1 |
 | Q.11 | Registered company or individual; which bank | 12.3 / 15.0 |
 | Q.12 | How often and how contractors are paid today | Phase 2 |
+| Q.13 | Two users saving the same record from two open pages: is "the last save wins" accepted (three office users, every change audited), or does each edit carry the row's version so a save from a stale page is refused? Found by the review of 1.6.4 (ADR 0025) | Before Phase 2 |

@@ -20,6 +20,19 @@ export function inTurn<T>(queue: WriteQueue, task: () => Promise<T>): Promise<T>
 export type Write<T> = (send: (current: T) => Promise<T>) => Promise<T>;
 
 /**
+ * Writes of one record in turn: each `send` gets the record as `read` gives it when its turn
+ * comes, which is what the last write stored, not what the page drew when the change was made.
+ */
+export function createSerialWrite<T>(queue: WriteQueue, read: () => T, store: (value: T) => void): Write<T> {
+  return (send) =>
+    inTurn(queue, async () => {
+      const value = await send(read());
+      store(value);
+      return value;
+    });
+}
+
+/**
  * The changes of one record on its page, sent one after another, each built from the record as
  * the last change left it, and each answer put in the query cache. Why: a page that saves every
  * field at once sends the whole record (a profile, a model's name, description and category), and
@@ -31,11 +44,15 @@ export function useSerialWrites<T>(key: QueryKey, saved?: (value: T) => void): W
   const queryClient = useQueryClient();
   const queue = useRef<Promise<unknown>>(Promise.resolve());
 
+  // The queue is reached only when a change is sent, never while the page draws.
   return (send) =>
-    inTurn(queue, async () => {
-      const value = await send(queryClient.getQueryData<T>(key)!);
-      queryClient.setQueryData(key, value);
-      saved?.(value);
-      return value;
-    });
+    createSerialWrite<T>(
+      queue,
+      // The page draws only once the record is loaded, so a change never comes before it.
+      () => queryClient.getQueryData<T>(key) as T,
+      (value) => {
+        queryClient.setQueryData(key, value);
+        saved?.(value);
+      },
+    )(send);
 }

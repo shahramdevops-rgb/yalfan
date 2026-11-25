@@ -24,6 +24,34 @@ export function readListAddress(params: URLSearchParams): ListAddress {
   };
 }
 
+/** What the search box and the address were last seen as, and the search this list last sent. */
+export interface SearchBox {
+  /** The text in the box, as typed. */
+  typed: string;
+  /** The address's search when the box last looked at it. */
+  followed: string;
+  /** The search the box sent to the address and has not seen arrive yet, or null. */
+  sent: string | null;
+}
+
+/**
+ * The box after the address's search changed. Its own search arriving changes nothing: more may
+ * have been typed while the address was updating, and that must not be erased. A change from
+ * outside (the sidebar link to the same list, the back button) is followed, or the old text would
+ * be sent again after the pause; unless the box already says it.
+ */
+export function followAddress(box: SearchBox, search: string): SearchBox {
+  if (search === box.followed) {
+    return box;
+  }
+
+  if (search === box.sent) {
+    return { ...box, followed: search, sent: null };
+  }
+
+  return { typed: search === box.typed.trim() ? box.typed : search, followed: search, sent: null };
+}
+
 /** How many pages a list has; an empty list still has its one page. */
 export function pageCount(totalCount: number, pageSize: number): number {
   return Math.max(1, Math.ceil(totalCount / pageSize));
@@ -47,18 +75,14 @@ export function writeListAddress({ search, page, withInactive }: ListAddress): R
 export function useListAddress() {
   const [params, setParams] = useSearchParams();
   const { search, page, withInactive } = readListAddress(params);
-  const [typed, setTyped] = useState(search);
+  const [box, setBox] = useState<SearchBox>({ typed: search, followed: search, sent: null });
+  const typed = box.typed;
 
-  // The address can change without the box: the sidebar link to the same list clears the search,
-  // and the back button may bring another one. The box follows, or the old text would be sent
-  // again after the pause; unless it already says it, because the address has just taken what
-  // was typed and a trailing space may still be in the middle of typing.
-  const [followed, setFollowed] = useState(search);
-  if (search !== followed) {
-    setFollowed(search);
-    if (search !== typed.trim()) {
-      setTyped(search);
-    }
+  // The address can change without the box (see followAddress); adjusted while drawing, so the
+  // box never shows the old text for a frame.
+  const followedBox = followAddress(box, search);
+  if (followedBox !== box) {
+    setBox(followedBox);
   }
 
   useEffect(() => {
@@ -66,10 +90,10 @@ export function useListAddress() {
       return;
     }
 
-    const timer = setTimeout(
-      () => setParams(writeListAddress({ search: typed.trim(), page: 1, withInactive }), { replace: true }),
-      typingPause,
-    );
+    const timer = setTimeout(() => {
+      setBox((before) => ({ ...before, sent: typed.trim() }));
+      setParams(writeListAddress({ search: typed.trim(), page: 1, withInactive }), { replace: true });
+    }, typingPause);
     return () => clearTimeout(timer);
   }, [typed, search, withInactive, setParams]);
 
@@ -78,7 +102,7 @@ export function useListAddress() {
     page,
     withInactive,
     typed,
-    setTyped,
+    setTyped: (text: string) => setBox((before) => ({ ...before, typed: text })),
     /** Another page: on a phone it must start from its top, not where the finger left the last one. */
     goToPage: (next: number) => {
       setParams(writeListAddress({ search, page: next, withInactive }));

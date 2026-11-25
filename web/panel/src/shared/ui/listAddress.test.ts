@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pageCount, readListAddress, writeListAddress } from './listAddress';
+import { followAddress, pageCount, readListAddress, writeListAddress, type SearchBox } from './listAddress';
 
 describe('readListAddress', () => {
   it('reads the search, the page and the inactive switch', () => {
@@ -34,5 +34,31 @@ describe('pageCount', () => {
     expect(pageCount(0, 20)).toBe(1);
     expect(pageCount(20, 20)).toBe(1);
     expect(pageCount(21, 20)).toBe(2);
+  });
+});
+
+describe('followAddress', () => {
+  const box = (typed: string, followed: string, sent: string | null = null): SearchBox => ({ typed, followed, sent });
+
+  it('follows a search cleared from outside, such as the sidebar link to the same list', () => {
+    expect(followAddress(box('حسن', 'حسن'), '').typed).toBe('');
+  });
+
+  it('follows another search brought back by the back button', () => {
+    expect(followAddress(box('حسن ح', 'حسن ح'), 'حسن').typed).toBe('حسن');
+  });
+
+  it('keeps what was typed while its own search was reaching the address', () => {
+    // «عل» was sent after the pause, and «ی» was typed before the address caught up.
+    expect(followAddress(box('علی', '', 'عل'), 'عل')).toEqual(box('علی', 'عل'));
+  });
+
+  it('keeps a space still being typed when the box already says the search', () => {
+    expect(followAddress(box('حسن ', ''), 'حسن').typed).toBe('حسن ');
+  });
+
+  it('changes nothing when the address did not change', () => {
+    const same = box('حس', 'حسن');
+    expect(followAddress(same, 'حسن')).toBe(same);
   });
 });

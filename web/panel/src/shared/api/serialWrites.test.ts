@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inTurn, type WriteQueue } from './serialWrites';
+import { createSerialWrite, inTurn, type WriteQueue } from './serialWrites';
 
 const later = <T>(value: T, ms: number) => new Promise<T>((resolve) => setTimeout(() => resolve(value), ms));
 
@@ -31,5 +31,29 @@ describe('inTurn', () => {
 
     await expect(failed).rejects.toThrow('refused');
     await expect(next).resolves.toBe('saved');
+  });
+});
+
+describe('createSerialWrite', () => {
+  it('builds each change from what the change before it saved, not from what the page drew', async () => {
+    // A record of two fields, each change sending both, as a profile does.
+    let stored = { notes: '', stages: ['sewing'] };
+    const write = createSerialWrite(
+      { current: Promise.resolve() },
+      () => stored,
+      (value) => (stored = value),
+    );
+    const saved: (typeof stored)[] = [];
+    const save = (change: Partial<typeof stored>) => (current: typeof stored) => {
+      const next = { ...current, ...change };
+      saved.push(next);
+      return later(next, 10);
+    };
+
+    // Both started in one gesture, before either answer came back.
+    await Promise.all([write(save({ notes: 'has a helper' })), write(save({ stages: ['sewing', 'packing'] }))]);
+
+    expect(saved[1]).toEqual({ notes: 'has a helper', stages: ['sewing', 'packing'] });
+    expect(stored).toEqual({ notes: 'has a helper', stages: ['sewing', 'packing'] });
   });
 });

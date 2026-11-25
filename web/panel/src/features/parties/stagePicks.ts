@@ -17,10 +17,15 @@ export function toggleStage(stages: readonly Stage[], ticked: readonly string[],
 }
 
 /**
- * Whether a tick may be taken off: a contractor does at least one stage, because the work-order
- * screen lists contractors by stage and one with none would appear in no list (ADR 0019). A worker
- * may have none.
+ * Whether a person's page keeps the last ticked stage: a contractor does at least one stage,
+ * because the work-order screen lists contractors by stage and one with none would appear in no
+ * list (ADR 0019). A worker may have none.
  */
-export function canUntick(kind: PartyKind, ticked: readonly string[], stageId: string): boolean {
-  return kind === 'workers' || ticked.length !== 1 || ticked[0] !== stageId;
+export function keepsOneStage(kind: PartyKind): boolean {
+  return kind === 'contractors';
+}
+
+/** The stage that cannot be unticked, when the last one is kept and only one is ticked. */
+export function lockedStage(ticked: readonly string[], keepOne: boolean): string | undefined {
+  return keepOne && ticked.length === 1 ? ticked[0] : undefined;
 }

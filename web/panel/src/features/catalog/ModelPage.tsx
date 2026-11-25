@@ -19,7 +19,14 @@ import { BagPicker } from './BagPicker';
 import { bagsToAdd, existingPicks, type Picks } from './bags';
 import { catalogListKey, catalogLists, type CatalogListItem } from './catalogListsApi';
 import { CategorySelect } from './CategorySelect';
-import { productKey, productSearchesKey, productsApi, profileOf, type ProductDetails } from './productsApi';
+import {
+  productKey,
+  productSearchesKey,
+  productsApi,
+  profileChange,
+  type ProductDetails,
+  type ProductProfile,
+} from './productsApi';
 
 type Bag = ProductDetails['variants'][number];
 
@@ -71,8 +78,10 @@ export function ModelPage() {
   }
 
   const model = product.data;
+  // Keyed by the model, so an open form or picks made for one model never carry over to another
+  // when the page goes from model to model without leaving.
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    <div key={model.id} className="flex max-w-3xl flex-col gap-6">
       <BackLink />
       <Profile product={model} write={write} />
       <RateCardSection productId={model.id} productIsActive={model.isActive} />
@@ -102,9 +111,8 @@ function Profile({ product, write }: { product: ProductDetails; write: ModelWrit
   }
 
   // The profile as the last change left it, not as this render saw it.
-  const update = (change: Parameters<typeof profileOf>[1]) =>
-    write((current) => productsApi.update(current.id, profileOf(current, change)));
-  const save = (change: Parameters<typeof profileOf>[1], field: string) => attempt(() => update(change), ignore, field);
+  const update = (change: Partial<ProductProfile>) => write(profileChange(change));
+  const save = (change: Partial<ProductProfile>, field: string) => attempt(() => update(change), ignore, field);
 
   return (
     <Card>

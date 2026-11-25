@@ -1,7 +1,7 @@
 import { t } from '../../shared/i18n/fa';
 import { Chip } from '../../shared/ui/Chip';
 import type { Stage } from '../production/stagesApi';
-import { stageChoices, toggleStage } from './stagePicks';
+import { lockedStage, stageChoices, toggleStage } from './stagePicks';
 
 interface StagePickerProps {
   /** The whole stage list, in the order of the work, inactive stages included. */
@@ -27,7 +27,7 @@ export function StagePicker({ stages, ticked, onChange, keepOne = false, disable
     return <p className="text-sm text-stone-500">{t('parties.noActiveStages')}</p>;
   }
 
-  const lastOne = keepOne && ticked.length === 1 ? ticked[0] : undefined;
+  const lastOne = lockedStage(ticked, keepOne);
 
   return (
     <div className="flex flex-wrap gap-2">

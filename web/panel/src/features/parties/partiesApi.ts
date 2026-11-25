@@ -116,6 +116,15 @@ export const partySearchKey = (kind: PartyKind, search: string, withInactive: bo
   [...partySearchesKey(kind), search, withInactive, page] as const;
 export const partyKey = (kind: PartyKind, id: string) => ['parties', kind, 'one', id] as const;
 
+/**
+ * Saving one part of a person's profile, built from the details as the last change left them: the
+ * page sends it through its queue of writes, which hands it those details (ADR 0025).
+ */
+export const profileChange =
+  (kind: PartyKind, change: Partial<PartyProfile>) =>
+  (current: PartyDetails): Promise<PartyDetails> =>
+    partiesApi[kind].update(current.id, profileOf(current, change));
+
 /** The start date, when the details are a worker's. */
 export const startDateOf = (party: PartyDetails): string | undefined =>
   'startDate' in party ? party.startDate : undefined;

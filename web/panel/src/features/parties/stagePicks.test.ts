@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Stage } from '../production/stagesApi';
-import { canUntick, stageChoices, toggleStage } from './stagePicks';
+import { keepsOneStage, lockedStage, stageChoices, toggleStage } from './stagePicks';
 
 // The stage list in the order of the work (ADR 0022); "finishing" was deactivated.
 const cutting: Stage = { id: 'c', name: 'برش', isActive: true };
@@ -26,13 +26,16 @@ describe('toggleStage', () => {
   });
 });
 
-describe('canUntick', () => {
-  it('keeps the last stage of a contractor, who does at least one', () => {
-    expect(canUntick('contractors', ['s'], 's')).toBe(false);
-    expect(canUntick('contractors', ['s', 'p'], 's')).toBe(true);
+describe('the last stage', () => {
+  it('is kept on a contractor, who does at least one, and not on a worker, who may have none', () => {
+    expect(keepsOneStage('contractors')).toBe(true);
+    expect(keepsOneStage('workers')).toBe(false);
   });
 
-  it('lets a worker have no stage, such as a storekeeper', () => {
-    expect(canUntick('workers', ['s'], 's')).toBe(true);
+  it('is locked only when it is the one ticked stage and the page keeps one', () => {
+    expect(lockedStage(['s'], true)).toBe('s');
+    expect(lockedStage(['s', 'p'], true)).toBeUndefined();
+    expect(lockedStage(['s'], false)).toBeUndefined();
+    expect(lockedStage([], true)).toBeUndefined();
   });
 });
