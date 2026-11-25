@@ -5,7 +5,8 @@ same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 14
 red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
 and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03, 1.6.3 and 1.6.4 on 1405/09/04 (the check
 of 1.6 waits for the developer, who does the operator's work for now), 1.6.5 on 1405/09/05.
-Next: 1.6.6 (change history). Read `docs/ARCHITECTURE.md` first.
+Next: 1.6.5b (housekeeping asked by the developer), then 1.6.6 (change history). Read
+`docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -572,6 +573,34 @@ were accepted as written):
     left is logged as a warning, and compose has a spare slot per account, with the way to change
     a number written in `.env.example` and the ADR; the numbers are listed in number order, since
     ids made in the same millisecond have no order (a test would have failed now and then).
+  - **1.6.5b Housekeeping (asked by the developer on 1405/09/05, for the next session).** The
+    review of 1.6.5 alone took about 158k tokens and the 1.6.5 session reached 360k in context,
+    so the developer asked for these, in one session, before 1.6.6:
+    1. **The real login numbers in the local configuration.** The developer's own owner account
+       and the workshop owner's account, in the git-ignored `.env` (`DEVELOPER_MOBILE`,
+       `OWNER_MOBILE`, with `DEVELOPER_FULL_NAME`, `OWNER_FULL_NAME`) and in user-secrets
+       (`Identity:Owners:…`, README). The numbers are in the session's private memory note
+       (`owner-login-numbers`), never in the repository. Ask the two names, and whether the third
+       number (the one not yet placed) is the owner's second (`OWNER_MOBILE_2`).
+    2. **Each task in a new session.** A long session sends its whole context again with every
+       message; write it into CLAUDE.md's workflow: when a task is committed, the session ends.
+    3. **A lighter roadmap.** Move the «Done» reports of finished tasks into
+       `docs/roadmap-done.md` and leave one status line per task here, because every session and
+       every review reads this file and it grows with each task (83 KB on 1405/09/05). Update
+       "Where things are" in CLAUDE.md.
+    4. **Ask before the review, and choose its model.** Before running `reviewer`, the session
+       asks the developer, saying which model it chose and why: Sonnet for an ordinary task,
+       Opus for one that touches money, access, login or the audit, where a missed rule costs
+       most. The session chooses; the developer only says yes or no. Written into CLAUDE.md's
+       workflow; the model is passed with each call, not fixed in `.claude/agents/reviewer.md`.
+    5. **A narrower review brief.** The session hands the reviewer the risky files and the ADR
+       sections to read; the reviewer greps the task's lines in the roadmap instead of reading it
+       whole, and skips what no rule covers. Written into `.claude/agents/reviewer.md`.
+    6. **Smaller tasks.** When a task grows while it is planned (as 1.6.5 did with the owner's
+       numbers), it is split before building, so each diff and each review stays small. Written
+       into CLAUDE.md's workflow.
+    *Done when:* the numbers log in on the local panel; CLAUDE.md, `.claude/agents/reviewer.md`
+    and the roadmap carry the rules above; `scripts/check.ps1` is green.
   - **1.6.6 Change history.** A «تاریخچه» on a model (with its bags, sizes and rates), a
     contractor and a worker (with their stages; an IBAN as «شبا عوض شد», with no number), for the
     owner, on its own page: newest first, one block per save with who and when, each change in the
