@@ -78,6 +78,24 @@ export function BagIcon({ className = 'size-5' }: { className?: string }) {
   );
 }
 
+/** The contractors: one person, and the work going out of the workshop to him. */
+export function ContractorsIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M9.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20a6.5 6.5 0 0 1 10.5-5.1M15.5 18h6M18.5 15l3 3-3 3" />
+    </svg>
+  );
+}
+
+/** The in-house workers: people working together. */
+export function WorkersIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M16 4.3a3.5 3.5 0 0 1 0 6.4M18 14.4a6.5 6.5 0 0 1 3.5 5.6" />
+    </svg>
+  );
+}
+
 export function CheckIcon({ className = 'size-4' }: { className?: string }) {
   return (
     <svg {...common} className={className} strokeWidth={2.4}>

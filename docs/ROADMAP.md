@@ -3,9 +3,9 @@
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 to 0.3 done the
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
 red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
-and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03, 1.6.3 on 1405/09/04 (the check of 1.6
-waits for the developer, who does the operator's work for now). Next: 1.6.4 (contractors and
-workers). Read `docs/ARCHITECTURE.md` first.
+and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03, 1.6.3 and 1.6.4 on 1405/09/04 (the check
+of 1.6 waits for the developer, who does the operator's work for now). Next: 1.6.5 (users and
+change history). Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -56,6 +56,7 @@ developer runs and maintains it. Phases wait for these.
 | O.10 | List materials and count the stock on hand; write the material recipe of each model | Phase 6 |
 | O.11 | An SMS provider account and a **service line** (خط خدماتی) with a login-code template, in the owner's name. Moved earlier on 1405/08/27: staff log in with SMS codes (ADR 0012), so the panel cannot go live without it. The developer gets the service line early instead of waiting for the store | Phase 3 (task 3.0) |
 | O.12 | Photograph the products properly | Phase 11 |
+| O.12b | Brand identity for the store: logo, colours and typeface by a graphic designer, not by the developer (added 1405/09/04). Why: the store is the brand's face, and code cannot make up for a weak visual identity. Start well before Phase 11, alongside the photography | Phase 11 |
 | O.13 | Apply for eNamad and a payment gateway in the owner's name (slow; start early in Phase 11) | Phase 12 |
 | O.14 | Choose shipping: post or courier for retail, freight for wholesale, and who pays | Phase 12 |
 
@@ -297,6 +298,15 @@ accepted as written):
   on the model's page, not on the new-model form; inactive models stay in the list, greyed, with
   no filter. In the screens a variant is a «کیف» and its SKU its «کد».
 
+Answered by the developer on 1405/09/04, for 1.6.4 (ADR 0025; the proposals he did not change
+were accepted as written):
+- **The in-house workers are «کارگران ثابت»**, not «کارگران», because «کارگران» means every
+  worker, contractors included; the contractors are «کنتراتی‌ها», as on the rate card.
+- **The lists show only the active people** unless a switch asks for the inactive ones too; a new
+  worker's **start date starts empty** and must be picked; a contractor's page saves each change
+  at once and keeps his last stage; the IBAN shows its last four digits, and only the owner sees
+  the whole number, with a copy button; every `/panel` answer carries `Cache-Control: no-store`.
+
 Answered by the developer on 1405/09/04, for 1.6.3 (ADR 0024; the proposals he did not change
 were accepted as written):
 - **The developer does the operator's work for now**, so the check of 1.6 ("the operator enters
@@ -456,9 +466,65 @@ were accepted as written):
     second line on a phone.
   - **1.6.4 Contractors and workers.** Search with the active filter and pages; the profile
     form with stages; the IBAN (last four digits; the whole number only for the owner).
+    **Done 1405/09/04:** 479 .NET tests pass (1 new: every `/panel` answer, a refusal too, carries
+    `Cache-Control: no-store`), 124 panel tests pass (23 new), build has 0 warnings. ADR 0025.
+    API: only that header, set by a middleware before the error handler. Panel: «کنتراتی‌ها»
+    (`/contractors`, `/contractors/new`, `/contractors/:id`) and «کارگران ثابت» (`/workers/…`) in
+    the sidebar, one set of components for both. The list: one search box for part of the name or
+    of the mobile, twenty per page, only the active people unless «غیرفعال‌ها هم دیده شوند» is on,
+    all in the address. The new-person form: name, mobile, stages, a worker's start date (empty
+    until picked, forty years back to this year, newest first), the optional IBAN and notes; every
+    refusal under its field. The person's page: name, mobile and notes edited in place, each stage
+    tick saved at once (a contractor keeps his last one), a switch, a worker's start date in a
+    small form; its changes go one after another, each built from the last answer. The IBAN card:
+    «•••• ۱۰۰۱», a form with IR fixed and the digits grouped as on a bank card, «پاک کردن شبا»
+    inside it; for the owner «نمایش کامل» with «کپی». Shared parts taken out on the way: the search
+    box, the pager and the list's address (the models page uses them now), the choice chip (the
+    bag picker uses it), the IBAN field, a notes field, the mobile shown grouped, and an empty
+    state for the Jalali date field (the rate form is unchanged).
+    Checked in Chrome against a throwaway database (dropped afterwards), 27 contractors and 4
+    workers: Persian alphabetical order and two pages; the search by Persian digits of a mobile;
+    the back button; the inactive switch; a whole IBAN shown to the owner, copied in Latin digits
+    and logged by the API; the notes left by tapping a stage, both saved; a contractor's last stage
+    locked; a taken mobile refused with its message, a new one saved from Persian digits and from
+    +98; a short IBAN, a mistyped one (refused by the API) and the caret kept when a digit is typed
+    in the middle; an IBAN replaced and removed, the whole number on show gone with it; a
+    deactivated stage kept on a worker who had it and left out of a new form; a future start date
+    refused under the field; the search text not carried from one list to the other; the models
+    page, a new model with the shared chips, and the rate form's date field again; no console
+    errors. The phone width was a 390 px frame inside the page, measured through the DOM (no
+    sideways scrolling on any of the seven pages) and seen in screenshots. Found on the way and
+    fixed: a note saved by tapping a stage could be undone by the stage's save, both sending the
+    whole profile at once (the page now sends its changes one after another); the IBAN field
+    showed its hint under the error, and a refused IBAN left the caret out of the field. Found and
+    left: the models page has the same gap between its name, description and category (ADR 0025,
+    "Not decided here").
   - **1.6.5 Users and change history.** The owner's users screen; a «تاریخچه» on the records,
     for the owner. API: list users, deactivate and activate, change a mobile (ending the user's
     sessions), read the audit of a record with names instead of ids.
+- **1.7 Design system (added 1405/09/04, asked by the developer).** Before Phase 2, because
+  Phase 2 is the most screen-heavy phase and is used every day: once forty screens exist, making
+  them consistent costs many times more. Builds on the shared parts 1.6 already made (`Button`,
+  `Card`, `Chip`, `TextField`, `AmountField`, `Money`, `JalaliDateField`, `QueryStates`, …), it
+  does not start over.
+  - **Tokens** in `index.css`: colours (brand, neutral, and status colours for success, warning,
+    danger, info), spacing, type scale, radius, shadow, focus ring. One place to change each.
+  - **Missing parts:** a searchable picker (contractor, model) operable by keyboard, a
+    confirmation dialog, toasts, a data table (sticky header, totals row, paging, empty state),
+    a page header, a status badge (colour **and** text, never colour alone), a form layout.
+  - **Library:** proposed Radix UI primitives with Tailwind (the gym's approach, shadcn/ui
+    pattern), only where a hand-made part would get focus, keyboard and RTL wrong (dialog,
+    popover, picker). Decided in this task's ADR; packages are added the ADR 0014 way.
+  - **Data entry rules:** keyboard-only flow, Enter moves to the next field, the first field
+    focused, today's date by default, the last choices remembered; every money action shows a
+    summary before saving («به … مبلغ … ریال بابت …»), because a mistake can only be reversed.
+  - **Print:** a print stylesheet and an A5/A4 layout for slips and statements (used from 2.9).
+  - **Screenshots:** automated Playwright screenshots of the main pages at desktop and phone
+    width, compared on each change, so an unintended visual change is seen.
+  - **Rules written down** in `docs/design/UI.md`, so every session builds screens the same way.
+  - The 1.6 screens are moved onto the finished parts.
+  *Done when:* every 1.6 screen uses only shared parts; the screenshots exist for both widths;
+  a page can be used start to finish with the keyboard alone; `UI.md` and the ADR are written.
 
 ## Phase 2 — Contractor work and accounts
 
@@ -470,6 +536,11 @@ is the number of cut pieces recorded (cutting is in-house); are bags sewn by in-
 workers counted, so that progress (2.8) shows all sewing and not only the contractors'; does
 the system refuse to issue cutting to a contractor (decided in 2.2).
 
+- **2.0 Prototypes of the three daily flows (added 1405/09/04).** Issuing work, receiving with
+  QC, and a contractor's statement and settlement, drawn as clickable mock-ups in two or three
+  variants each, before any code, and shown to the owner (and the operator once there is one).
+  Why: changing a drawing takes minutes, changing a built screen takes hours. *Done when:* one
+  variant of each flow is chosen and saved in `docs/design/`.
 - **2.1 Production orders.** Model, colours and quantities, due date, status. *Done when:* an order
   can be opened, changed while unstarted, and closed.
 - **2.2 Work orders: issue.** A stage of a production order given to a contractor: quantity, date,
@@ -547,6 +618,10 @@ Open questions: O.4, O.5, O.6, O.11; server in Iran, size and provider; panel ad
   as a safety copy.
 - **3.6 First-week fixes.** Whatever the operator trips over. *Done when:* the operator's list is
   empty.
+- **3.7 Usability session (added 1405/09/04).** The operator gets a real task with no help and
+  is watched in silence; every hesitation is noted. Repeated after each later go-live. Why: a
+  few short sessions like this find most of what no code review can. *Done when:* the notes are
+  turned into tasks or into changes to `docs/design/UI.md`.
 
 ## Phase 4 — Attendance, live
 

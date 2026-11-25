@@ -1,3 +1,4 @@
+import { caretAfterDigits } from './caret';
 import { toLatinDigits, toPersianDigits } from './digits';
 
 // The amount field keeps what was typed as plain Latin digits and shows it grouped in threes in
@@ -39,30 +40,10 @@ export function readAmountInput(text: string, caret: number): AmountInput {
   const digitsBeforeCaret = Math.min(Math.max(typedBeforeCaret - dropped, 0), digits.length);
 
   const display = groupDigits(digits);
-  return { digits, display, caret: caretAfterDigits(display, digitsBeforeCaret) };
+  return { digits, display, caret: caretAfterDigits(display, digitsBeforeCaret, separator) };
 }
 
 /** Latin digits as the field shows them: "1200000" becomes "۱٬۲۰۰٬۰۰۰". */
 export function groupDigits(digits: string): string {
   return toPersianDigits(digits.replace(/\B(?=(\d{3})+(?!\d))/g, separator));
-}
-
-/** The place in `display` just after its `count`-th digit (0 is the start). */
-function caretAfterDigits(display: string, count: number): number {
-  if (count === 0) {
-    return 0;
-  }
-
-  let seen = 0;
-  for (let index = 0; index < display.length; index++) {
-    if (display[index] !== separator) {
-      seen++;
-    }
-
-    if (seen === count) {
-      return index + 1;
-    }
-  }
-
-  return display.length;
 }

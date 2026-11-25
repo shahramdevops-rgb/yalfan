@@ -8,6 +8,9 @@ import { ModelPage } from '../features/catalog/ModelPage';
 import { ModelsPage } from '../features/catalog/ModelsPage';
 import { NewModelPage } from '../features/catalog/NewModelPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
+import { NewPartyPage } from '../features/parties/NewPartyPage';
+import { PartyListPage } from '../features/parties/PartyListPage';
+import { PartyPage } from '../features/parties/PartyPage';
 import { StagesPage } from '../features/production/StagesPage';
 import { sessionStore } from '../shared/api/client';
 import { AppLayout } from './AppLayout';
@@ -29,6 +32,14 @@ const router = createBrowserRouter([
           { path: 'models', element: <ModelsPage /> },
           { path: 'models/new', element: <NewModelPage /> },
           { path: 'models/:id', element: <ModelPage /> },
+          // The key gives each list its own page state: without it, going from one list to the
+          // other would keep the search box's text and send it to the other list.
+          { path: 'contractors', element: <PartyListPage key="contractors" kind="contractors" /> },
+          { path: 'contractors/new', element: <NewPartyPage key="contractors" kind="contractors" /> },
+          { path: 'contractors/:id', element: <PartyPage key="contractors" kind="contractors" /> },
+          { path: 'workers', element: <PartyListPage key="workers" kind="workers" /> },
+          { path: 'workers/new', element: <NewPartyPage key="workers" kind="workers" /> },
+          { path: 'workers/:id', element: <PartyPage key="workers" kind="workers" /> },
           { path: 'lists', element: <Navigate to="/lists/fabrics" replace /> },
           { path: 'lists/:kind', element: <CatalogListsPage /> },
           { path: 'stages', element: <StagesPage /> },

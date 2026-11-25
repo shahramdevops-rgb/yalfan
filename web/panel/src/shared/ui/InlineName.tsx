@@ -20,6 +20,10 @@ interface InlineNameProps {
    * by it, and the button is read by its own text.
    */
   label?: string;
+  /** What is shown while the text is not being edited, when it differs from it (a grouped mobile). */
+  display?: string;
+  /** A text that reads left to right, such as a phone number, with the phone's number keyboard. */
+  numeric?: boolean;
 }
 
 /**
@@ -37,6 +41,8 @@ export function InlineName({
   maxLength = 100,
   large = false,
   label,
+  display,
+  numeric = false,
 }: InlineNameProps) {
   const [draft, setDraft] = useState<string | null>(null);
   const [error, setError] = useState<string>();
@@ -90,12 +96,13 @@ export function InlineName({
           setDraft(value);
         }}
         title={t('list.renameHint')}
+        dir={numeric ? 'ltr' : undefined}
         aria-label={label ? undefined : empty ? placeholder : t('list.renameButton', { name: value })}
         className={`-mx-2 min-w-0 rounded-md px-2 py-1 text-start hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-brand-700 ${size} ${
           multiline ? 'whitespace-pre-line' : 'truncate'
         } ${empty ? 'text-stone-400' : muted ? 'text-stone-400' : 'text-stone-900'}`}
       >
-        {empty ? placeholder : value}
+        {empty ? placeholder : (display ?? value)}
       </button>
     );
   }
@@ -114,6 +121,7 @@ export function InlineName({
     readOnly: busy,
     maxLength,
     autoFocus: true,
+    ...(numeric && { dir: 'ltr', inputMode: 'tel' as const, autoComplete: 'off' }),
     className: `w-full rounded-lg border bg-white px-3 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 ${size} ${
       error ? 'border-red-500' : 'border-stone-300'
     } ${multiline ? 'min-h-24 max-w-xl py-2' : 'h-10 max-w-sm'}`,

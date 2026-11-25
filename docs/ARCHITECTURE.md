@@ -456,6 +456,9 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 - **Encrypted columns (decided in task 1.3, ADR 0019):** IBANs are stored with AES-256-GCM and
   a key from configuration, applied to every `Iban` property of the model by type, together with
   the audit's redaction. The API never returns a whole IBAN except to the owner on request.
+- **No browser cache for the panel API (task 1.6.4, ADR 0025):** every answer under `/panel`
+  carries `Cache-Control: no-store`, so personal data and a whole IBAN shown to the owner do not
+  stay in a phone's browser cache. The panel keeps the whole IBAN in one card's state only.
 - **Persian order:** a column people read as a sorted list of Persian names gets the ICU
   collation `fa-x-icu` (contractor and worker names, ADR 0019), so the order does not depend on
   the server's locale.
@@ -576,3 +579,4 @@ server in the developer's.
 | 0022 | Inactive master data; the stages in an order dragged by the operator | 1.6.1 (written) |
 | 0023 | The model screens: bags per fabric, every size, sizes added later | 1.6.2 (written) |
 | 0024 | The rate card screen; the money display, the amount and the Jalali date fields | 1.6.3 (written) |
+| 0025 | The contractor and worker screens; the IBAN on screen; no browser cache for the panel API | 1.6.4 (written) |

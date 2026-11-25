@@ -1,12 +1,15 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'link';
+type Variant = 'primary' | 'secondary' | 'danger' | 'link';
 
 const variants: Record<Variant, string> = {
   primary:
     'bg-brand-700 text-white hover:bg-brand-800 focus-visible:outline-brand-700 disabled:bg-stone-300 disabled:text-stone-500',
   secondary:
     'bg-white text-stone-800 ring-1 ring-stone-300 hover:bg-stone-50 focus-visible:outline-brand-700 disabled:text-stone-400',
+  // A rare step that takes something away, such as removing an IBAN: quiet, but not mistaken for the save.
+  danger:
+    'bg-white text-red-700 ring-1 ring-red-200 hover:bg-red-50 focus-visible:outline-red-700 disabled:text-stone-400',
   link: 'text-brand-700 hover:text-brand-800 hover:underline disabled:text-stone-400 disabled:no-underline',
 };
 

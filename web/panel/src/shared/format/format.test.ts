@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDay, formatWeekdayDate, formatWeekdayDay } from './dates';
+import { dayInTehran, formatDate, formatDay, formatWeekdayDate, formatWeekdayDay } from './dates';
 import { digitsOnly, formatCountdown, toLatinDigits, toPersianDigits } from './digits';
 import { formatRial, tomanLine } from './money';
 
@@ -23,6 +23,14 @@ describe('formatDate', () => {
 
   it('refuses something that is not a date', () => {
     expect(() => formatDate('yesterday')).toThrow(RangeError);
+  });
+});
+
+describe('dayInTehran', () => {
+  it('is the calendar day in Tehran, not in the zone of the machine', () => {
+    // 21:00 UTC on the 18th is 13:00 on the 18th in Los Angeles, but already the 19th in Tehran.
+    expect(dayInTehran(new Date('2026-11-18T21:00:00Z'))).toBe('2026-11-19');
+    expect(dayInTehran(new Date('2026-11-18T20:00:00Z'))).toBe('2026-11-18');
   });
 });
 

@@ -49,6 +49,8 @@ try
 
     // Outermost, so the logged status is the one the caller really received.
     app.UseRequestLogging();
+    // Before the error handler, so its answers carry the header too (ADR 0025).
+    app.UseNoStoreForPanel();
     app.UseErrorHandling();
 
     app.UseAuthentication();

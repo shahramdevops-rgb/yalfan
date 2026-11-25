@@ -1,6 +1,6 @@
 import { byPersianName } from '../../shared/format/persianOrder';
 import { t } from '../../shared/i18n/fa';
-import { CheckIcon } from '../../shared/ui/icons';
+import { Chip } from '../../shared/ui/Chip';
 import { toggleColour, toggleFabric, type Picks } from './bags';
 import type { CatalogListItem } from './catalogListsApi';
 
@@ -49,7 +49,8 @@ export function BagPicker({ fabrics, colours, picks, onChange, locked = [] }: Ba
               label={fabric.name}
               on={ticked.includes(fabric)}
               locked={isLocked(fabric.id)}
-              inactive={!fabric.isActive}
+              title={isLocked(fabric.id) ? t('bags.lockedHint') : undefined}
+              note={fabric.isActive ? undefined : t('bags.inactive')}
               onToggle={() => onChange(toggleFabric(picks, fabric.id))}
             />
           ))}
@@ -77,7 +78,8 @@ export function BagPicker({ fabrics, colours, picks, onChange, locked = [] }: Ba
                     label={colour.name}
                     on={already.includes(colour.id) || picked.includes(colour.id)}
                     locked={already.includes(colour.id)}
-                    inactive={!colour.isActive}
+                    title={already.includes(colour.id) ? t('bags.lockedHint') : undefined}
+                    note={colour.isActive ? undefined : t('bags.inactive')}
                     onToggle={() => tickColour(fabric.id, colour.id)}
                   />
                 ))}
@@ -87,38 +89,5 @@ export function BagPicker({ fabrics, colours, picks, onChange, locked = [] }: Ba
         );
       })}
     </div>
-  );
-}
-
-function Chip({
-  label,
-  on,
-  locked,
-  inactive,
-  onToggle,
-}: {
-  label: string;
-  on: boolean;
-  locked: boolean;
-  inactive: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      disabled={locked}
-      title={locked ? t('bags.lockedHint') : undefined}
-      onClick={onToggle}
-      className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3.5 text-sm ring-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 ${
-        on
-          ? 'bg-brand-50 font-medium text-brand-800 ring-brand-600'
-          : 'bg-white text-stone-700 ring-stone-300 hover:bg-stone-50'
-      } ${locked ? 'cursor-default opacity-75' : ''}`}
-    >
-      {on && <CheckIcon />}
-      {label}
-      {inactive && <span className="text-xs font-normal text-stone-500">{t('bags.inactive')}</span>}
-    </button>
   );
 }

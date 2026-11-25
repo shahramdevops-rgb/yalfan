@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Yalfan.Api.IntegrationTests.Parties;
 using Yalfan.Api.IntegrationTests.Sample;
 using Yalfan.Domain.Identity;
 
@@ -199,6 +200,22 @@ public sealed class RequestPipelineTests(ApiFactory factory) : IClassFixture<Api
         Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
         var problem = await ReadJson(response);
         Assert.Equal("request.method_not_allowed", problem.GetProperty("code").GetString());
+    }
+
+    [Fact]
+    public async Task Every_panel_answer_tells_the_browser_not_to_keep_a_copy()
+    {
+        // The owner's phone must not keep a whole IBAN in its cache; a refusal carries it too (ADR 0025).
+        using var owner = await factory.CreateClientAsAsync(Role.Owner);
+        var id = (await owner.CreateContractorAsync(iban: ContractorApi.Iban)).Id();
+
+        var iban = await owner.GetAsync($"{ContractorApi.Contractors}/{id}/iban", Cancel);
+        var refused = await _client.GetAsync(ContractorApi.Contractors, Cancel);
+
+        Assert.Equal(HttpStatusCode.OK, iban.StatusCode);
+        Assert.True(iban.Headers.CacheControl?.NoStore);
+        Assert.Equal(HttpStatusCode.Unauthorized, refused.StatusCode);
+        Assert.True(refused.Headers.CacheControl?.NoStore);
     }
 
     private static async Task<JsonElement> ReadJson(HttpResponseMessage response) =>

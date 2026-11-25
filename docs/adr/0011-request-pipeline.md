@@ -131,3 +131,5 @@ so the product carries no fake feature. Task 0.7 adds a real PostgreSQL to the s
   `UseCaseRegistration`.
 - `ValidatorOptions.Global` is set once in `AddApplication()`; it is process-wide, which is fine
   for one API process.
+- Added in 1.6.4 (ADR 0025): every answer under `/panel`, errors included, carries
+  `Cache-Control: no-store`, set by a small middleware before the error handler.

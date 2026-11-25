@@ -41,6 +41,26 @@ export function formatWeekdayDay(day: string): string {
   return `${calendarWeekday.format(date)} ${calendarDay.format(date)}`;
 }
 
+const dayPartsInTehran = new Intl.DateTimeFormat('en-u-ca-gregory-nu-latn', {
+  timeZone: workshopTimeZone,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/**
+ * The workshop's calendar day at a moment, as the API writes a day: "2026-11-25". The panel uses
+ * it only to bound what it offers (the years of a start date); the API checks against its own today.
+ */
+export function dayInTehran(instant: Date = new Date()): string {
+  const parts: Partial<Record<Intl.DateTimeFormatPartTypes, string>> = {};
+  for (const part of dayPartsInTehran.formatToParts(instant)) {
+    parts[part.type] = part.value;
+  }
+
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
 function dayToDate(day: string): Date {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
   if (!match) {
