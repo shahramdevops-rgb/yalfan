@@ -4,10 +4,12 @@ namespace Yalfan.Application.Identity.Sessions;
 public static class SessionPolicy
 {
     /// <summary>
-    /// Short, so that a deactivated user or a changed role takes effect within minutes; the
-    /// panel renews it silently.
+    /// Short, so that a deactivated user, a changed number or role, or a stolen phone's number
+    /// switched off takes effect within minutes; the panel renews it silently. Ten minutes since
+    /// 1405/09/05 (ADR 0026): the open page on a stolen phone works at most this long. Nothing is
+    /// checked in the database on each request, to keep that load off the future store.
     /// </summary>
-    public static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15);
+    public static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(10);
 
     /// <summary>Renewed on every use: a daily user almost never asks for a new code.</summary>
     public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);

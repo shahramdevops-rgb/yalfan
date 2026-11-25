@@ -285,6 +285,12 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("failed_attempts");
 
+                    b.Property<string>("MobileNumber")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("mobile_number");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
@@ -298,8 +304,8 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_otp_codes");
 
-                    b.HasIndex("UserId", "CreatedAt")
-                        .HasDatabaseName("ix_otp_codes_user_id_created_at");
+                    b.HasIndex("UserId", "MobileNumber", "CreatedAt")
+                        .HasDatabaseName("ix_otp_codes_user_id_mobile_number_created_at");
 
                     b.ToTable("otp_codes", (string)null);
 
@@ -380,17 +386,12 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
-                        .HasColumnName("full_name");
+                        .HasColumnName("full_name")
+                        .UseCollation("fa-x-icu");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("character varying(11)")
-                        .HasColumnName("mobile_number");
 
                     b.Property<string>("Role")
                         .IsRequired()
@@ -400,10 +401,6 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("MobileNumber")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_mobile_number");
 
                     b.ToTable("users", (string)null);
                 });
@@ -829,6 +826,48 @@ namespace Yalfan.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_refresh_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("Yalfan.Domain.Identity.User", b =>
+                {
+                    b.OwnsMany("Yalfan.Domain.Identity.LoginNumber", "LoginNumbers", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<bool>("IsActive")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_active");
+
+                            b1.Property<string>("MobileNumber")
+                                .IsRequired()
+                                .HasMaxLength(11)
+                                .HasColumnType("character varying(11)")
+                                .HasColumnName("mobile_number");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_user_login_numbers");
+
+                            b1.HasIndex("MobileNumber")
+                                .IsUnique()
+                                .HasDatabaseName("ix_user_login_numbers_mobile_number");
+
+                            b1.HasIndex("UserId")
+                                .HasDatabaseName("ix_user_login_numbers_user_id");
+
+                            b1.ToTable("user_login_numbers", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_user_login_numbers_users_user_id");
+                        });
+
+                    b.Navigation("LoginNumbers");
                 });
 
             modelBuilder.Entity("Yalfan.Domain.Parties.Contractor", b =>

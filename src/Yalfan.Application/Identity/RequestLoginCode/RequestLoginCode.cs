@@ -27,9 +27,11 @@ public sealed class RequestLoginCodeValidator : AbstractValidator<RequestLoginCo
 }
 
 /// <summary>
-/// Sends a login code to an active user's mobile. A number with no active account, or one that
-/// asked too often, gets the same answer and no SMS: the endpoint must not reveal which numbers
-/// belong to staff, and must not send SMS at the workshop's cost on a stranger's request.
+/// Sends a login code to a switched-on number of an active user. A number with no active account,
+/// a switched-off number, or one that asked too often, gets the same answer and no SMS: the
+/// endpoint must not reveal which numbers belong to staff, and must not send SMS at the
+/// workshop's cost on a stranger's request. The wait and the hourly limit count per number
+/// (ADR 0026), so codes asked on a stolen phone do not block the owner's other phone.
 /// </summary>
 internal sealed partial class RequestLoginCodeHandler(
     IAppDbContext db,
@@ -46,7 +48,7 @@ internal sealed partial class RequestLoginCodeHandler(
         var mobile = MobileNumber.Create(command.MobileNumber).Value;
         var now = clock.UtcNow;
 
-        var user = await db.Users.SingleOrDefaultAsync(u => u.MobileNumber == mobile && u.IsActive, cancellationToken);
+        var user = await db.Users.SingleOrDefaultAsync(UserLogin.ByActiveNumber(mobile), cancellationToken);
         if (user is null)
         {
             LogUnknownNumber(logger);
@@ -55,7 +57,7 @@ internal sealed partial class RequestLoginCodeHandler(
 
         var hourAgo = now - TimeSpan.FromHours(1);
         var recent = await db.OtpCodes
-            .Where(code => code.UserId == user.Id && code.CreatedAt > hourAgo)
+            .Where(code => code.UserId == user.Id && code.MobileNumber == mobile && code.CreatedAt > hourAgo)
             .Select(code => code.CreatedAt)
             .ToListAsync(cancellationToken);
 
@@ -67,7 +69,7 @@ internal sealed partial class RequestLoginCodeHandler(
         }
 
         var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6", CultureInfo.InvariantCulture);
-        db.OtpCodes.Add(OtpCode.Issue(user.Id, code, now));
+        db.OtpCodes.Add(OtpCode.Issue(user.Id, mobile, code, now));
         await db.SaveChangesAsync(cancellationToken);
 
         await sms.SendAsync(
@@ -77,7 +79,7 @@ internal sealed partial class RequestLoginCodeHandler(
         return Answer;
     }
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Login code asked for a number with no active account")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Login code asked for a number with no active account or switched off")]
     private static partial void LogUnknownNumber(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Login code refused for user {UserId}: asked too often")]

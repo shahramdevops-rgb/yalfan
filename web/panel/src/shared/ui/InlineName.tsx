@@ -24,6 +24,8 @@ interface InlineNameProps {
   display?: string;
   /** A text that reads left to right, such as a phone number, with the phone's number keyboard. */
   numeric?: boolean;
+  /** Shown under the field while it is edited, saying what saving will do (a user's new number). */
+  hint?: string;
 }
 
 /**
@@ -43,6 +45,7 @@ export function InlineName({
   label,
   display,
   numeric = false,
+  hint,
 }: InlineNameProps) {
   const [draft, setDraft] = useState<string | null>(null);
   const [error, setError] = useState<string>();
@@ -130,6 +133,7 @@ export function InlineName({
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       {multiline ? <textarea {...field} rows={3} /> : <input {...field} />}
+      {hint && !error && <p className="max-w-sm text-sm text-amber-800">{hint}</p>}
       {error && (
         <p role="alert" className="text-sm text-red-700">
           {error}

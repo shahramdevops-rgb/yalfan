@@ -26,7 +26,11 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
     internal static string Normalize(string code) => Digits.ToLatin(code).Trim();
 }
 
-/// <summary>Checks the newest code of the user and starts a session.</summary>
+/// <summary>
+/// Checks the newest code sent to this number and starts a session. A code sent to another of
+/// the user's numbers does not count (ADR 0026): a code taken on a stolen phone before its
+/// number was switched off must not work with the owner's other number.
+/// </summary>
 internal sealed class LoginHandler(IAppDbContext db, SessionIssuer sessions, IClock clock)
     : ICommandHandler<LoginCommand, AuthSession>
 {
@@ -34,7 +38,7 @@ internal sealed class LoginHandler(IAppDbContext db, SessionIssuer sessions, ICl
     {
         var mobile = MobileNumber.Create(command.MobileNumber).Value;
 
-        var user = await db.Users.SingleOrDefaultAsync(u => u.MobileNumber == mobile && u.IsActive, cancellationToken);
+        var user = await db.Users.SingleOrDefaultAsync(UserLogin.ByActiveNumber(mobile), cancellationToken);
         if (user is null)
         {
             // The same answer as a wrong code, so the endpoint cannot be used to test numbers.
@@ -43,7 +47,7 @@ internal sealed class LoginHandler(IAppDbContext db, SessionIssuer sessions, ICl
 
         // Only the newest code counts: asking for a new code silently retires the older ones.
         var otp = await db.OtpCodes
-            .Where(code => code.UserId == user.Id)
+            .Where(code => code.UserId == user.Id && code.MobileNumber == mobile)
             .OrderByDescending(code => code.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (otp is null)

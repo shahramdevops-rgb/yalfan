@@ -36,9 +36,17 @@ services:
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env (at least 32 characters)}
       # Encrypts stored IBANs (ADR 0019). Losing it loses every stored IBAN: keep a copy off the server.
       Encryption__IbanKey: ${IBAN_ENCRYPTION_KEY:?Set IBAN_ENCRYPTION_KEY in .env (32 random bytes in base64)}
-      # The first owner, created at start when no owner exists. Optional.
-      Identity__SeedOwner__FullName: ${OWNER_FULL_NAME:-}
-      Identity__SeedOwner__MobileNumber: ${OWNER_MOBILE:-}
+      # Owner accounts (ADR 0026): created or given their missing numbers at start, never
+      # switched back on. The owner logs in with either of his two numbers; the developer's
+      # account has one number, so nobody can switch it off from the panel. A new number goes in
+      # the empty slot next to the old one, never in its place (see .env.example). Optional.
+      Identity__Owners__0__FullName: ${OWNER_FULL_NAME:-}
+      Identity__Owners__0__MobileNumbers__0: ${OWNER_MOBILE:-}
+      Identity__Owners__0__MobileNumbers__1: ${OWNER_MOBILE_2:-}
+      Identity__Owners__0__MobileNumbers__2: ${OWNER_MOBILE_3:-}
+      Identity__Owners__1__FullName: ${DEVELOPER_FULL_NAME:-}
+      Identity__Owners__1__MobileNumbers__0: ${DEVELOPER_MOBILE:-}
+      Identity__Owners__1__MobileNumbers__1: ${DEVELOPER_MOBILE_2:-}
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
     depends_on:

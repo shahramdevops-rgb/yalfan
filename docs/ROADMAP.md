@@ -4,8 +4,8 @@ Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15); tasks 0.1 t
 same day, 0.4 and 0.5 on 1405/08/27, 0.6 to 0.8 on 1405/08/28, 0.9 locally on 1405/08/29 (its
 red run on GitHub waits for a push, which closes Phase 0), 1.1 and 1.2 on 1405/09/01, 1.3, 1.4
 and 1.5 on 1405/09/02, 1.6.1 and 1.6.2 on 1405/09/03, 1.6.3 and 1.6.4 on 1405/09/04 (the check
-of 1.6 waits for the developer, who does the operator's work for now). Next: 1.6.5 (users and
-change history). Read `docs/ARCHITECTURE.md` first.
+of 1.6 waits for the developer, who does the operator's work for now), 1.6.5 on 1405/09/05.
+Next: 1.6.6 (change history). Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session.
@@ -59,6 +59,7 @@ developer runs and maintains it. Phases wait for these.
 | O.12b | Brand identity for the store: logo, colours and typeface by a graphic designer, not by the developer (added 1405/09/04). Why: the store is the brand's face, and code cannot make up for a weak visual identity. Start well before Phase 11, alongside the photography | Phase 11 |
 | O.13 | Apply for eNamad and a payment gateway in the owner's name (slow; start early in Phase 11) | Phase 12 |
 | O.14 | Choose shipping: post or courier for retail, freight for wholesale, and who pays | Phase 12 |
+| O.15 | Give the developer the SIM of his owner account, and keep the owner's own two numbers on two separate phones (ADR 0026). The numbers go only into the server's `.env`, never into the repository | Phase 3 |
 
 ---
 
@@ -266,7 +267,27 @@ Decided with the developer on 1405/09/03, before 1.6: **1.6 is split into five t
 (deactivating the lists, editing a model, the users, reading the audit) and the whole is far
 more than one session. Models and rates come before contractors and workers, so the check of
 1.6 ("the operator enters a real model with its rates without help") can be made after three
-of them. Each task's questions are asked when it starts.
+of them. Each task's questions are asked when it starts. **Changed 1405/09/05: six tasks**, 1.6.5
+split into the users (1.6.5) and the change history (1.6.6), because giving the owner several
+numbers changed the login code, the most sensitive code there is, which deserves its own review
+and commit; the history does not depend on it.
+
+Answered by the developer on 1405/09/05, for 1.6.5 (ADR 0026; the proposals he did not change
+were accepted as written):
+- **The owner logs in with two numbers on two separate phones**, and **the developer has an owner
+  account of his own** with one number, so that when the owner's phone is stolen the developer,
+  or the owner from his other phone, switches the stolen number off at once and the owner keeps
+  working. The developer's number was not put on the owner's account, because the audit would
+  record his changes as the owner's and a thief holding the stolen phone could switch it off.
+- **Owner accounts and their numbers come only from the server's configuration**, only added at
+  start, never switched back on; the panel only switches them off and on, and an account always
+  keeps one number on. Switching one off ends every session of the account. A number of one's
+  own account is switched back on only by another owner account (added after the review, so a
+  thief's still-open page cannot switch the stolen number on).
+- **The access token lives ten minutes** (was fifteen), with no database check on each request,
+  to keep that load off the future store.
+- **A user's name and role can be corrected**, the role only between manager and operator; only
+  the owner manages users (the manager adds no operators).
 
 Answered by the developer on 1405/09/03, for 1.6.1 (ADR 0022; the proposals he did not change
 were accepted as written):
@@ -512,9 +533,50 @@ were accepted as written):
     typed while its own search reaches the address; placeholder data no longer moves a valid
     page. Left open for the developer: Q.13 (two users saving the same record) and whether the
     panel gets component tests (ADR 0025, "Not decided here"). 135 panel tests pass.
-  - **1.6.5 Users and change history.** The owner's users screen; a «تاریخچه» on the records,
-    for the owner. API: list users, deactivate and activate, change a mobile (ending the user's
-    sessions), read the audit of a record with names instead of ids.
+  - **1.6.5 Users and login numbers.** The owner's users screen. API: list users, deactivate and
+    activate, change a mobile (ending the user's sessions), correct a name and a role; owner
+    accounts with several login numbers from the configuration (added 1405/09/05, ADR 0026).
+    **Done 1405/09/05:** 525 .NET tests pass (46 new: 12 domain, 34 integration on PostgreSQL),
+    145 panel tests pass (10 new), build has 0 warnings. ADR 0026. A user logs in with one or more
+    numbers (`user_login_numbers`, migration `UserLoginNumbers`, which copies each user's number);
+    a login code, its wait and its hourly limit belong to one number. `Identity:Owners` replaces
+    `Identity:SeedOwner` (the old setting stops the start): owner accounts are created or given
+    their missing numbers at start, never switched back on; compose, `.env.example` and the README
+    follow. API, owner only: `GET /panel/users`, `PUT …/{id}/name|role|mobile`,
+    `POST …/{id}/deactivate|activate`, `POST …/{id}/numbers/{numberId}/deactivate|activate`; a new
+    number, a deactivation and a number switched off revoke every session of the user; one number
+    always stays on (`identity.last_login_number`); an owner account is locked otherwise
+    (`identity.owner_locked`). The access token lives ten minutes; `/panel/auth/me` carries no
+    mobile. Panel: «کاربران» (`/users`) in the sidebar for an owner only, «not found» for anyone
+    else; a card per user with the name edited in place, the role as two chips, the number edited
+    in place with a line saying the user will be logged out everywhere, a switch; an owner
+    account with a switch per number, the last one on locked; the new-user form starting at
+    «اپراتور دفتر». Checked in Chrome against a throwaway database (dropped afterwards): the two
+    owner accounts from the configuration, the developer's single number locked; a name corrected
+    in Persian; the empty form and a taken number (the owner's second, typed in Persian digits)
+    refused under their fields; a user added; his role changed; his number changed from +98 with
+    the line shown while typing; deactivated with its note and activated; the owner's second
+    number switched off from his own session, which went to the login at once; that number then
+    got no code while the first logged in, with the first locked as the last one on; the second
+    switched back on without logging out; a manager saw no «کاربران» and `/users` said not found;
+    the contractor and model pages again; no console errors. The phone width was a 390 px frame
+    inside the page, measured through the DOM (no sideways scrolling), not seen by eye: the
+    Chrome window was minimized and screenshots timed out. Found on the way and changed: the
+    stolen-phone hint is shown only on an account with more than one number.
+    Reviewed the same day by the `reviewer` agent, and fixed: a thief whose page on the stolen
+    phone still worked could switch the stolen number back on, so a number of one's own account
+    is now switched back on only by another owner account (`identity.own_number_switch_on`; seen
+    in Chrome: locked on the owner's own card, free on the developer's); "one number stays on" is
+    also a constraint trigger in the database, against two switches at once; the same number
+    under two configured accounts stops the start; a configured account none of whose numbers is
+    left is logged as a warning, and compose has a spare slot per account, with the way to change
+    a number written in `.env.example` and the ADR; the numbers are listed in number order, since
+    ids made in the same millisecond have no order (a test would have failed now and then).
+  - **1.6.6 Change history.** A «تاریخچه» on a model (with its bags, sizes and rates), a
+    contractor and a worker (with their stages; an IBAN as «شبا عوض شد», with no number), for the
+    owner, on its own page: newest first, one block per save with who and when, each change in the
+    workshop's words. API: read the audit of a record with names instead of ids. (Split from 1.6.5
+    on 1405/09/05; the shape was accepted with 1.6.5's questions.)
 - **1.7 Design system (added 1405/09/04, asked by the developer).** Before Phase 2, because
   Phase 2 is the most screen-heavy phase and is used every day: once forty screens exist, making
   them consistent costs many times more. Builds on the shared parts 1.6 already made (`Button`,

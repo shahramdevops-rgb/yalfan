@@ -23,7 +23,8 @@ public sealed class AuditTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         var response = await client.PostAsJsonAsync(
             "/panel/users", new { fullName = "Zahra Ahmadi", mobileNumber = mobile, role = "operator" }, Cancel);
-        var userId = (await response.Content.ReadFromJsonAsync<JsonElement>(Cancel)).GetProperty("id").GetGuid();
+        var created = await response.Content.ReadFromJsonAsync<JsonElement>(Cancel);
+        var userId = created.GetProperty("id").GetGuid();
 
         var entry = Assert.Single(await EntriesFor("users", userId));
         Assert.Equal(AuditAction.Created, entry.Action);
@@ -34,11 +35,19 @@ public sealed class AuditTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         var changes = Parse(entry.Changes);
         Assert.Equal("Zahra Ahmadi", changes.GetProperty("fullName").GetProperty("new").GetString());
-        Assert.Equal(mobile, changes.GetProperty("mobileNumber").GetProperty("new").GetString());
         Assert.Equal("Operator", changes.GetProperty("role").GetProperty("new").GetString());
         Assert.True(changes.GetProperty("isActive").GetProperty("new").GetBoolean());
         Assert.False(changes.GetProperty("fullName").TryGetProperty("old", out _));
         Assert.False(changes.TryGetProperty("id", out _));
+
+        // The number is a row of its own (ADR 0026), created in the same save, naming its user.
+        var numberId = created.GetProperty("loginNumbers")[0].GetProperty("id").GetGuid();
+        var number = Assert.Single(await EntriesFor("user_login_numbers", numberId));
+        Assert.Equal(AuditAction.Created, number.Action);
+        Assert.Equal(entry.OccurredAt, number.OccurredAt);
+        var numberChanges = Parse(number.Changes);
+        Assert.Equal(mobile, numberChanges.GetProperty("mobileNumber").GetProperty("new").GetString());
+        Assert.Equal(userId.ToString(), numberChanges.GetProperty("userId").GetProperty("new").GetString());
     }
 
     [Fact]
@@ -126,13 +135,7 @@ public sealed class AuditTests(ApiFactory factory) : IClassFixture<ApiFactory>
             .ToListAsync(Cancel);
     }
 
-    private async Task<Guid> UserIdOf(string mobile)
-    {
-        await using var scope = factory.Services.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var number = Domain.Common.MobileNumber.Create(mobile).Value;
-        return await db.Users.Where(u => u.MobileNumber == number).Select(u => u.Id).SingleAsync(Cancel);
-    }
+    private Task<Guid> UserIdOf(string mobile) => factory.UserIdOfAsync(mobile);
 
     private static JsonElement Parse(string json)
     {

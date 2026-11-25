@@ -376,7 +376,10 @@ A future `Assistant` module would call existing handlers. It needs no change to 
 ## 12. Cross-cutting rules
 
 - **Auth (decided in task 0.5, ADR 0012):** no passwords; everyone logs in with an Iranian
-  mobile and a one-time SMS code. Own `User` entity in Domain, not ASP.NET Identity. A 15-minute
+  mobile and a one-time SMS code. Own `User` entity in Domain, not ASP.NET Identity. A user logs
+  in with one or more numbers, each switched on and off by itself; owner accounts and their
+  numbers come only from the server's configuration, so a stolen phone's number can be switched
+  off while the owner logs in with his other phone (ADR 0026). A 10-minute
   JWT access token in the body and a 7-day rotating refresh token in an HttpOnly, Secure,
   SameSite=Strict cookie; a reused refresh token revokes the whole session. Endpoints are closed
   by default. Roles: Owner, Manager, Operator now; Contractor, RetailCustomer, WholesaleCustomer
@@ -580,3 +583,4 @@ server in the developer's.
 | 0023 | The model screens: bags per fabric, every size, sizes added later | 1.6.2 (written) |
 | 0024 | The rate card screen; the money display, the amount and the Jalali date fields | 1.6.3 (written) |
 | 0025 | The contractor and worker screens; the IBAN on screen; no browser cache for the panel API | 1.6.4 (written) |
+| 0026 | The users screen; owner accounts with several login numbers from the configuration; a 10-minute access token | 1.6.5 (written) |

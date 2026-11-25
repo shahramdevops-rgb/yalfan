@@ -56,6 +56,8 @@ Decided by the developer on 1405/08/27.
 
 - **Access token:** JWT, HMAC-SHA256, 15 minutes, claims `sub`, `name`, `role`. Short, so that a
   deactivated user or a changed role takes effect within minutes without a revocation list.
+  **Update 1405/09/05 (task 1.6.5, ADR 0026): ten minutes**, so an open page on a stolen phone
+  works at most that long after its number is switched off; still no check on each request.
   The signing key (at least 32 bytes) comes from user-secrets or `Jwt__SigningKey`; without it
   the API does not start.
 - **Refresh token:** 256 random bits, only its SHA-256 stored, 7 days from the last renewal.
@@ -87,10 +89,14 @@ Decided by the developer on 1405/08/27.
 - **Only the owner adds users, and only managers and operators** (decided 1405/08/27). A second
   owner would hold everything the owner holds, including payout approval later, so that stays his
   decision outside the panel. Whether the manager may add operators is open; until the owner says
-  so, the smallest power is the default.
+  so, the smallest power is the default. **Answered 1405/09/05 (ADR 0026): only the owner.**
 - **The first owner** is created at start from `Identity:SeedOwner` (name and mobile, no secret)
-  when no owner exists. A configured but invalid owner stops the start.
+  when no owner exists. A configured but invalid owner stops the start. **Replaced 1405/09/05
+  (ADR 0026)** by `Identity:Owners`: owner accounts with one or more numbers each, only added at
+  start, never switched back on; the developer has an owner account of his own.
 - User list, deactivation and changing a user's number come with the panel's users screen (1.6).
+  **Built in 1.6.5 (ADR 0026)**, with a user logging in with one or more numbers, each switched on
+  and off by itself, and codes, waits and limits per number.
 
 ### Access rules in the API
 
@@ -127,7 +133,7 @@ Decided by the developer on 1405/08/27.
 The auth tests run against a real PostgreSQL started by Testcontainers (part of 0.7 brought
 forward, because login cannot be proven without a database): one container per test run, one
 database per test class. A fake clock moves time (code expiry, the 7-day session, the 15-minute
-token) and a fake SMS sender hands the code to the test. Docker must be running for the tests.
+token, ten minutes since ADR 0026) and a fake SMS sender hands the code to the test. Docker must be running for the tests.
 
 ## Consequences
 

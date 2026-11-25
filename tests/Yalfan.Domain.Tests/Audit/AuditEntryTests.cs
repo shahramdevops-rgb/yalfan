@@ -41,7 +41,7 @@ public class AuditEntryTests
     {
         var user = User.Create("Zahra", MobileNumber.Create("09121234567").Value, Role.Operator, Now).Value;
 
-        user.Deactivate();
+        Assert.True(user.Deactivate().IsSuccess);
 
         Assert.False(user.IsActive);
     }

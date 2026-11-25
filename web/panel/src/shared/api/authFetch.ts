@@ -5,7 +5,7 @@ const anonymousRoutes = new Set(['/panel/auth/otp', '/panel/auth/login', '/panel
 
 /**
  * The fetch behind the typed API client. It adds the access token, and when the API answers
- * 401 because the 15-minute token expired, it renews the session once and sends the request
+ * 401 because the 10-minute token expired, it renews the session once and sends the request
  * again. If renewing fails the store is signed out and the 401 is returned as it was.
  */
 export function createAuthFetch(

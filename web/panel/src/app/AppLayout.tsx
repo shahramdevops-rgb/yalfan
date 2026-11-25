@@ -11,6 +11,7 @@ import {
   CloseIcon,
   ContractorsIcon,
   HomeIcon,
+  KeyIcon,
   ListIcon,
   LogoutIcon,
   MenuIcon,
@@ -19,13 +20,15 @@ import {
 } from '../shared/ui/icons';
 
 // The sidebar grows one item per module as the phases land (docs/ROADMAP.md).
-const navigation: { to: string; label: MessageKey; icon: typeof HomeIcon }[] = [
+const navigation: { to: string; label: MessageKey; icon: typeof HomeIcon; ownerOnly?: boolean }[] = [
   { to: '/', label: 'nav.dashboard', icon: HomeIcon },
   { to: '/models', label: 'nav.models', icon: BagIcon },
   { to: '/contractors', label: 'nav.contractors', icon: ContractorsIcon },
   { to: '/workers', label: 'nav.workers', icon: WorkersIcon },
   { to: '/lists', label: 'nav.lists', icon: ListIcon },
   { to: '/stages', label: 'nav.stages', icon: StagesIcon },
+  // Only an owner manages users (ADR 0012); the others do not see the item at all.
+  { to: '/users', label: 'nav.users', icon: KeyIcon, ownerOnly: true },
 ];
 
 /**
@@ -81,6 +84,10 @@ export function AppLayout() {
 }
 
 function Sidebar() {
+  const session = useSession();
+  const isOwner = session.status === 'signedIn' && session.user.role === 'owner';
+  const items = navigation.filter((item) => !item.ownerOnly || isOwner);
+
   return (
     <nav className="flex h-full flex-col gap-6 p-4">
       <div className="flex items-center gap-3 px-2 py-1">
@@ -91,7 +98,7 @@ function Sidebar() {
         </div>
       </div>
       <ul className="flex flex-col gap-1">
-        {navigation.map(({ to, label, icon: Icon }) => (
+        {items.map(({ to, label, icon: Icon }) => (
           <li key={to}>
             <NavLink
               to={to}

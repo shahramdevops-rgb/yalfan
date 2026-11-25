@@ -26,7 +26,8 @@ public sealed class LoginTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var body = await response.Body();
         Assert.False(string.IsNullOrEmpty(body.GetProperty("accessToken").GetString()));
         Assert.Equal("operator", body.GetProperty("user").GetProperty("role").GetString());
-        Assert.Equal(mobile, body.GetProperty("user").GetProperty("mobileNumber").GetString());
+        var userId = body.GetProperty("user").GetProperty("id").GetGuid();
+        Assert.Equal(await factory.UserIdOfAsync(mobile), userId);
 
         // The refresh token is only in the cookie, and the cookie is locked down.
         Assert.False(body.TryGetProperty("refreshToken", out _));
@@ -40,7 +41,7 @@ public sealed class LoginTests(ApiFactory factory) : IClassFixture<ApiFactory>
             new AuthenticationHeaderValue("Bearer", body.GetProperty("accessToken").GetString());
         var me = await _client.GetAsync("/panel/auth/me", Cancel);
         Assert.Equal(HttpStatusCode.OK, me.StatusCode);
-        Assert.Equal(mobile, (await me.Body()).GetProperty("mobileNumber").GetString());
+        Assert.Equal(userId, (await me.Body()).GetProperty("id").GetGuid());
     }
 
     [Fact]

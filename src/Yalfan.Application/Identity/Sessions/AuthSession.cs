@@ -13,11 +13,15 @@ public sealed record AuthSession(
     string RefreshToken,
     DateTimeOffset RefreshTokenExpiresAt);
 
-public sealed record UserSummary(Guid Id, string FullName, string MobileNumber, Role Role)
+/// <summary>
+/// Who is logged in. No mobile number: an owner account has several, and the panel needs none
+/// (ADR 0026).
+/// </summary>
+public sealed record UserSummary(Guid Id, string FullName, Role Role)
 {
     public static UserSummary From(User user)
     {
         ArgumentNullException.ThrowIfNull(user);
-        return new UserSummary(user.Id, user.FullName, user.MobileNumber.Value, user.Role);
+        return new UserSummary(user.Id, user.FullName, user.Role);
     }
 }

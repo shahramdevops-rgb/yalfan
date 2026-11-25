@@ -91,8 +91,14 @@ public static class DependencyInjection
                 $"Jwt:SigningKey must be at least {JwtOptions.MinimumKeyBytes} bytes. Set it with user-secrets or Jwt__SigningKey.")
             .ValidateOnStart();
 
-        services.AddOptions<SeedOwnerOptions>()
-            .Bind(configuration.GetSection(SeedOwnerOptions.SectionName));
+        // The old single-owner setting would now be ignored, and a new database would have no
+        // owner at all, so it stops the start with the name of its replacement.
+        services.AddOptions<OwnerAccountsOptions>()
+            .Bind(configuration.GetSection(OwnerAccountsOptions.SectionName))
+            .Validate(
+                _ => !configuration.GetSection("Identity:SeedOwner").GetChildren().Any(setting => !string.IsNullOrWhiteSpace(setting.Value)),
+                "Identity:SeedOwner was replaced by Identity:Owners (ADR 0026): set Identity:Owners:0:FullName and Identity:Owners:0:MobileNumbers:0 instead.")
+            .ValidateOnStart();
 
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
     }

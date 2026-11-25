@@ -87,6 +87,16 @@ export function ContractorsIcon({ className = 'size-5' }: { className?: string }
   );
 }
 
+/** The users who log in to the panel: a key. */
+export function KeyIcon({ className = 'size-5' }: { className?: string }) {
+  return (
+    <svg {...common} className={className}>
+      <circle cx="8" cy="15" r="4" />
+      <path d="M10.8 12.2 20 3M17 6l3 3M14.5 8.5 17 11" />
+    </svg>
+  );
+}
+
 /** The in-house workers: people working together. */
 export function WorkersIcon({ className = 'size-5' }: { className?: string }) {
   return (

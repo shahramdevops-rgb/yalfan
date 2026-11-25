@@ -30,6 +30,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public const string SeededOwnerMobile = "09120000000";
 
+    /// <summary>The seeded owner's second number, on his other phone (ADR 0026).</summary>
+    public const string SeededOwnerSecondMobile = "09120000009";
+
+    /// <summary>A second owner account with one number, as the developer's is.</summary>
+    public const string SeededSecondOwnerMobile = "09120000008";
+
     /// <summary>
     /// One IBAN key for every test class, unlike the JWT key: the IBAN cipher lives inside the EF
     /// model, which EF Core may build once and reuse for every API in the test run (ADR 0019), so
@@ -86,9 +92,51 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var number = MobileNumber.Create(mobile).Value;
-        var user = await db.Users.SingleAsync(u => u.MobileNumber == number);
-        user.Deactivate();
+        var user = await db.Users.SingleAsync(u => u.LoginNumbers.Any(n => n.MobileNumber == number));
+        Assert.True(user.Deactivate().IsSuccess);
         await db.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Adds an owner account with these numbers straight to the database, as the configuration
+    /// would; returns its id. Each test gets its own, so switching numbers off never leaks.
+    /// </summary>
+    public async Task<Guid> CreateOwnerAccountAsync(params string[] mobiles)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var owner = User.Create("Test Owner Account", MobileNumber.Create(mobiles[0]).Value, Role.Owner, Time.GetUtcNow()).Value;
+        foreach (var mobile in mobiles.Skip(1))
+        {
+            Assert.True(owner.AddLoginNumber(MobileNumber.Create(mobile).Value).IsSuccess);
+        }
+
+        db.Users.Add(owner);
+        await db.SaveChangesAsync();
+        return owner.Id;
+    }
+
+    /// <summary>The id of the login number row for this number.</summary>
+    public async Task<Guid> LoginNumberIdAsync(string mobile)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var number = MobileNumber.Create(mobile).Value;
+        var user = await db.Users.AsNoTracking()
+            .SingleAsync(u => u.LoginNumbers.Any(n => n.MobileNumber == number), TestContext.Current.CancellationToken);
+        return user.LoginNumbers.Single(n => n.MobileNumber == number).Id;
+    }
+
+    /// <summary>The id of the user who logs in with this number.</summary>
+    public async Task<Guid> UserIdOfAsync(string mobile)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var number = MobileNumber.Create(mobile).Value;
+        return await db.Users
+            .Where(u => u.LoginNumbers.Any(n => n.MobileNumber == number))
+            .Select(u => u.Id)
+            .SingleAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>A client on https, so the Secure refresh cookie is kept and sent like in a browser.</summary>
@@ -127,8 +175,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Sms:Provider", "Log");
         builder.UseSetting("Jwt:SigningKey", Convert.ToBase64String(RandomNumberGenerator.GetBytes(48)));
         builder.UseSetting("Encryption:IbanKey", IbanKey);
-        builder.UseSetting("Identity:SeedOwner:FullName", "Seeded Owner");
-        builder.UseSetting("Identity:SeedOwner:MobileNumber", SeededOwnerMobile);
+        builder.UseSetting("Identity:Owners:0:FullName", "Seeded Owner");
+        builder.UseSetting("Identity:Owners:0:MobileNumbers:0", SeededOwnerMobile);
+        builder.UseSetting("Identity:Owners:0:MobileNumbers:1", SeededOwnerSecondMobile);
+        builder.UseSetting("Identity:Owners:1:FullName", "Second Owner");
+        builder.UseSetting("Identity:Owners:1:MobileNumbers:0", SeededSecondOwnerMobile);
 
         builder.ConfigureTestServices(services =>
         {

@@ -12,6 +12,7 @@ import { NewPartyPage } from '../features/parties/NewPartyPage';
 import { PartyListPage } from '../features/parties/PartyListPage';
 import { PartyPage } from '../features/parties/PartyPage';
 import { StagesPage } from '../features/production/StagesPage';
+import { UsersPage } from '../features/users/UsersPage';
 import { sessionStore } from '../shared/api/client';
 import { AppLayout } from './AppLayout';
 import { ErrorPage } from './ErrorPage';
@@ -43,6 +44,8 @@ const router = createBrowserRouter([
           { path: 'lists', element: <Navigate to="/lists/fabrics" replace /> },
           { path: 'lists/:kind', element: <CatalogListsPage /> },
           { path: 'stages', element: <StagesPage /> },
+          // Owner only: the page shows «not found» to anyone else, and the API refuses them.
+          { path: 'users', element: <UsersPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

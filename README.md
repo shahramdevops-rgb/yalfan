@@ -58,8 +58,11 @@ docker compose up db seq --wait
 dotnet user-secrets set "ConnectionStrings:Database" "Host=localhost;Port=5433;Database=yalfan;Username=yalfan;Password=<the password in .env>" --project src/Yalfan.Api
 dotnet user-secrets set "Jwt:SigningKey" "<at least 32 random characters>" --project src/Yalfan.Api
 dotnet user-secrets set "Encryption:IbanKey" "<32 random bytes in base64, as in .env.example>" --project src/Yalfan.Api
-dotnet user-secrets set "Identity:SeedOwner:FullName" "<owner's name>" --project src/Yalfan.Api
-dotnet user-secrets set "Identity:SeedOwner:MobileNumber" "<owner's mobile>" --project src/Yalfan.Api
+dotnet user-secrets set "Identity:Owners:0:FullName" "<owner's name>" --project src/Yalfan.Api
+dotnet user-secrets set "Identity:Owners:0:MobileNumbers:0" "<owner's first mobile>" --project src/Yalfan.Api
+dotnet user-secrets set "Identity:Owners:0:MobileNumbers:1" "<owner's second mobile>" --project src/Yalfan.Api
+dotnet user-secrets set "Identity:Owners:1:FullName" "<developer's name>" --project src/Yalfan.Api
+dotnet user-secrets set "Identity:Owners:1:MobileNumbers:0" "<developer's mobile>" --project src/Yalfan.Api
 dotnet run --project src/Yalfan.Api          # http://localhost:5080/health
 ```
 

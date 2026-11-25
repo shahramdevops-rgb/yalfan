@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Yalfan.Domain.Common;
 using Yalfan.Domain.Identity;
 using Yalfan.Infrastructure.Persistence.Auditing;
 
@@ -18,10 +19,16 @@ internal sealed class OtpCodeConfiguration : IEntityTypeConfiguration<OtpCode>
 
         builder.Property(code => code.CodeHash).HasMaxLength(64).IsRequired();
 
+        builder.Property(code => code.MobileNumber)
+            .HasConversion(mobile => mobile.Value, value => MobileNumber.Create(value).Value)
+            .HasMaxLength(11)
+            .IsRequired();
+
         builder.HasOne<User>().WithMany().HasForeignKey(code => code.UserId).OnDelete(DeleteBehavior.Restrict);
 
-        // "Newest code of this user" and "codes of this user in the last hour".
-        builder.HasIndex(code => new { code.UserId, code.CreatedAt });
+        // "Newest code of this user for this number" and "codes of this number in the last hour"
+        // (ADR 0026: a code, its wait and its limit belong to one number).
+        builder.HasIndex(code => new { code.UserId, code.MobileNumber, code.CreatedAt });
 
         // PostgreSQL's xmin as a row version: two requests with the same right code cannot both
         // use it.

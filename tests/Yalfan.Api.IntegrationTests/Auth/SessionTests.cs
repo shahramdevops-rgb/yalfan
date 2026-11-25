@@ -126,12 +126,12 @@ public sealed class SessionTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
-    public async Task An_access_token_stops_working_after_fifteen_minutes()
+    public async Task An_access_token_stops_working_after_ten_minutes()
     {
         var login = await LoginNewUser();
         var accessToken = (await login.Body()).GetProperty("accessToken").GetString();
 
-        factory.Time.Advance(TimeSpan.FromMinutes(15) + TimeSpan.FromSeconds(31));
+        factory.Time.Advance(TimeSpan.FromMinutes(10) + TimeSpan.FromSeconds(31));
         var request = new HttpRequestMessage(HttpMethod.Get, "/panel/auth/me");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         var response = await _client.SendAsync(request, Cancel);

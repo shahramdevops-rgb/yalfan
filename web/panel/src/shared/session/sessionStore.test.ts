@@ -4,7 +4,7 @@ import { createSessionStore, REFRESH_SUPERSEDED, type RenewResult, type SessionR
 const session = (token: string): SessionResponse => ({
   accessToken: token,
   accessTokenExpiresAt: '2026-11-19T08:15:00Z',
-  user: { id: '0193a000-0000-7000-8000-000000000001', fullName: 'Owner', mobileNumber: '09120000000', role: 'owner' },
+  user: { id: '0193a000-0000-7000-8000-000000000001', fullName: 'Owner', role: 'owner' },
 });
 
 const ok = (token: string): RenewResult => ({ ok: true, session: session(token) });

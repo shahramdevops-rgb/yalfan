@@ -5,8 +5,9 @@ using Yalfan.Domain.Common;
 namespace Yalfan.Domain.Identity;
 
 /// <summary>
-/// A one-time login code sent by SMS. Only its hash is stored, so a database backup or a log of
-/// the table never shows a code that still works.
+/// A one-time login code sent by SMS to one of the user's numbers. Only its hash is stored, so a
+/// database backup or a log of the table never shows a code that still works. A code works only
+/// with the number it was sent to (ADR 0026).
 /// </summary>
 public sealed class OtpCode : Entity
 {
@@ -20,15 +21,22 @@ public sealed class OtpCode : Entity
     {
     }
 
-    private OtpCode(Guid userId, string codeHash, DateTimeOffset createdAt)
+    private OtpCode(Guid userId, MobileNumber mobileNumber, string codeHash, DateTimeOffset createdAt)
     {
         UserId = userId;
+        MobileNumber = mobileNumber;
         CodeHash = codeHash;
         CreatedAt = createdAt;
         ExpiresAt = createdAt + Lifetime;
     }
 
     public Guid UserId { get; private set; }
+
+    /// <summary>
+    /// The number the code was sent to. The waits and limits count per number, so a thief asking
+    /// for codes on a stolen phone cannot keep the owner from getting one on his other phone.
+    /// </summary>
+    public MobileNumber MobileNumber { get; private set; } = null!;
 
     public string CodeHash { get; private set; } = null!;
 
@@ -40,10 +48,11 @@ public sealed class OtpCode : Entity
 
     public DateTimeOffset? ConsumedAt { get; private set; }
 
-    public static OtpCode Issue(Guid userId, string code, DateTimeOffset now)
+    public static OtpCode Issue(Guid userId, MobileNumber mobileNumber, string code, DateTimeOffset now)
     {
+        ArgumentNullException.ThrowIfNull(mobileNumber);
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
-        return new OtpCode(userId, Hash(userId, code), now);
+        return new OtpCode(userId, mobileNumber, Hash(userId, mobileNumber, code), now);
     }
 
     public bool IsUsable(DateTimeOffset now) =>
@@ -61,7 +70,7 @@ public sealed class OtpCode : Entity
             return IdentityErrors.OtpExpired;
         }
 
-        var candidate = Encoding.ASCII.GetBytes(Hash(UserId, code));
+        var candidate = Encoding.ASCII.GetBytes(Hash(UserId, MobileNumber, code));
         var expected = Encoding.ASCII.GetBytes(CodeHash);
 
         // Constant-time comparison: the time taken must not reveal how much of the code matched.
@@ -75,6 +84,6 @@ public sealed class OtpCode : Entity
         return Result.Success();
     }
 
-    private static string Hash(Guid userId, string code) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{userId:N}:{code}")));
+    private static string Hash(Guid userId, MobileNumber mobileNumber, string code) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{userId:N}:{mobileNumber.Value}:{code}")));
 }
