@@ -71,6 +71,12 @@ works alone; the workshop owner is his brother and is treated as a client.
 - Commit messages follow Conventional Commits, e.g. `feat(production): add work order issue`.
 - Never commit secrets.
 - Every task ends with passing tests, shown as evidence (the summary of `scripts/check.ps1`).
+- Two project agents (`.claude/agents/`, added 1405/09/04): `checker` runs `scripts/check.ps1`
+  on a cheaper model and returns only the summary and failures; `reviewer` reads the task's
+  changes with a fresh context and reports broken rules (money, access, audit, architecture,
+  UI). When a task's checks are green, run `reviewer` before committing and fix or answer each
+  finding. Why: the session that wrote the code shares its own assumptions, and in a money
+  system one broken rule costs more than many visible bugs. Its report is not proof.
 
 ## Commands
 Run from the repository root. Keep this section up to date when commands change.
