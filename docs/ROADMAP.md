@@ -467,7 +467,7 @@ were accepted as written):
   - **1.6.4 Contractors and workers.** Search with the active filter and pages; the profile
     form with stages; the IBAN (last four digits; the whole number only for the owner).
     **Done 1405/09/04:** 479 .NET tests pass (1 new: every `/panel` answer, a refusal too, carries
-    `Cache-Control: no-store`), 124 panel tests pass (23 new), build has 0 warnings. ADR 0025.
+    `Cache-Control: no-store`), 127 panel tests pass (26 new), build has 0 warnings. ADR 0025.
     API: only that header, set by a middleware before the error handler. Panel: «کنتراتی‌ها»
     (`/contractors`, `/contractors/new`, `/contractors/:id`) and «کارگران ثابت» (`/workers/…`) in
     the sidebar, one set of components for both. The list: one search box for part of the name or
@@ -496,9 +496,15 @@ were accepted as written):
     sideways scrolling on any of the seven pages) and seen in screenshots. Found on the way and
     fixed: a note saved by tapping a stage could be undone by the stage's save, both sending the
     whole profile at once (the page now sends its changes one after another); the IBAN field
-    showed its hint under the error, and a refused IBAN left the caret out of the field. Found and
-    left: the models page has the same gap between its name, description and category (ADR 0025,
-    "Not decided here").
+    showed its hint under the error, and a refused IBAN left the caret out of the field.
+    Fixed after the review the same day (asked by the developer: no bug left behind), each seen
+    in Chrome before and after: the models page had the same gap, a description left by choosing
+    a category vanished from the screen and the next save would have erased it (its changes now
+    go through the same queue, `useSerialWrites`); in all three lists the sidebar link to the same
+    list cleared the address but the old search came back from the box, and a page past the last
+    one said the list was empty. Checked again: the model's description and category together,
+    sizes added and moved, the model's and a bag's switch, new bags; the notes and a stage on a
+    contractor; the back button and a space typed in the middle of a search.
   - **1.6.5 Users and change history.** The owner's users screen; a «تاریخچه» on the records,
     for the owner. API: list users, deactivate and activate, change a mobile (ending the user's
     sessions), read the audit of a record with names instead of ids.

@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { toPersianDigits } from '../../shared/format/digits';
 import { t } from '../../shared/i18n/fa';
 import { PlusIcon } from '../../shared/ui/icons';
-import { useListAddress } from '../../shared/ui/listAddress';
+import { pageCount, useListAddress, usePageWithin } from '../../shared/ui/listAddress';
 import { Pager, SearchField } from '../../shared/ui/ListSearch';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { productSearchKey, productsApi, type ProductListItem } from './productsApi';
@@ -26,6 +26,7 @@ export function ModelsPage() {
   });
 
   const data = results.data;
+  const outOfRange = usePageWithin(page, data && pageCount(data.totalCount, data.pageSize), list.replacePage);
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -43,14 +44,15 @@ export function ModelsPage() {
       <section className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6">
         <SearchField label={t('models.search')} value={list.typed} onChange={list.setTyped} />
 
-        {results.isPending && <ListSkeleton />}
+        {/* A page past the last one is replaced by the last page; until then it is only loading. */}
+        {(results.isPending || outOfRange) && <ListSkeleton />}
         {results.isError && <LoadError error={results.error} onRetry={() => void results.refetch()} />}
-        {data && data.items.length === 0 && (
+        {data && !outOfRange && data.items.length === 0 && (
           <p className="py-6 text-center text-stone-500">
             {search ? t('models.notFound', { search }) : t('models.empty')}
           </p>
         )}
-        {data && data.items.length > 0 && (
+        {data && !outOfRange && data.items.length > 0 && (
           <ul className={`divide-y divide-stone-100 ${results.isPlaceholderData ? 'opacity-60' : ''}`}>
             {data.items.map((item) => (
               <ModelRow key={item.id} item={item} />
@@ -58,7 +60,7 @@ export function ModelsPage() {
           </ul>
         )}
 
-        {data && (
+        {data && !outOfRange && (
           <Pager
             page={page}
             totalCount={data.totalCount}

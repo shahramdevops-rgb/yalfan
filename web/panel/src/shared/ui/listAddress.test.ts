@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readListAddress, writeListAddress } from './listAddress';
+import { pageCount, readListAddress, writeListAddress } from './listAddress';
 
 describe('readListAddress', () => {
   it('reads the search, the page and the inactive switch', () => {
@@ -26,5 +26,13 @@ describe('writeListAddress', () => {
   it('writes back what it reads', () => {
     const address = { search: 'حسن', page: 3, withInactive: true };
     expect(readListAddress(new URLSearchParams(writeListAddress(address)))).toEqual(address);
+  });
+});
+
+describe('pageCount', () => {
+  it('counts the pages, and an empty list still has its one page', () => {
+    expect(pageCount(0, 20)).toBe(1);
+    expect(pageCount(20, 20)).toBe(1);
+    expect(pageCount(21, 20)).toBe(2);
   });
 });

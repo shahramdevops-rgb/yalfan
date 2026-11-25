@@ -40,7 +40,10 @@ The developer accepted the plan on 1405/09/04 with one change: the in-house work
 - Each row: the name, under it the stages, and the mobile in Persian digits, left to right
   («۰۹۱۲ ۱۲۳ ۴۵۶۷»). A tap opens the person's page.
 - The search box and the pager were taken out of the models page into shared parts, so the three
-  lists cannot drift apart.
+  lists cannot drift apart. Two gaps of the models list, found here, are closed for all three: the
+  search box now follows the address (the sidebar link to the same list used to clear the address
+  while the old text stayed in the box and was sent again), and a page past the last one (an old
+  link, or the list shrank) shows the last page instead of «nobody here».
 
 ### Adding a person
 
@@ -67,10 +70,13 @@ The developer accepted the plan on 1405/09/04 with one change: the in-house work
   and a contractor does at least one stage (ADR 0019); the hint says «دست‌کم یکی». The new-contractor
   form checks it on saving instead, so a wrong first tick can be taken back. A stage ticked before
   it was deactivated stays ticked, marked «غیرفعال» (ADR 0022).
-- **The page's changes are sent one after another**, each built from the answer of the last.
-  Why: leaving the notes by tapping a stage starts two saves in one gesture, and the profile
-  request carries every field; two at once would each send the other's field as it was, and the
-  later one would quietly undo the earlier. The models page has the same gap (see below).
+- **The page's changes are sent one after another**, each built from the answer of the last
+  (`useSerialWrites` in `shared/api`). Why: leaving the notes by tapping a stage starts two saves
+  in one gesture, and the profile request carries every field; two at once would each send the
+  other's field as it was, the page would show the later answer without the earlier change, and
+  the next save would write that back to the database. The models page had the same gap
+  (description and category), seen in the browser and in the audit, and now uses the same queue
+  for every change it sends.
 - **A taken mobile** says that the number belongs to someone else in the same list and to search
   for it, because entering the same person twice is the likely mistake and the search by mobile
   already finds him. The API does not say who has it.
@@ -103,9 +109,6 @@ The developer accepted the plan on 1405/09/04 with one change: the in-house work
 - **A stage filter on the contractor list** («who sews»): the first screen that needs it is the
   work order (2.2), where a contractor is picked by stage.
 - **Calling a person from his page** (`tel:`): not asked for; one link if it is wanted.
-- **The models page** sends its profile changes the same way the person's page used to (name,
-  description and category each send the whole profile at once), so leaving the description by
-  choosing a category can undo one of the two. Found here, left for a fix of its own.
 
 ## Consequences
 

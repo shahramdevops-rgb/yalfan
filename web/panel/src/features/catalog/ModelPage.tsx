@@ -3,6 +3,7 @@ import { useId, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { fieldCode, toProblem } from '../../shared/api/problem';
 import { attempt, refusalMessage } from '../../shared/api/refusal';
+import { useSerialWrites, type Write } from '../../shared/api/serialWrites';
 import { toPersianDigits } from '../../shared/format/digits';
 import { t } from '../../shared/i18n/fa';
 import { AddNameForm } from '../../shared/ui/AddNameForm';
@@ -22,8 +23,10 @@ import { productKey, productSearchesKey, productsApi, profileOf, type ProductDet
 
 type Bag = ProductDetails['variants'][number];
 
-/** Saves the answer of a change: the page shows it, and the model lists show it on their next look. */
-type Put = (product: ProductDetails) => void;
+/** Sends one change of the model, in turn with the page's other changes (ADR 0025). */
+type ModelWrite = Write<ProductDetails>;
+
+const ignore = () => undefined;
 
 const digits = (value: number) => toPersianDigits(String(value));
 
@@ -42,11 +45,12 @@ export function ModelPage() {
   const queryClient = useQueryClient();
   const key = productKey(id);
   const product = useQuery({ queryKey: key, queryFn: () => productsApi.get(id) });
-
-  const put: Put = (details) => {
-    queryClient.setQueryData(key, details);
+  // One change after another, each from the last answer: leaving the description by choosing a
+  // category starts two saves in one gesture, and each sends the name, description and category.
+  // Every answer also refreshes the model lists on their next look.
+  const write: ModelWrite = useSerialWrites<ProductDetails>(key, () => {
     void queryClient.invalidateQueries({ queryKey: productSearchesKey });
-  };
+  });
 
   if (product.isPending) {
     return <ListSkeleton rows={6} />;
@@ -70,10 +74,10 @@ export function ModelPage() {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <BackLink />
-      <Profile product={model} put={put} />
+      <Profile product={model} write={write} />
       <RateCardSection productId={model.id} productIsActive={model.isActive} />
-      <Sizes product={model} put={put} />
-      <Bags product={model} put={put} />
+      <Sizes product={model} write={write} />
+      <Bags product={model} write={write} />
     </div>
   );
 }
@@ -86,19 +90,21 @@ function BackLink() {
   );
 }
 
-function Profile({ product, put }: { product: ProductDetails; put: Put }) {
+function Profile({ product, write }: { product: ProductDetails; write: ModelWrite }) {
   const categories = useQuery({ queryKey: catalogListKey('categories'), queryFn: catalogLists.categories.list });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
 
   async function run(send: () => Promise<ProductDetails>) {
     setBusy(true);
-    setError(await attempt(send, put));
+    setError(await attempt(send, ignore));
     setBusy(false);
   }
 
-  const save = (change: Parameters<typeof profileOf>[1], field: string) =>
-    attempt(() => productsApi.update(product.id, profileOf(product, change)), put, field);
+  // The profile as the last change left it, not as this render saw it.
+  const update = (change: Parameters<typeof profileOf>[1]) =>
+    write((current) => productsApi.update(current.id, profileOf(current, change)));
+  const save = (change: Parameters<typeof profileOf>[1], field: string) => attempt(() => update(change), ignore, field);
 
   return (
     <Card>
@@ -116,7 +122,7 @@ function Profile({ product, put }: { product: ProductDetails; put: Put }) {
           <span className="text-xs text-stone-500">{t('list.columnActive')}</span>
           <Switch
             checked={product.isActive}
-            onChange={(isActive) => void run(() => productsApi.setActive(product.id, isActive))}
+            onChange={(isActive) => void run(() => write(() => productsApi.setActive(product.id, isActive)))}
             label={t('model.activeLabel', { name: product.name })}
             disabled={busy}
           />
@@ -132,7 +138,7 @@ function Profile({ product, put }: { product: ProductDetails; put: Put }) {
           categories={categories.data}
           value={product.category?.id ?? null}
           disabled={busy}
-          onChange={(categoryId) => void run(() => productsApi.update(product.id, profileOf(product, { categoryId })))}
+          onChange={(categoryId) => void run(() => update({ categoryId }))}
         />
       )}
 
@@ -158,7 +164,7 @@ function Profile({ product, put }: { product: ProductDetails; put: Put }) {
   );
 }
 
-function Sizes({ product, put }: { product: ProductDetails; put: Put }) {
+function Sizes({ product, write }: { product: ProductDetails; write: ModelWrite }) {
   const queryClient = useQueryClient();
   const headingId = useId();
   const key = productKey(product.id);
@@ -179,14 +185,20 @@ function Sizes({ product, put }: { product: ProductDetails; put: Put }) {
     setMoveError(undefined);
 
     try {
-      put(
-        await productsApi.reorderSizes(
+      await write(() =>
+        productsApi.reorderSizes(
           product.id,
           sizes.map((size) => size.id),
         ),
       );
     } catch (error) {
-      queryClient.setQueryData(key, before);
+      // Only the order goes back: whatever another change saved meanwhile stays on the page.
+      const order = before.sizes.map((size) => size.id);
+      const place = (sizeId: string) => (order.includes(sizeId) ? order.indexOf(sizeId) : order.length);
+      queryClient.setQueryData<ProductDetails>(
+        key,
+        (current) => current && { ...current, sizes: [...current.sizes].sort((a, b) => place(a.id) - place(b.id)) },
+      );
       setMoveError(refusalMessage(error, 'sizeIds'));
 
       // Another user changed the sizes meanwhile: bring the model again, to be dragged again.
@@ -215,7 +227,9 @@ function Sizes({ product, put }: { product: ProductDetails; put: Put }) {
       {hasSizes ? (
         <NameList
           items={product.sizes.map((size) => ({ ...size, isActive: true }))}
-          onRename={(sizeId, name) => attempt(() => productsApi.renameSize(product.id, sizeId, name), put, 'name')}
+          onRename={(sizeId, name) =>
+            attempt(() => write(() => productsApi.renameSize(product.id, sizeId, name)), ignore, 'name')
+          }
           onMove={product.sizes.length > 1 ? (from, to) => void move(from, to) : undefined}
           moving={moving}
           emptyText=""
@@ -235,7 +249,7 @@ function Sizes({ product, put }: { product: ProductDetails; put: Put }) {
           label={t('model.addSize')}
           hint={addHint}
           maxLength={sizeMaxLength}
-          onAdd={(name) => attempt(() => productsApi.addSize(product.id, name), put, 'name')}
+          onAdd={(name) => attempt(() => write(() => productsApi.addSize(product.id, name)), ignore, 'name')}
         />
       ) : (
         <p className="text-sm text-stone-500">{t('model.inactiveNoAdd')}</p>
@@ -244,7 +258,7 @@ function Sizes({ product, put }: { product: ProductDetails; put: Put }) {
   );
 }
 
-function Bags({ product, put }: { product: ProductDetails; put: Put }) {
+function Bags({ product, write }: { product: ProductDetails; write: ModelWrite }) {
   const headingId = useId();
   const fabrics = useQuery({ queryKey: catalogListKey('fabrics'), queryFn: catalogLists.fabrics.list });
   const colours = useQuery({ queryKey: catalogListKey('colours'), queryFn: catalogLists.colours.list });
@@ -262,11 +276,8 @@ function Bags({ product, put }: { product: ProductDetails; put: Put }) {
     setAdding(true);
     setAddError(
       await attempt(
-        () => productsApi.addVariants(product.id, toAdd),
-        (details) => {
-          put(details);
-          setPicks([]);
-        },
+        () => write(() => productsApi.addVariants(product.id, toAdd)),
+        () => setPicks([]),
       ),
     );
     setAdding(false);
@@ -288,7 +299,7 @@ function Bags({ product, put }: { product: ProductDetails; put: Put }) {
       ) : (
         <ul className="divide-y divide-stone-100">
           {product.variants.map((bag) => (
-            <BagRow key={bag.id} productId={product.id} bag={bag} put={put} />
+            <BagRow key={bag.id} productId={product.id} bag={bag} write={write} />
           ))}
         </ul>
       )}
@@ -328,13 +339,13 @@ function Bags({ product, put }: { product: ProductDetails; put: Put }) {
   );
 }
 
-function BagRow({ productId, bag, put }: { productId: string; bag: Bag; put: Put }) {
+function BagRow({ productId, bag, write }: { productId: string; bag: Bag; write: ModelWrite }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
 
   async function toggle(isActive: boolean) {
     setBusy(true);
-    setError(await attempt(() => productsApi.setVariantActive(productId, bag.id, isActive), put));
+    setError(await attempt(() => write(() => productsApi.setVariantActive(productId, bag.id, isActive)), ignore));
     setBusy(false);
   }
 

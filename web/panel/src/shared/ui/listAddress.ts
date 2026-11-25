@@ -24,6 +24,11 @@ export function readListAddress(params: URLSearchParams): ListAddress {
   };
 }
 
+/** How many pages a list has; an empty list still has its one page. */
+export function pageCount(totalCount: number, pageSize: number): number {
+  return Math.max(1, Math.ceil(totalCount / pageSize));
+}
+
 /** The address of a list's state, leaving out what is the default, so a plain list has a plain address. */
 export function writeListAddress({ search, page, withInactive }: ListAddress): Record<string, string> {
   return {
@@ -43,6 +48,18 @@ export function useListAddress() {
   const [params, setParams] = useSearchParams();
   const { search, page, withInactive } = readListAddress(params);
   const [typed, setTyped] = useState(search);
+
+  // The address can change without the box: the sidebar link to the same list clears the search,
+  // and the back button may bring another one. The box follows, or the old text would be sent
+  // again after the pause; unless it already says it, because the address has just taken what
+  // was typed and a trailing space may still be in the middle of typing.
+  const [followed, setFollowed] = useState(search);
+  if (search !== followed) {
+    setFollowed(search);
+    if (search !== typed.trim()) {
+      setTyped(search);
+    }
+  }
 
   useEffect(() => {
     if (typed.trim() === search) {
@@ -69,5 +86,22 @@ export function useListAddress() {
     },
     showInactive: (show: boolean) =>
       setParams(writeListAddress({ search, page: 1, withInactive: show }), { replace: true }),
+    /** Another page in place of this one, with no step for the back button. */
+    replacePage: (next: number) => setParams(writeListAddress({ search, page: next, withInactive }), { replace: true }),
   };
+}
+
+/**
+ * Whether the address asks for a page past the last one, which happens when the list shrank (a
+ * person deactivated from the last page, then the back button) or with an old link. The last page
+ * is then shown in its place, instead of an empty page that says the list has nobody.
+ */
+export function usePageWithin(page: number, pages: number | undefined, replacePage: (page: number) => void): boolean {
+  useEffect(() => {
+    if (pages !== undefined && page > pages) {
+      replacePage(pages);
+    }
+  }, [page, pages, replacePage]);
+
+  return pages !== undefined && page > pages;
 }

@@ -1,6 +1,7 @@
 import { api } from '../../shared/api/client';
 import { unwrap } from '../../shared/api/request';
 import type { components } from '../../shared/api/schema';
+import type { Write as WriteOf } from '../../shared/api/serialWrites';
 
 type Schemas = components['schemas'];
 
@@ -29,11 +30,8 @@ export interface NewParty extends PartyProfile {
   iban: string | null;
 }
 
-/**
- * Sends one change of a person on their page and shows its answer. `send` gets the details as the
- * last change left them, so a change never sends back an older copy of the parts it does not change.
- */
-export type Write = (send: (current: PartyDetails) => Promise<PartyDetails>) => Promise<PartyDetails>;
+/** Sends one change of a person on their page, in turn with the page's other changes. */
+export type Write = WriteOf<PartyDetails>;
 
 /** The requests of one list. The IBAN has its own requests, so saving a name never touches it (ADR 0019). */
 export interface PartyApi {

@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { formatMobile } from '../../shared/format/mobile';
 import { t } from '../../shared/i18n/fa';
 import { PlusIcon } from '../../shared/ui/icons';
-import { useListAddress } from '../../shared/ui/listAddress';
+import { pageCount, useListAddress, usePageWithin } from '../../shared/ui/listAddress';
 import { Pager, SearchField } from '../../shared/ui/ListSearch';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { Switch } from '../../shared/ui/Switch';
@@ -26,6 +26,7 @@ export function PartyListPage({ kind }: { kind: PartyKind }) {
   });
 
   const data = results.data;
+  const outOfRange = usePageWithin(page, data && pageCount(data.totalCount, data.pageSize), list.replacePage);
   const emptyText = search
     ? t(`parties.${kind}.notFound`, { search })
     : withInactive
@@ -54,10 +55,13 @@ export function PartyListPage({ kind }: { kind: PartyKind }) {
           </span>
         </div>
 
-        {results.isPending && <ListSkeleton />}
+        {/* A page past the last one is replaced by the last page; until then it is only loading. */}
+        {(results.isPending || outOfRange) && <ListSkeleton />}
         {results.isError && <LoadError error={results.error} onRetry={() => void results.refetch()} />}
-        {data && data.items.length === 0 && <p className="py-6 text-center text-stone-500">{emptyText}</p>}
-        {data && data.items.length > 0 && (
+        {data && !outOfRange && data.items.length === 0 && (
+          <p className="py-6 text-center text-stone-500">{emptyText}</p>
+        )}
+        {data && !outOfRange && data.items.length > 0 && (
           <ul className={`divide-y divide-stone-100 ${results.isPlaceholderData ? 'opacity-60' : ''}`}>
             {data.items.map((item) => (
               <PartyRow key={item.id} kind={kind} item={item} />
@@ -65,7 +69,7 @@ export function PartyListPage({ kind }: { kind: PartyKind }) {
           </ul>
         )}
 
-        {data && (
+        {data && !outOfRange && (
           <Pager
             page={page}
             totalCount={data.totalCount}

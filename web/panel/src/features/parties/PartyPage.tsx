@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { toProblem } from '../../shared/api/problem';
 import { attempt } from '../../shared/api/refusal';
+import { useSerialWrites } from '../../shared/api/serialWrites';
 import { dayInTehran, formatDay } from '../../shared/format/dates';
 import { toPersianDigits } from '../../shared/format/digits';
 import { toJalali } from '../../shared/format/jalali';
@@ -46,21 +47,11 @@ export function PartyPage({ kind }: { kind: PartyKind }) {
   const queryClient = useQueryClient();
   const key = partyKey(kind, id);
   const party = useQuery({ queryKey: key, queryFn: () => partiesApi[kind].get(id) });
-  const queue = useRef<Promise<unknown>>(Promise.resolve());
-
-  // One change after another. Leaving the notes by tapping a stage starts two saves in one
-  // gesture; the profile request carries every field, so two at once would each send the other
-  // field as it was, and the later one would quietly undo the earlier.
-  const write: Write = (send) => {
-    const next = queue.current.then(async () => {
-      const details = await send(queryClient.getQueryData<PartyDetails>(key)!);
-      queryClient.setQueryData(key, details);
-      void queryClient.invalidateQueries({ queryKey: partySearchesKey(kind) });
-      return details;
-    });
-    queue.current = next.catch(() => undefined);
-    return next;
-  };
+  // One change after another, each from the last answer: leaving the notes by tapping a stage
+  // starts two saves in one gesture, and each sends the whole profile.
+  const write: Write = useSerialWrites<PartyDetails>(key, () => {
+    void queryClient.invalidateQueries({ queryKey: partySearchesKey(kind) });
+  });
 
   if (party.isPending) {
     return <ListSkeleton rows={6} />;
