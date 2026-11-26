@@ -10,6 +10,7 @@ business features yet.
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — layers, modules, core models, attendance, languages
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases 0–15, tasks, the owner's own to-do list, open questions
+- [docs/roadmap-done.md](docs/roadmap-done.md) — what each finished task delivered, how it was checked
 
 In one line: a .NET modular monolith (Clean Architecture, PostgreSQL) behind three web apps: a
 Persian staff panel, a phone panel for contractors, and a three-language store.

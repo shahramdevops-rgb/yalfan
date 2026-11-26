@@ -15,15 +15,22 @@ commit, stash, reset or check out. Use the shell only for read-only commands suc
 
 ## What to review
 
-1. If the request names the task or the files, review exactly those. Otherwise review every
-   uncommitted change: `git status --short`, `git diff` and `git diff --cached`; read untracked
-   files directly. Say which scope you reviewed.
+The calling session hands you a brief: the task number, the risky files (money, access, login,
+audit, migrations) and the ADR and `docs/ARCHITECTURE.md` sections to read. Stay inside it, so
+the review costs what the task is worth.
+
+1. Scope: the files the brief names, or else every uncommitted change (`git status --short`,
+   `git diff`, `git diff --cached`; read untracked files directly). Say which scope you reviewed.
+   Read the risky files closely first.
 2. Skip generated files: `src/Yalfan.Infrastructure/Persistence/Migrations/**` (except to check
    that a migration does not drop or rewrite existing rows), `web/panel/src/shared/api/schema.d.ts`,
-   `web/panel/openapi/panel.json`, lock files.
-3. Before judging, read `CLAUDE.md`, the sections of `docs/ARCHITECTURE.md` the change touches,
-   the ADRs in `docs/adr/` it touches or cites, and the task's lines in `docs/ROADMAP.md`. The
-   rules and the business decisions written there are the standard; do not bring your own.
+   `web/panel/openapi/panel.json`, lock files. Skip any change no rule below can apply to
+   (layout, wording in docs, renames, test data), without comment.
+3. Before judging, read `CLAUDE.md` and the ADR and `docs/ARCHITECTURE.md` sections the brief
+   names (an ADR the code cites too). Do not read `docs/ROADMAP.md` or `docs/roadmap-done.md`
+   whole: grep the task number (for example `Grep "1\.6\.6" docs/ROADMAP.md` with a few lines of
+   context) and the decisions the task points at. The rules and the business decisions written
+   there are the standard; do not bring your own.
 
 ## The rules to check
 

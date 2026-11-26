@@ -10,7 +10,10 @@ Status: Phase 1 (master data) in progress; see docs/ROADMAP.md for the next task
 works alone; the workshop owner is his brother and is treated as a client.
 
 ## Where things are
-- Roadmap, task status, the owner's to-do list, open questions: docs/ROADMAP.md
+- Roadmap, task status, the owner's to-do list, open questions: docs/ROADMAP.md (one status line
+  per finished task)
+- What each finished task delivered, how it was checked, what was found: docs/roadmap-done.md
+  (search it for the task number; do not read it whole)
 - Layers, modules, core models, attendance, languages: docs/ARCHITECTURE.md
 - Architecture decisions, once written: docs/adr/
 - CI (GitHub Actions; build and every test on each push): .github/workflows/ci.yml
@@ -60,8 +63,16 @@ works alone; the workshop owner is his brother and is treated as a client.
 ## Workflow
 - Small phases. Before a phase starts, ask its open questions (docs/ROADMAP.md) and wait for the
   answers. Never invent a business rule; the workshop's real practice decides.
-- One roadmap task per session. Do not start the next task unless asked.
+- One roadmap task per session, and a new session for each task: when a task is committed, the
+  session ends and the next task starts in a fresh one. Why: a long session sends its whole
+  context again with every message (1.6.5 reached 360k tokens). Do not start the next task.
 - For any non-trivial task, present a plan first and wait for approval.
+- When a task grows while it is planned (as 1.6.5 did with the owner's numbers), split it before
+  building into lettered tasks in the roadmap (1.6.5, 1.6.5b), so each diff and each review stays
+  small.
+- When a task is finished, move its whole roadmap entry with its «Done» report to
+  docs/roadmap-done.md and leave one status line in docs/ROADMAP.md (with anything still open),
+  because every session and every review reads the roadmap.
 - Commit when a task is finished and its tests are green (allowed by the developer on
   1405/08/28). IMPORTANT: never push; the developer pushes from his own terminal, so tell him
   when there is something to push.
@@ -77,6 +88,13 @@ works alone; the workshop owner is his brother and is treated as a client.
   UI). When a task's checks are green, run `reviewer` before committing and fix or answer each
   finding. Why: the session that wrote the code shares its own assumptions, and in a money
   system one broken rule costs more than many visible bugs. Its report is not proof.
+- Before running `reviewer`, ask the developer, naming the model chosen and why: `sonnet` for an
+  ordinary task, `opus` for one that touches money, access, login or the audit, where a missed
+  rule costs most. The session chooses; the developer only says yes or no. Pass the model with
+  the call (`model`); `reviewer.md` keeps `inherit`, so a forgotten model falls back to the
+  session's own, never a weaker one. Hand it a brief: the task number, the risky files, and the
+  ADR and docs/ARCHITECTURE.md sections to read (added 1405/09/05, task 1.6.5b: the review of
+  1.6.5 alone took about 158k tokens).
 
 ## Commands
 Run from the repository root. Keep this section up to date when commands change.
