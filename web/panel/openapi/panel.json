@@ -1006,6 +1006,120 @@
         }
       }
     },
+    "/panel/history/models/{id}": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/history/contractors/{id}": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/history/workers/{id}": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/parties/contractors": {
       "get": {
         "tags": [
@@ -2696,6 +2810,145 @@
           }
         }
       },
+      "HistoryAction": {
+        "enum": [
+          "created",
+          "updated",
+          "deleted"
+        ]
+      },
+      "HistoryChange": {
+        "required": [
+          "part",
+          "action",
+          "label",
+          "fields"
+        ],
+        "type": "object",
+        "properties": {
+          "part": {
+            "$ref": "#/components/schemas/HistoryPart"
+          },
+          "action": {
+            "$ref": "#/components/schemas/HistoryAction"
+          },
+          "label": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoryField"
+            }
+          }
+        }
+      },
+      "HistoryField": {
+        "required": [
+          "name",
+          "old",
+          "new"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/HistoryFieldName"
+          },
+          "old": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "new": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "HistoryFieldName": {
+        "enum": [
+          "name",
+          "description",
+          "category",
+          "active",
+          "position",
+          "fabric",
+          "colour",
+          "size",
+          "amount",
+          "startsOn",
+          "fullName",
+          "mobileNumber",
+          "notes",
+          "startDate",
+          "iban"
+        ]
+      },
+      "HistoryPage": {
+        "required": [
+          "saves",
+          "before"
+        ],
+        "type": "object",
+        "properties": {
+          "saves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistorySave"
+            }
+          },
+          "before": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "HistoryPart": {
+        "enum": [
+          "model",
+          "size",
+          "bag",
+          "rate",
+          "contractor",
+          "worker",
+          "stage"
+        ]
+      },
+      "HistorySave": {
+        "required": [
+          "at",
+          "by",
+          "changes"
+        ],
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoryChange"
+            }
+          }
+        }
+      },
       "LoginCodeRequested": {
         "required": [
           "expiresInSeconds",
@@ -3551,6 +3804,9 @@
     },
     {
       "name": "Catalog"
+    },
+    {
+      "name": "History"
     },
     {
       "name": "Parties"

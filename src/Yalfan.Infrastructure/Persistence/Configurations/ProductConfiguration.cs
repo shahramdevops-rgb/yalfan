@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Yalfan.Application.History;
 using Yalfan.Domain.Catalog;
 
 namespace Yalfan.Infrastructure.Persistence.Configurations;
@@ -8,7 +9,7 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.ToTable("products");
+        builder.ToTable(AuditedTables.Products);
         builder.HasKey(product => product.Id);
         builder.Property(product => product.Id).ValueGeneratedNever();
 
@@ -21,7 +22,7 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.OwnsMany(product => product.Translations, translation =>
         {
-            translation.ToTable("product_translations");
+            translation.ToTable(AuditedTables.ProductTranslations);
             translation.WithOwner().HasForeignKey("ProductId");
             translation.Property(t => t.Locale)
                 .HasConversion(TranslationMapping.LocaleConverter)

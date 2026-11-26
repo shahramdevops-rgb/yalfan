@@ -68,6 +68,9 @@ public sealed class ContractorRecordTests(ApiFactory factory) : IClassFixture<Ap
         var id = (await client.CreateContractorAsync(iban: OtherIban)).Id();
 
         (await client.PutAsJsonAsync($"{Contractors}/{id}/iban", new { iban = Iban }, Cancel)).EnsureSuccessStatusCode();
+
+        // The test clock stands still; moved on, the two changes are read back in their order.
+        factory.Time.Advance(TimeSpan.FromSeconds(1));
         (await client.DeleteAsync($"{Contractors}/{id}/iban", Cancel)).EnsureSuccessStatusCode();
 
         var updates = (await EntriesFor("contractors", id.ToString())).Where(e => e.Action == AuditAction.Updated).ToList();
@@ -80,6 +83,14 @@ public sealed class ContractorRecordTests(ApiFactory factory) : IClassFixture<Ap
             Assert.Equal(JsonValueKind.Null, field.Value.GetProperty("old").ValueKind);
             Assert.Equal(JsonValueKind.Null, field.Value.GetProperty("new").ValueKind);
         }
+
+        // Replaced, then removed: only whether there was one, so the history tells them apart (ADR 0027).
+        var replaced = Parse(updates[0].Changes).GetProperty("iban");
+        var removed = Parse(updates[1].Changes).GetProperty("iban");
+        Assert.True(replaced.GetProperty("oldSet").GetBoolean());
+        Assert.True(replaced.GetProperty("newSet").GetBoolean());
+        Assert.True(removed.GetProperty("oldSet").GetBoolean());
+        Assert.False(removed.GetProperty("newSet").GetBoolean());
 
         await AssertNoIbanInTheAudit();
     }

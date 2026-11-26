@@ -14,6 +14,7 @@ import { NameList } from '../../shared/ui/NameList';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { moveItem } from '../../shared/ui/sortable';
 import { Switch } from '../../shared/ui/Switch';
+import { HistoryLink } from '../history/HistoryLink';
 import { RateCardSection } from '../production/RateCardSection';
 import { BagPicker } from './BagPicker';
 import { bagsToAdd, existingPicks, type Picks } from './bags';
@@ -82,7 +83,10 @@ export function ModelPage() {
   // when the page goes from model to model without leaving.
   return (
     <div key={model.id} className="flex max-w-3xl flex-col gap-6">
-      <BackLink />
+      <div className="flex items-center justify-between gap-4">
+        <BackLink />
+        <HistoryLink kind="models" id={model.id} />
+      </div>
       <Profile product={model} write={write} />
       <RateCardSection productId={model.id} productIsActive={model.isActive} />
       <Sizes product={model} write={write} />

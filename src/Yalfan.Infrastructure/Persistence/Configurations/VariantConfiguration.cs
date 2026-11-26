@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Yalfan.Application.History;
 using Yalfan.Domain.Catalog;
 
 namespace Yalfan.Infrastructure.Persistence.Configurations;
@@ -8,7 +9,7 @@ internal sealed class VariantConfiguration : IEntityTypeConfiguration<Variant>
 {
     public void Configure(EntityTypeBuilder<Variant> builder)
     {
-        builder.ToTable("product_variants");
+        builder.ToTable(AuditedTables.ProductVariants);
         builder.HasKey(variant => variant.Id);
         builder.Property(variant => variant.Id).ValueGeneratedNever();
 

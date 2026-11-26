@@ -178,6 +178,18 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IClock clock) : S
             if (redacted)
             {
                 field["redacted"] = true;
+
+                // Whether there was a value, never the value: the history tells an IBAN set,
+                // replaced or removed apart, and replacing one is the payout fraud (ADR 0027).
+                if (action != AuditAction.Created)
+                {
+                    field["oldSet"] = property.OriginalValue is not null;
+                }
+
+                if (action != AuditAction.Deleted)
+                {
+                    field["newSet"] = property.CurrentValue is not null;
+                }
             }
 
             changes[name] = field;

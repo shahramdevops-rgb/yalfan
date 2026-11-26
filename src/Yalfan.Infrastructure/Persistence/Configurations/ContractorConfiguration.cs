@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Yalfan.Application.History;
 using Yalfan.Domain.Common;
 using Yalfan.Domain.Parties;
 using Yalfan.Domain.Production;
@@ -10,7 +11,7 @@ internal sealed class ContractorConfiguration : IEntityTypeConfiguration<Contrac
 {
     public void Configure(EntityTypeBuilder<Contractor> builder)
     {
-        builder.ToTable("contractors");
+        builder.ToTable(AuditedTables.Contractors);
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedNever();
 
@@ -38,7 +39,7 @@ internal sealed class ContractorConfiguration : IEntityTypeConfiguration<Contrac
 
         builder.OwnsMany(x => x.Stages, stage =>
         {
-            stage.ToTable("contractor_stages");
+            stage.ToTable(AuditedTables.ContractorStages);
             stage.WithOwner().HasForeignKey("ContractorId");
             stage.HasKey("ContractorId", nameof(ContractorStage.StageId));
 

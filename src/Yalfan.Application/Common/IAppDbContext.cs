@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Yalfan.Domain.Audit;
 using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Identity;
 using Yalfan.Domain.Parties;
@@ -38,6 +39,12 @@ public interface IAppDbContext
 
     /// <summary>In-house workers; the stages each one does are reached through the worker (ADR 0020).</summary>
     DbSet<Worker> Workers { get; }
+
+    /// <summary>
+    /// The audit, to read only: not a DbSet, so a use case can neither add nor change an entry
+    /// (ADR 0013); the interceptor alone writes it. Read without tracking.
+    /// </summary>
+    IQueryable<AuditEntry> AuditEntries { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

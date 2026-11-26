@@ -37,6 +37,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, IbanCip
     /// <summary>Written only by the audit interceptor; read by a history screen later (1.6).</summary>
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
+    IQueryable<AuditEntry> IAppDbContext.AuditEntries => AuditEntries.AsNoTracking();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Each entity is mapped by its own IEntityTypeConfiguration in Persistence/Configurations.

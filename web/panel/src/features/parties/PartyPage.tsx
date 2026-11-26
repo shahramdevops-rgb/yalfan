@@ -15,6 +15,7 @@ import { InlineName } from '../../shared/ui/InlineName';
 import { JalaliDateField } from '../../shared/ui/JalaliDateField';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { Switch } from '../../shared/ui/Switch';
+import { HistoryLink } from '../history/HistoryLink';
 import { stagesApi, stagesKey } from '../production/stagesApi';
 import { IbanSection } from './IbanSection';
 import {
@@ -77,7 +78,10 @@ export function PartyPage({ kind }: { kind: PartyKind }) {
   // person and must not stay on the page when it goes straight to another person.
   return (
     <div key={party.data.id} className="flex max-w-3xl flex-col gap-6">
-      <BackLink kind={kind} />
+      <div className="flex items-center justify-between gap-4">
+        <BackLink kind={kind} />
+        <HistoryLink kind={kind} id={party.data.id} />
+      </div>
       <Profile kind={kind} party={party.data} write={write} />
       <IbanSection kind={kind} party={party.data} write={write} />
     </div>

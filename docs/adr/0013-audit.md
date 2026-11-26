@@ -77,7 +77,7 @@ owner's users screen (1.6) uses it too.
 ### Not in this task
 
 - Viewing the history in the panel: added to task 1.6 (owner only), where the first screens
-  with something to show are built.
+  with something to show are built. **Built in 1.6.6 (ADR 0027).**
 - IP address and browser: the trace id already links each entry to the full request log.
 
 ## Consequences
@@ -108,3 +108,9 @@ owner's users screen (1.6) uses it too.
   {"new": "IRR"}}`; a `Money` property mapped with the default column names gives
   `priceAmount`, `priceCurrency`. Owned types that share their owner's table are still not
   handled; nothing uses one.
+  **Update 1405/09/05 (task 1.6.6, ADR 0027):** a redacted field also records whether there was a
+  value before and after, never the value: `{"old": null, "new": null, "redacted": true,
+  "oldSet": true, "newSet": false}` (only `newSet` when created, only `oldSet` when deleted), so
+  the owner's history tells an IBAN set, replaced and removed apart. Entries written before carry
+  no flags. The history reads the audit through `IAppDbContext.AuditEntries`, an untracked
+  `IQueryable`, so no use case can write it.

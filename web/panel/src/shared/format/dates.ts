@@ -24,6 +24,18 @@ export function formatDate(instant: string | Date): string {
   return dateInTehran.format(toDate(instant));
 }
 
+const timeInTehran = new Intl.DateTimeFormat('fa-IR', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+  timeZone: workshopTimeZone,
+});
+
+/** The time of a moment in Tehran, on a 24-hour clock: "2026-11-18T06:05:00Z" is "۰۹:۳۵". */
+export function formatTime(instant: string | Date): string {
+  return timeInTehran.format(toDate(instant));
+}
+
 /** The same, with the weekday: "پنجشنبه ۲۸ آبان ۱۴۰۵". */
 export function formatWeekdayDate(instant: string | Date): string {
   const date = toDate(instant);

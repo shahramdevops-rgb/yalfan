@@ -1,7 +1,7 @@
 # Yalfan — Roadmap
 
-Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.6.6 (change
-history). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
+Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7 (design
+system). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
 GitHub (waits for a push, which closes Phase 0) and the check of 1.6 (waits for the developer,
 who does the operator's work for now).
 
@@ -205,6 +205,11 @@ split into the users (1.6.5) and the change history (1.6.6), because giving the 
 numbers changed the login code, the most sensitive code there is, which deserves its own review
 and commit; the history does not depend on it.
 
+Accepted by the developer on 1405/09/05, for 1.6.6 (ADR 0027): the plan as written, so **an
+IBAN in the history reads «ثبت شد», «عوض شد» or «پاک شد»**: the audit now records whether there
+was one before and after, never the number, because replacing an IBAN that was there is the usual
+payout fraud and «عوض شد» alone hid it. The review ran on Sonnet, at his choice.
+
 Answered by the developer on 1405/09/05, for 1.6.5 (ADR 0026; the proposals he did not change
 were accepted as written):
 - **The owner logs in with two numbers on two separate phones**, and **the developer has an owner
@@ -295,11 +300,8 @@ were accepted as written):
     developer: Q.13 and whether the panel gets component tests.
   - **1.6.5 Users and login numbers.** Done 1405/09/05 (ADR 0026).
   - **1.6.5b Housekeeping.** Done 1405/09/05 (rules in CLAUDE.md and `.claude/agents/reviewer.md`).
-  - **1.6.6 Change history.** A «تاریخچه» on a model (with its bags, sizes and rates), a
-    contractor and a worker (with their stages; an IBAN as «شبا عوض شد», with no number), for the
-    owner, on its own page: newest first, one block per save with who and when, each change in the
-    workshop's words. API: read the audit of a record with names instead of ids. (Split from 1.6.5
-    on 1405/09/05; the shape was accepted with 1.6.5's questions.)
+  - **1.6.6 Change history.** Done 1405/09/05 (ADR 0027); an IBAN now reads set, replaced or
+    removed (ADR 0013 updated).
 - **1.7 Design system (added 1405/09/04, asked by the developer).** Before Phase 2, because
   Phase 2 is the most screen-heavy phase and is used every day: once forty screens exist, making
   them consistent costs many times more. Builds on the shared parts 1.6 already made (`Button`,

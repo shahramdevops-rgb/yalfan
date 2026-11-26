@@ -390,8 +390,10 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   time, trace id, old and new value. An EF interceptor writes the entry in the same save as the
   change; the table is append-only (a trigger refuses UPDATE, DELETE, TRUNCATE). Security
   records (login codes, session tokens) are excluded; secrets such as IBANs are recorded as
-  "changed" without values. `ExecuteUpdate`, `ExecuteDelete` and raw SQL writes are build errors
-  because they skip the audit.
+  "changed" without values, only whether there was one (ADR 0027). `ExecuteUpdate`,
+  `ExecuteDelete` and raw SQL writes are build errors because they skip the audit. The owner
+  reads the change history of a model, a contractor and a worker in the panel (1.6.6, ADR 0027):
+  one card per save, names instead of ids, the words in the panel.
 - **Time:** `IClock` everywhere; business "today" is Asia/Tehran. Instants are `DateTimeOffset`
   in UTC, calendar days are `DateOnly`; calling `DateTime.Now` and its relatives is a build
   error (ADR 0005).
@@ -584,3 +586,4 @@ server in the developer's.
 | 0024 | The rate card screen; the money display, the amount and the Jalali date fields | 1.6.3 (written) |
 | 0025 | The contractor and worker screens; the IBAN on screen; no browser cache for the panel API | 1.6.4 (written) |
 | 0026 | The users screen; owner accounts with several login numbers from the configuration; a 10-minute access token | 1.6.5 (written) |
+| 0027 | The change history of a model, a contractor and a worker; an IBAN as set, replaced or removed | 1.6.6 (written) |

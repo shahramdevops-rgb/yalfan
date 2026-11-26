@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Yalfan.Application.History;
 using Yalfan.Domain.Catalog;
 using Yalfan.Domain.Common;
 using Yalfan.Domain.Production;
@@ -13,11 +14,9 @@ namespace Yalfan.Infrastructure.Persistence.Configurations;
 /// </summary>
 internal sealed class PieceRateConfiguration : IEntityTypeConfiguration<PieceRate>
 {
-    public const string TableName = "piece_rates";
-
     public void Configure(EntityTypeBuilder<PieceRate> builder)
     {
-        builder.ToTable(TableName, table =>
+        builder.ToTable(AuditedTables.PieceRates, table =>
             table.HasCheckConstraint("ck_piece_rates_amount_positive", "amount > 0"));
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedNever();

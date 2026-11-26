@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayInTehran, formatDate, formatDay, formatWeekdayDate, formatWeekdayDay } from './dates';
+import { dayInTehran, formatDate, formatDay, formatTime, formatWeekdayDate, formatWeekdayDay } from './dates';
 import { digitsOnly, formatCountdown, toLatinDigits, toPersianDigits } from './digits';
 import { formatRial, tomanLine } from './money';
 
@@ -23,6 +23,14 @@ describe('formatDate', () => {
 
   it('refuses something that is not a date', () => {
     expect(() => formatDate('yesterday')).toThrow(RangeError);
+  });
+});
+
+describe('formatTime', () => {
+  it('shows the time in Tehran on a 24-hour clock', () => {
+    expect(formatTime('2026-11-18T06:05:00Z')).toBe('۰۹:۳۵');
+    expect(formatTime('2026-11-18T20:30:00Z')).toBe('۰۰:۰۰');
+    expect(formatTime('2026-11-18T12:00:00Z')).toBe('۱۵:۳۰');
   });
 });
 

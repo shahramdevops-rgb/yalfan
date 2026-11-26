@@ -371,3 +371,39 @@ The entry of 1.6 itself stays in the roadmap until its last part is finished.
     are" in CLAUDE.md and the README name this file. The Phase 1 decisions stay in the roadmap,
     because later tasks rest on them. (5) `reviewer.md`: works from the brief, greps the task's
     lines instead of reading the roadmap, and skips the changes no rule covers.
+  - **1.6.6 Change history.** A «تاریخچه» on a model (with its bags, sizes and rates), a
+    contractor and a worker (with their stages; an IBAN as «شبا عوض شد», with no number), for the
+    owner, on its own page: newest first, one block per save with who and when, each change in the
+    workshop's words. API: read the audit of a record with names instead of ids. (Split from 1.6.5
+    on 1405/09/05; the shape was accepted with 1.6.5's questions.)
+    **Done 1405/09/05:** 535 .NET tests pass (10 new integration tests on PostgreSQL; the two
+    IBAN audit tests extended), 156 panel tests pass (11 new), build has 0 warnings; no migration
+    (`dotnet ef migrations has-pending-model-changes`: none). ADR 0027; ADR 0013 updated. API,
+    owner only on the whole group: `GET /panel/history/models|contractors|workers/{id}`, twenty
+    saves a page, `?before=` for the next; each save its moment, the user's name and its changes
+    (part, action, label, fields as text with ids already named), fields in a fixed order. The
+    audit is read by exact keys with `UNION ALL` on the existing index, through an untracked
+    `IQueryable` in `IAppDbContext`; the audited tables are constants shared with the EF
+    configurations; every recorded field is named or left out in `HistoryVocabulary`, and a test
+    fails on one the vocabulary does not know. The audit now records whether a redacted field had
+    a value before and after (`oldSet`, `newSet`), so the history says «شبا ثبت شد / عوض شد / پاک
+    شد». Panel: «تاریخچه» on the model, contractor and worker pages for the owner only, «not
+    found» on the history page for anyone else; a card per save with the name, the Jalali date and
+    the time in Tehran (`formatTime`); sizes dragged into a new order as one line; more than six
+    bag lines folded; a new rate with its amount and Toman words; codes and mobiles kept left to
+    right inside the Persian lines. Checked in Chrome against a throwaway database (dropped
+    afterwards), with a model changed by a manager and the owner, a model of eight bags, a
+    contractor and a worker: every card in its order with names instead of ids, the folded bags,
+    the IBAN set, replaced and removed, the start date, the stages. Found in Chrome and fixed:
+    a mobile read in reverse groups and a bag code reversed (now Unicode isolates, measured
+    through the DOM against the model page's left-to-right codes); a Latin user name pulled the
+    date around it (now `<bdi>`); fields came in jsonb's key order (the IBAN first) and a new
+    model's sizes in today's dragged order (both fixed in the API, and the integration tests now
+    assert the order). The phone width was a 390 px frame measured through the DOM (no sideways
+    scrolling), not seen by eye; a manager's view (no link, «not found») was not opened in
+    Chrome: the API's 403 is tested and the page uses the users screen's check.
+    Reviewed the same day by the `reviewer` agent on Sonnet (the developer's choice): no broken
+    rule and nothing blocking. Its three questions, answered without a change: a save whose user
+    is not found would read «سیستم», which cannot happen since users are never deleted; the page
+    never sees a loading session, because `RequireSession` renders the routes only once signed in;
+    only the Persian translation is read, as ADR 0027 says.

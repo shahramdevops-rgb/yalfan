@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Yalfan.Application.History;
 using Yalfan.Domain.Catalog;
 
 namespace Yalfan.Infrastructure.Persistence.Configurations;
@@ -8,7 +9,7 @@ internal sealed class ProductSizeConfiguration : IEntityTypeConfiguration<Produc
 {
     public void Configure(EntityTypeBuilder<ProductSize> builder)
     {
-        builder.ToTable("product_sizes");
+        builder.ToTable(AuditedTables.ProductSizes);
         builder.HasKey(size => size.Id);
         builder.Property(size => size.Id).ValueGeneratedNever();
 
@@ -19,6 +20,6 @@ internal sealed class ProductSizeConfiguration : IEntityTypeConfiguration<Produc
 
         // Size names are unique within one model only, which the Domain checks; the same name
         // ("بزرگ") is normal across models, so there is no unique index.
-        builder.OwnsNames(size => size.Names, "product_size_translations", ProductSize.NameMaxLength, uniqueNames: false);
+        builder.OwnsNames(size => size.Names, AuditedTables.ProductSizeTranslations, ProductSize.NameMaxLength, uniqueNames: false);
     }
 }

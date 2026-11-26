@@ -33,7 +33,7 @@ public sealed class AuditInterceptorTests : IAsyncLifetime
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Fact]
-    public async Task A_redacted_field_is_recorded_as_changed_without_its_values()
+    public async Task A_redacted_field_is_recorded_as_changed_without_its_values_but_with_whether_it_had_one()
     {
         await using var db = NewContext();
         var gadget = new Gadget("first", "IR000000000000000000000001");
@@ -51,6 +51,12 @@ public sealed class AuditInterceptorTests : IAsyncLifetime
         Assert.True(created.GetProperty("secret").GetProperty("redacted").GetBoolean());
         Assert.Equal(JsonValueKind.Null, updated.GetProperty("secret").GetProperty("old").ValueKind);
         Assert.True(updated.GetProperty("secret").GetProperty("redacted").GetBoolean());
+
+        // Whether there was a value, never the value (ADR 0027).
+        Assert.True(created.GetProperty("secret").GetProperty("newSet").GetBoolean());
+        Assert.False(created.GetProperty("secret").TryGetProperty("oldSet", out _));
+        Assert.True(updated.GetProperty("secret").GetProperty("oldSet").GetBoolean());
+        Assert.True(updated.GetProperty("secret").GetProperty("newSet").GetBoolean());
         Assert.DoesNotContain("IR0000", string.Concat(entries.Select(e => e.Changes)), StringComparison.Ordinal);
     }
 
