@@ -98,7 +98,7 @@ export function LoginPage() {
           <BagMark className="size-14" />
           <div>
             <p className="text-2xl font-bold text-ink">{t('app.name')}</p>
-            <p className="text-sm text-muted">{t('app.subtitle')}</p>
+            <p className="text-sm text-body">{t('app.subtitle')}</p>
           </div>
         </div>
 

@@ -8,12 +8,13 @@
   /* The panel's colours, named by what they are for, not by their shade (ADR 0029,
      docs/design/UI.md). Tailwind's own palette is switched off, so `text-stone-500` makes no CSS
      and a raw colour cannot creep back; checks/colours.test.ts fails on one. Changing a colour is
-     one line here. The values are Tailwind's (stone, teal, red, amber, green), named in each
-     comment, so the move onto these names changed no pixel. */
+     one line here. Most values are Tailwind's (stone, red, amber, green), named in each comment,
+     so the move onto these names changed no pixel; the workshop's olive green and the cream of
+     the page come from its logo and business card (1405/09/06). */
   --color-*: initial;
 
   /* Grounds. */
-  --color-page: oklch(97% 0.001 106.424); /* stone-100: behind the cards */
+  --color-page: #f5f1e8; /* the cream of the business card: behind the cards */
   --color-surface: #fff; /* a card, a field, the sidebar and the header */
   --color-subtle: oklch(98.5% 0.001 106.423); /* stone-50: a row under the pointer, a sunken box */
   --color-fill: oklch(97% 0.001 106.424); /* stone-100: a badge, a loading bar, a quiet button under the pointer */
@@ -33,13 +34,13 @@
   --color-muted: oklch(55.3% 0.013 58.071); /* stone-500: a hint, the line under a name */
   --color-faint: oklch(70.9% 0.01 56.259); /* stone-400: inactive, disabled, a field's empty example */
 
-  /* The workshop's colour. */
-  --color-brand: oklch(51.1% 0.096 186.391); /* teal-700: the main button, a link, the focus ring */
-  --color-brand-strong: oklch(43.7% 0.078 188.216); /* teal-800: the main button under the pointer, a chosen item */
-  --color-brand-line: oklch(60% 0.118 184.704); /* teal-600: the edge of the field being typed in */
-  --color-brand-edge: oklch(91% 0.096 180.426); /* teal-200: the edge of a small form opened inside a card */
-  --color-brand-glow: oklch(95.3% 0.051 180.801); /* teal-100: the glow around the field being typed in */
-  --color-brand-soft: oklch(98.4% 0.014 180.72); /* teal-50: behind a chosen item */
+  /* The workshop's colour: the olive green of its logo. White on brand is 7.5 to 1. */
+  --color-brand: #4b5a34; /* the main button, a link, the focus ring */
+  --color-brand-strong: #3c4829; /* the logo's lettering: the main button under the pointer, a chosen item */
+  --color-brand-line: #6e7f52; /* the edge of the field being typed in */
+  --color-brand-edge: #d2dabf; /* the edge of a small form opened inside a card */
+  --color-brand-glow: #e5ebd8; /* the glow around the field being typed in */
+  --color-brand-soft: #f3f6ec; /* behind a chosen item */
   --color-on-brand: #fff; /* text and marks on the workshop's colour */
 
   /* Danger: a refusal, a wrong field, a step that takes something away. */

@@ -25,7 +25,7 @@ Only these names, by what they are for. Tailwind's own palette is switched off: 
 
 | Name | For |
 |---|---|
-| `page` | The ground behind the cards |
+| `page` | The ground behind the cards: the cream of the workshop's business card |
 | `surface` | A card, a field, the sidebar and the header |
 | `subtle` | A row under the pointer; a sunken box inside a card (the whole IBAN, a rate's history) |
 | `fill` | A badge, a loading bar, a quiet button under the pointer |
@@ -40,7 +40,7 @@ Only these names, by what they are for. Tailwind's own palette is switched off: 
 | `body` | A sentence that is not the point of the page (an empty list, a status line) |
 | `muted` | A hint, the line under a name, the Toman words under an amount |
 | `faint` | Inactive, disabled, a field's empty example |
-| `brand` | The main button, a link, the focus ring, a switch turned on |
+| `brand` | The olive green of the workshop's logo: the main button, a link, the focus ring, a switch turned on |
 | `brand-strong` | The main button under the pointer; a chosen item's text; a model's number |
 | `brand-line` | The edge of the field being typed in; a chosen chip's edge |
 | `brand-edge` | The frame of a small form opened inside a card (`InsetForm`) |
@@ -53,6 +53,8 @@ Only these names, by what they are for. Tailwind's own palette is switched off: 
 
 - Each `-soft` ground takes its `-strong` text («این مدل غیرفعال است…» is `warning-strong` on
   `warning-soft`).
+- Text on the `page` ground (outside a card) is `body` or darker, never `muted`: `muted` on the
+  cream is 4.26 to 1, below the 4.5 text needs; inside a white card it is 4.81.
 - A state is never told by colour alone: it always has a word (`StatusBadge`, `Notice`).
 - A new colour is a new name, added on purpose to `index.css` and to this table, never written
   out in a page. There is no `info` colour yet (ADR 0029 point 4).

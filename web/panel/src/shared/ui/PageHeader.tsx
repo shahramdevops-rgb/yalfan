@@ -41,7 +41,7 @@ export function PageHeader({ title, titleId, hint, back, actions }: PageHeaderPr
           <h1 id={titleId} className="text-2xl font-bold">
             {title}
           </h1>
-          {hint && <p className="mt-1 text-muted">{hint}</p>}
+          {hint && <p className="mt-1 text-body">{hint}</p>}
         </div>
         {actions}
       </div>

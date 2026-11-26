@@ -1,8 +1,7 @@
 # Yalfan — Roadmap
 
-Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7b (tokens and
-the simple parts; the design system was split into 1.7 to 1.7d, and 1.7, the screenshots, is
-done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
+Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7c (overlays and
+the keyboard; the design system was split into 1.7 to 1.7d, and 1.7 and 1.7b are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
 GitHub (waits for a push, which closes Phase 0) and the check of 1.6 (waits for the developer,
 who does the operator's work for now).
 
@@ -58,7 +57,7 @@ developer runs and maintains it. Phases wait for these.
 | O.10 | List materials and count the stock on hand; write the material recipe of each model | Phase 6 |
 | O.11 | An SMS provider account and a **service line** (خط خدماتی) with a login-code template, in the owner's name. Moved earlier on 1405/08/27: staff log in with SMS codes (ADR 0012), so the panel cannot go live without it. The developer gets the service line early instead of waiting for the store | Phase 3 (task 3.0) |
 | O.12 | Photograph the products properly | Phase 11 |
-| O.12b | Brand identity for the store: logo, colours and typeface by a graphic designer, not by the developer (added 1405/09/04). Why: the store is the brand's face, and code cannot make up for a weak visual identity. Start well before Phase 11, alongside the photography | Phase 11 |
+| O.12b | Brand identity for the store: logo, colours and typeface by a graphic designer, not by the developer (added 1405/09/04). Why: the store is the brand's face, and code cannot make up for a weak visual identity. Start well before Phase 11, alongside the photography. **Received 1405/09/06:** the logo, the business card and the hang tag (olive green, cream, a thin gold line, a serif Latin wordmark); the panel took the olive and the cream (1.7b, ADR 0029). Still needed: the logo's own files (SVG, or PNG with a transparent background) for the panel's mark, the browser icon and the store, since the pictures sent are photos of prints. The hang tag reads «یافان» for «یلفان» twice, told to the developer | Phase 11 |
 | O.13 | Apply for eNamad and a payment gateway in the owner's name (slow; start early in Phase 11) | Phase 12 |
 | O.14 | Choose shipping: post or courier for retail, freight for wholesale, and who pays | Phase 12 |
 | O.15 | Give the developer the SIM of his owner account, and keep the owner's own two numbers on two separate phones (ADR 0026). The numbers go only into the server's `.env`, never into the repository | Phase 3 |
@@ -335,15 +334,9 @@ were accepted as written):
   and what the picker is built on), whether saving a rate also shows a summary first, whether
   the panel gets component tests (open since 1.6.4), and the first thing printed.
   - **1.7 Screenshots.** Done 1405/09/06 (ADR 0028); 28 pictures, one changed pixel fails.
-  - **1.7b Tokens and the simple parts.** The tokens by role (surface, line, muted text,
-    danger, warning, success, info, brand) with Tailwind's default colours switched off, so
-    each is changed in one place and a raw colour cannot creep back; a page header, a status
-    badge (colour and text), a link that looks like a button, the form layout; the 1.6 screens
-    moved onto them; `docs/design/UI.md` begun. Found while planning: `ring-brand-200` on the
-    IBAN form names a shade that does not exist, so the ring is drawn in the text colour. Found
-    in 1.7: the model, contractor and worker pages have no `h1`, which the page header gives
-    them. The pictures of 1.7 show every change this task makes: one that should look the same
-    must leave them unchanged.
+  - **1.7b Tokens and the simple parts.** Done 1405/09/06 (ADR 0029, `docs/design/UI.md`);
+    the panel took the olive green and cream of the workshop's logo. Left open: the logo's own
+    file (O.12b); the pointer and focus states were not seen by eye.
   - **1.7c Overlays and the keyboard.** The confirmation dialog, toasts, the searchable picker
     and the phone drawer on accessible primitives; the data entry rules (Enter to the next
     field, the first field focused, the last choices remembered, a summary before every money

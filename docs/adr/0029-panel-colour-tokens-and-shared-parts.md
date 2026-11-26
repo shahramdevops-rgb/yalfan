@@ -27,7 +27,7 @@ saying he leaves the look to the session.
    `brand-soft`, `on-brand`), and the states `danger-*`, `warning-*` and `success`. The table
    of what each one is for is in `docs/design/UI.md`. Why: a page says what a colour is for
    (`text-muted`, `bg-danger-soft`), and a colour is changed in one line for every page.
-2. **Each role took the exact value it had**, Tailwind's own value written in the file with its
+2. **Each role first took the exact value it had**, Tailwind's own value written in the file with its
    old name in a comment. Why: the 28 screenshots of ADR 0028 then prove the move of 376 classes
    changed nothing; they passed with no pixel changed before any part was touched. Merging the
    six greys of text into fewer, or a new colour, is later a change of value here, one line, and
@@ -77,6 +77,23 @@ saying he leaves the look to the session.
    to the pixel.
 8. **Left as they are:** the login page and the page shown after a crash, the two pages outside
    the panel's frame, keep their own centred layout.
+9. **The workshop's colours** (a second commit the same day). Mid-task the developer sent the
+   workshop's logo, business card and hang tag, to be used where needed. With point 2 done and
+   committed, the change was a few values in `index.css`:
+   - `brand` is the logo's olive green (`#4b5a34`) and `brand-strong` its lettering
+     (`#3c4829`), with lighter steps of the same green for the field's edge and glow, the
+     small form's frame and a chosen item's ground. White on `brand` is 7.5 to 1 (teal-700
+     gave 5.4), so the main button reads better than before.
+   - `page` is the business card's cream (`#f5f1e8`); the cards stay white, the greys stay
+     Tailwind's warm `stone`, which sits well on it.
+   - The hint under a page title, the login page's subtitle and the loading line moved from
+     `muted` to `body`: `muted` on the cream is 4.26 to 1, below the 4.5 that text needs (it was
+     4.41 on the old grey, already short). `muted` stays for the hints inside white cards
+     (4.81 to 1).
+   - The card's thin gold line is kept for the store; the panel needs no accent beside the green.
+   - The panel's bag mark stays as it was drawn, now in the olive, until the logo's own file
+     (SVG or a transparent PNG) arrives; the pictures sent are photos of prints (O.12b).
+   Every screenshot changed with it, and the developer looked at them before the commit.
 
 ## Consequences
 

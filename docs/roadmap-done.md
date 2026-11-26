@@ -453,3 +453,64 @@ The entry of 1.7 itself stays in the roadmap until its last part (1.7d) is finis
     for a text from it). Its question, whether `screens:update` takes the picture of a page just
     added, answered from the first run, which took all 28 that way. Its note that the container
     runs as root, which matters only on a Linux PC, is in ADR 0028.
+  - **1.7b Tokens and the simple parts.** The tokens by role (surface, line, muted text,
+    danger, warning, success, info, brand) with Tailwind's default colours switched off, so
+    each is changed in one place and a raw colour cannot creep back; a page header, a status
+    badge (colour and text), a link that looks like a button, the form layout; the 1.6 screens
+    moved onto them; `docs/design/UI.md` begun. Found while planning: `ring-brand-200` on the
+    IBAN form names a shade that does not exist, so the ring is drawn in the text colour. Found
+    in 1.7: the model, contractor and worker pages have no `h1`, which the page header gives
+    them. The pictures of 1.7 show every change this task makes: one that should look the same
+    must leave them unchanged.
+    Decided with the developer on 1405/09/06, who accepted every proposal and left the look to
+    the session: each role keeps the value it had, so the pictures prove the move; the name of
+    a record, edited where it stands, is its page's `h1`; component tests wait for 1.7c, where
+    the parts have behaviour. Mid-task he sent the workshop's logo, business card and hang tag
+    and asked that they be used where needed: the panel took their olive green and cream, in a
+    second commit, so the first one still shows the move changing nothing.
+    **Done 1405/09/06:** 535 .NET tests and 159 panel tests pass (3 new: the colour check), and
+    28 screenshots pass. Build has 0 warnings. ADR 0029; `docs/design/UI.md`; a line in
+    `CLAUDE.md` and in `docs/ARCHITECTURE.md` section 9.
+    - Colours: 376 raw colour classes in 39 files moved onto 32 roles in `src/index.css`
+      (`page`, `surface`, `ink`, `muted`, `brand`, `danger-soft`…), each first with Tailwind's
+      exact value; Tailwind's palette is off. No `info` yet: nothing uses it, and an unused
+      colour is never seen in a picture.
+    - `web/panel/checks/colours.test.ts` gives every colour class in `src` to Tailwind's own
+      compiler and fails on one that makes no CSS (a raw colour, a misspelt role, under any
+      variant), on a colour written out and on a class built from pieces. It lives with the Node
+      project, because the app's has no Node types.
+    - Parts: `PageHeader`, `StatusBadge`, `Notice`, `ButtonLink` and `TextLink` (Button's
+      classes shared through `buttonStyle.ts`), `Field`, `FieldError`, `FormFields`,
+      `FormSection`, `FormActions`, `InsetForm`, `FormCard`, `CardHeader`, and `InlineName
+      heading`. Gone: five hand-written «غیرفعال» badges, eight hand-written card frames, two
+      copies of `Field`, nine back and history links, ten warning and refusal boxes. The login
+      page and the crash page keep their own centred layout.
+    - The workshop's colours (second commit): `brand` is the logo's olive green (`#4b5a34`;
+      white on it 7.5 to 1, teal gave 5.4) and its lettering `#3c4829` for `brand-strong`; the
+      page ground is the business card's cream (`#f5f1e8`); cards stay white. The hint under a
+      page title, the login page's subtitle and the loading line moved from `muted` to `body`,
+      because `muted` on the cream is 4.26 to 1, below the 4.5 text needs (it was 4.41 on the
+      grey already). The card's thin gold line is kept for the store. The bag mark of the panel
+      stays as drawn, in the olive, until the logo's own file arrives (O.12b).
+    How it was checked: right after the colours moved, before any part, all 28 pictures passed
+    with no pixel changed. Three mistakes planted in `Card.tsx` (`hover:bg-subtel`,
+    `text-stone-500`, `bg-[#fff]`) each failed the colour check, naming the file. After the
+    screens moved onto the parts, 23 pictures stayed equal and five changed, from three pages,
+    each looked at and taken on purpose: the history page's header now like every page (back
+    link above a `text-2xl` title), the new-user form ends with a line and its button like the
+    other two forms, the dashboard card's padding on a phone like every card. No picture shows
+    an open IBAN or rate form (their new `brand-edge` frame changed no picture). The record
+    pages' `h1` changed no pixel. The second commit changed all 28 pictures, which the developer
+    looked at before it was committed. Not seen by eye: the pointer and focus states; the colour
+    check proves each of their classes makes CSS, and their values did not change in the first
+    commit.
+    Reviewed the same day by the `reviewer` agent on Sonnet (the developer's choice): nothing
+    blocking; no access, money, IBAN or audit rule broken, every handler, id and `role="alert"`
+    kept. Its two findings, fixed: the colour check skipped a class under a variant with
+    brackets (`data-[state=on]:`, `@md:`) and a piece built as `'bg-' + tone` (now found, with a
+    test of its own); a record's `h1` was read by screen readers as «تغییر نام …» (its button now
+    has no `aria-label` when it is the heading). Its questions, answered in ADR 0029: `Field` is
+    a named group in every use, because a value edited in place («۰۹۱۲ …») needs its label read
+    with it, and a text field never goes inside one; the new-user `FormCard` is a named form
+    because it is one part among several; the docs now say that only the colours are enforced
+    by a tool, the parts by the review.
