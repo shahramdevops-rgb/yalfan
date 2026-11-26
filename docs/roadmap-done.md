@@ -407,3 +407,49 @@ The entry of 1.6 itself stays in the roadmap until its last part is finished.
     is not found would read «سیستم», which cannot happen since users are never deleted; the page
     never sees a loading session, because `RequireSession` renders the routes only once signed in;
     only the Persian translation is read, as ADR 0027 says.
+
+### 1.7 Design system
+
+The entry of 1.7 itself stays in the roadmap until its last part (1.7d) is finished.
+
+  - **1.7 Screenshots.** Playwright screenshots of the main pages at desktop (1280) and phone
+    (390) width, compared on each run of `scripts/check.ps1` and in CI. Decided with the
+    developer: Playwright runs **inside its official Docker image**, pinned, on his PC and in
+    CI alike, because fonts render differently on Windows and Linux and a picture taken on one
+    always fails on the other (about 2 GB pulled once); the API is **answered by fixed sample
+    data** in the browser and the clock is frozen, so no database, SMS or backend is needed and
+    every run is the same; the comparison runs **on every run of the check script**, not only
+    in CI, because the developer runs it before each commit. *Done when:* the pictures exist for
+    both widths, a changed pixel fails the check with the page named, and the ADR is written.
+    **Done 1405/09/06:** 535 .NET tests and 156 panel tests pass (none changed), and 28
+    screenshots pass: 14 pages, each at both widths, the whole page. Build has 0 warnings. ADR 0028;
+    ADR 0014 point 7 and ADR 0017 point 1 updated. `@playwright/test` 1.65.0, exact, installed
+    with `--before=2026-11-12`; the image `mcr.microsoft.com/playwright:v1.65.0-noble` pinned by
+    digest (about 1 GB, not 2). `npm run screens` and `npm run screens:update`
+    (`scripts/screens.mjs`) run it in Docker with `--shm-size=1g` rather than Playwright's
+    suggested `--ipc=host`, which would share the host's memory; `node_modules` lives in a
+    Docker volume and the production build in the container's `/tmp`, so the PC's own are not
+    touched. The API is answered in the browser from sample data typed by the contract and
+    type-checked by the build (`screens/api.ts`, `screens/sample.ts`: made-up names, mobiles
+    `0912 000 0xxx`); the clock is frozen at 1405/09/04, ten in the morning in Tehran. A request
+    with no answer or an error thrown in the page fails the test naming it. `check.ps1` has a
+    `panel screens` step that prints each failed page and width with its reason; CI has a
+    `Screens` step and keeps the pictures of a failure as the artifact `screens`. How it was
+    checked: runs with no change were all green, five times; a text moved one shade
+    (`stone-500` to `stone-600`, the stages under the names in the contractor and worker lists)
+    **passed with Playwright's default `threshold` of 0.2**, so the tolerance is now none, and
+    it then failed on exactly those two lists at both widths, with the diff picture marking the
+    line; a sample answer taken out failed as «requests the sample API has no answer for: GET
+    /panel/users»; the version check stops a mismatched image before Docker; the `subst` drive
+    resolves to the real path for Docker. The pictures were looked at: real pages with their
+    data, not errors or grey placeholders. Found for 1.7b: the model, contractor and worker
+    pages have no `h1`.
+    Reviewed the same day by the `reviewer` agent on Sonnet (the developer's choice): nothing
+    blocking. Its three findings, fixed: `@playwright/test` was `^1.65.0`, so an `npm update` could
+    move it away from the image (now exact, and the script compares the lock with the image);
+    a failed run could have left its pictures in `web/panel/test-results` if the script was
+    bypassed (now always the mounted `artifacts/check/screens`); three pages (a new model, a new
+    contractor, the history) waited only for their heading (now every page that loads data waits
+    for a text from it). Its question, whether `screens:update` takes the picture of a page just
+    added, answered from the first run, which took all 28 that way. Its note that the container
+    runs as root, which matters only on a Linux PC, is in ADR 0028.

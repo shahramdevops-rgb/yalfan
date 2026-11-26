@@ -3,7 +3,8 @@
     Runs every check CI runs and prints only a summary and what failed.
 
 .DESCRIPTION
-    The steps of .github/workflows/ci.yml for .NET and the panel: format, lint, build and tests.
+    The steps of .github/workflows/ci.yml for .NET and the panel: format, lint, build, tests and
+    the panel's screenshots (ADR 0028).
     Each step's full output goes to artifacts/check/<step>.log. The console gets one line per
     step with the test counts, and for a failed step only what is needed to fix it: compiler
     messages once each, failed tests grouped by their error. Why (ADR 0017): one failing test run
@@ -188,6 +189,29 @@ function Get-TestReport([string[]]$Lines) {
     [pscustomobject]@{ Summary = $summary; Details = $details.ToArray() }
 }
 
+function Get-ScreensReport([string[]]$Lines) {
+    # Playwright's list reporter ends with a block per failed test, headed
+    # "  1) [phone] > screens/pages.spec.ts:44:3 > contractors ---", then "Error: ..." and the reason
+    # on the next line ("578 pixels ... are different."). Each failed picture prints as its page,
+    # its width and that reason; the counts are Playwright's own "28 passed" lines.
+    $counts = @($Lines | Where-Object { $_ -match '^\s+\d+ (passed|failed|flaky|did not run)' } | ForEach-Object { $_.Trim() })
+    $details = [System.Collections.Generic.List[string]]::new()
+    for ($i = 0; $i -lt $Lines.Count; $i++) {
+        if ($Lines[$i] -notmatch '^\s+\d+\) \[(\w+)\] \S+ \S+ \S+ (\S+)') { continue }
+        $page = "$($Matches[2]) ($($Matches[1]))"
+        $reason = @()
+        for ($j = $i + 1; $j -lt $Lines.Count -and $Lines[$j] -notmatch '^\s+\d+\) \['; $j++) {
+            if ($Lines[$j] -notmatch '^\s*Error: (.+)$') { continue }
+            $reason = @($Matches[1].Trim())
+            $next = @($Lines[($j + 1)..([Math]::Min($j + 3, $Lines.Count - 1))] | Where-Object { $_.Trim() } | Select-Object -First 1)
+            if ($next.Count -gt 0) { $reason += $next[0].Trim() }
+            break
+        }
+        $details.Add("$page`: $($reason -join ' ')")
+    }
+    [pscustomobject]@{ Summary = ($counts -join ', '); Details = $details.ToArray() }
+}
+
 function Test-Docker {
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { return $false }
     $ErrorActionPreference = 'Continue'
@@ -253,7 +277,7 @@ function Get-SubstRoot {
 }
 
 function Invoke-PanelChecks {
-    $names = @('panel lint', 'panel format', 'panel build', 'panel test')
+    $names = @('panel lint', 'panel format', 'panel build', 'panel test', 'panel screens')
     $panelOnDisk = Join-Path $repoRoot 'web\panel'
     $npm = if ($env:OS -eq 'Windows_NT') { 'npm.cmd' } else { 'npm' }
     $subst = Get-SubstRoot
@@ -293,6 +317,24 @@ function Invoke-PanelChecks {
             else {
                 Write-Step -Status FAIL -Name $step.Name -Run $run -Note $step.Fix -Details (Get-Shortened $run.Lines)
             }
+        }
+
+        # The screenshots of the main pages, compared inside the pinned Playwright image (ADR 0028).
+        if (-not (Test-Docker)) {
+            Write-Step -Status FAIL -Name $names[4] -Note 'Docker is not running' `
+                -Details @('The screenshots run in the Playwright image. Start Docker Desktop and run again.')
+            return
+        }
+        $screens = Invoke-Logged -Name 'panel-screens' -Directory $panel -Command $npm -Arguments @('run', 'screens')
+        $report = Get-ScreensReport $screens.Lines
+        if ($screens.ExitCode -eq 0) { Write-Step -Status PASS -Name $names[4] -Run $screens -Note $report.Summary }
+        elseif ($report.Details.Count -gt 0) {
+            Write-Step -Status FAIL -Name $names[4] -Run $screens -Note $report.Summary -Details ($report.Details + @(
+                    'pictures: artifacts\check\screens (expected, actual, diff)',
+                    'if the change is intended: npm run screens:update (in web/panel), then review the pictures in git'))
+        }
+        else {
+            Write-Step -Status FAIL -Name $names[4] -Run $screens -Details (Get-Shortened $screens.Lines)
         }
     }
     finally {

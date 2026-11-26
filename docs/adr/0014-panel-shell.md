@@ -74,7 +74,9 @@ decided here.
 
 7. **Not now:** `web/shared` waits for the second app (Phase 10), because a workspace for one
    app is only overhead; Playwright waits for the first real workflow (2.9), because it needs
-   the whole stack, database and SMS log included, in CI.
+   the whole stack, database and SMS log included, in CI. *Changed 1405/09/05 (ADR 0028):*
+   Playwright arrived in task 1.7 for screenshots of the main pages only, with the API answered
+   by sample data in the browser; the flows with the whole stack still wait for 2.9.
 
 ## Consequences
 

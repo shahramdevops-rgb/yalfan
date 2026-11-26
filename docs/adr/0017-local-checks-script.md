@@ -18,7 +18,8 @@ Docker stopped printed 4,277 lines (528 KB, about 130,000 tokens), the same Test
 ## Decision
 
 1. **`scripts/check.ps1` runs the steps of `ci.yml`**: dotnet format, build and test; panel lint,
-   format, build and test. It prints one line per step; the full output of each step goes to
+   format, build and test; and since 1405/09/05 the panel's screenshots (ADR 0028), whose
+   failure prints each page and width with its reason. It prints one line per step; the full output of each step goes to
    `artifacts/check/<step>.log` (ignored by git). As in CI, every step runs even when an earlier
    one failed, and a step is skipped only when what it needs is missing.
 2. **A failed step prints only what is needed to fix it:**

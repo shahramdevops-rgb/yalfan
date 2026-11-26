@@ -439,8 +439,11 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   (`http://localhost:5342`). One line per request; bodies and query strings are never logged
   (ADR 0011).
 - **Testing:** domain unit tests; integration tests against a real PostgreSQL; Vitest for
-  frontend logic; Playwright for the main flows. CI (GitHub Actions, `.github/workflows/ci.yml`)
-  builds and runs every test on each push, on Linux like the production image.
+  frontend logic; Playwright for the main flows (from 2.9), and since 1.7 for screenshots of
+  the panel's main pages at desktop and phone width, run in Playwright's pinned Docker image with
+  the API answered by sample data, one changed pixel failing (ADR 0028). CI (GitHub Actions,
+  `.github/workflows/ci.yml`) builds and runs every test on each push, on Linux like the
+  production image.
   - Format and lint (decided in task 0.9, ADR 0015): the .NET analyzers and code style rules run
     inside the build, so a violation is a build error everywhere; `dotnet format whitespace`,
     ESLint and Prettier are CI steps. CI runs every check even after one fails, so one push
@@ -587,3 +590,4 @@ server in the developer's.
 | 0025 | The contractor and worker screens; the IBAN on screen; no browser cache for the panel API | 1.6.4 (written) |
 | 0026 | The users screen; owner accounts with several login numbers from the configuration; a 10-minute access token | 1.6.5 (written) |
 | 0027 | The change history of a model, a contractor and a worker; an IBAN as set, replaced or removed | 1.6.6 (written) |
+| 0028 | Screenshots of the panel: Playwright in its pinned image, the API answered by sample data | 1.7 (written) |

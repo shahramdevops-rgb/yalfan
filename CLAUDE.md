@@ -98,8 +98,8 @@ works alone; the workshop owner is his brother and is treated as a client.
 
 ## Commands
 Run from the repository root. Keep this section up to date when commands change.
-- Check everything CI checks: `./scripts/check.ps1` (`-Only dotnet` or `-Only panel`). One line
-  per step with the test counts, and for a failure only its errors, grouped; full logs in
+- Check everything CI checks: `./scripts/check.ps1` (`-Only dotnet` or `-Only panel`; the panel
+  includes the screenshots). One line per step with the test counts, and for a failure only its errors, grouped; full logs in
   `artifacts/check/` (ADR 0017). Use it instead of the separate build, test, lint and format
   checks below, so long output stays out of the conversation; read a log only when the summary
   is not enough. It sets up the panel's `subst` drive itself; Docker must be running
@@ -133,6 +133,12 @@ Run from the repository root. Keep this section up to date when commands change.
   `npm run format:check`). Run format and lint before every commit (ADR 0015).
   Vite cannot run from a path containing `#` (ADR 0014): use a `subst` drive until the checkout
   moves
+- Panel screenshots (from `web/panel`; ADR 0028): `npm run screens` compares the main pages at
+  desktop and phone width with the pictures in `screens/__screenshots__`, inside Playwright's
+  pinned Docker image (Docker must be running; `check.ps1` runs it too). A failure leaves the
+  expected, actual and diff pictures in `artifacts/check/screens`. When a page changes on
+  purpose, `npm run screens:update`, look at the new pictures and commit them with the change.
+  A page that calls a new API route needs its answer in `screens/api.ts`
 - Panel API types: generated from `web/panel/openapi/panel.json` before every dev, build and
   test run. When `PanelDocumentTests` fails, it has rewritten that file from the API: review and
   commit it

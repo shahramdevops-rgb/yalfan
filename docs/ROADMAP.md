@@ -1,7 +1,8 @@
 # Yalfan — Roadmap
 
-Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7 (design
-system). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
+Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7b (tokens and
+the simple parts; the design system was split into 1.7 to 1.7d, and 1.7, the screenshots, is
+done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
 GitHub (waits for a push, which closes Phase 0) and the check of 1.6 (waits for the developer,
 who does the operator's work for now).
 
@@ -325,6 +326,32 @@ were accepted as written):
   - The 1.6 screens are moved onto the finished parts.
   *Done when:* every 1.6 screen uses only shared parts; the screenshots exist for both widths;
   a page can be used start to finish with the keyboard alone; `UI.md` and the ADR are written.
+
+  Split on 1405/09/05 into four tasks, accepted by the developer with every proposal as written,
+  because the eight parts above are far more than one session. **The screenshots come first**,
+  not the tokens: moving about 280 raw colours in some forty files onto tokens is blind without
+  them, and with them every unintended change is seen and every intended one is accepted on
+  purpose. Each task's questions are asked when it starts; noted for them: the library (Radix,
+  and what the picker is built on), whether saving a rate also shows a summary first, whether
+  the panel gets component tests (open since 1.6.4), and the first thing printed.
+  - **1.7 Screenshots.** Done 1405/09/06 (ADR 0028); 28 pictures, one changed pixel fails.
+  - **1.7b Tokens and the simple parts.** The tokens by role (surface, line, muted text,
+    danger, warning, success, info, brand) with Tailwind's default colours switched off, so
+    each is changed in one place and a raw colour cannot creep back; a page header, a status
+    badge (colour and text), a link that looks like a button, the form layout; the 1.6 screens
+    moved onto them; `docs/design/UI.md` begun. Found while planning: `ring-brand-200` on the
+    IBAN form names a shade that does not exist, so the ring is drawn in the text colour. Found
+    in 1.7: the model, contractor and worker pages have no `h1`, which the page header gives
+    them. The pictures of 1.7 show every change this task makes: one that should look the same
+    must leave them unchanged.
+  - **1.7c Overlays and the keyboard.** The confirmation dialog, toasts, the searchable picker
+    and the phone drawer on accessible primitives; the data entry rules (Enter to the next
+    field, the first field focused, the last choices remembered, a summary before every money
+    action); a page used start to finish with the keyboard alone, as a test. Found while
+    planning: an IBAN is removed with one click and no question, and the phone drawer neither
+    closes on Escape nor keeps the focus inside it.
+  - **1.7d Data table and print.** The data table (sticky header, totals row, paging, empty
+    state, rows as cards on a phone); the print stylesheet and the A5/A4 layout.
 
 ## Phase 2 — Contractor work and accounts
 
