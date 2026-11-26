@@ -1,5 +1,6 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { t } from '../i18n/fa';
+import { FieldError } from './Form';
 
 interface InlineNameProps {
   value: string;
@@ -26,6 +27,13 @@ interface InlineNameProps {
   numeric?: boolean;
   /** Shown under the field while it is edited, saying what saving will do (a user's new number). */
   hint?: string;
+  /**
+   * The page's `h1`: the name at the top of a record's own page (a model, a contractor), which
+   * has no other title. The button is then read by the name alone, so the page's title is the
+   * name and not «تغییر نام …»; its `title` still says a tap changes it. While the name is being
+   * edited the field takes the heading's place, with its own label.
+   */
+  heading?: boolean;
 }
 
 /**
@@ -46,6 +54,7 @@ export function InlineName({
   display,
   numeric = false,
   hint,
+  heading = false,
 }: InlineNameProps) {
   const [draft, setDraft] = useState<string | null>(null);
   const [error, setError] = useState<string>();
@@ -91,7 +100,7 @@ export function InlineName({
 
   if (draft === null) {
     const empty = value.trim() === '';
-    return (
+    const button = (
       <button
         type="button"
         onClick={() => {
@@ -100,14 +109,16 @@ export function InlineName({
         }}
         title={t('list.renameHint')}
         dir={numeric ? 'ltr' : undefined}
-        aria-label={label ? undefined : empty ? placeholder : t('list.renameButton', { name: value })}
-        className={`-mx-2 min-w-0 rounded-md px-2 py-1 text-start hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-brand-700 ${size} ${
+        aria-label={label || heading ? undefined : empty ? placeholder : t('list.renameButton', { name: value })}
+        className={`-mx-2 min-w-0 rounded-md px-2 py-1 text-start hover:bg-fill focus-visible:outline-2 focus-visible:outline-brand ${size} ${
           multiline ? 'whitespace-pre-line' : 'truncate'
-        } ${empty ? 'text-stone-400' : muted ? 'text-stone-400' : 'text-stone-900'}`}
+        } ${empty ? 'text-faint' : muted ? 'text-faint' : 'text-ink'}`}
       >
         {empty ? placeholder : (display ?? value)}
       </button>
     );
+    // A column, so the button still spans the line as it does without the heading around it.
+    return heading ? <h1 className="flex min-w-0 flex-col">{button}</h1> : button;
   }
 
   const field = {
@@ -125,20 +136,16 @@ export function InlineName({
     maxLength,
     autoFocus: true,
     ...(numeric && { dir: 'ltr', inputMode: 'tel' as const, autoComplete: 'off' }),
-    className: `w-full rounded-lg border bg-white px-3 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 ${size} ${
-      error ? 'border-red-500' : 'border-stone-300'
+    className: `w-full rounded-lg border bg-surface px-3 outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow ${size} ${
+      error ? 'border-danger-line' : 'border-line-strong'
     } ${multiline ? 'min-h-24 max-w-xl py-2' : 'h-10 max-w-sm'}`,
   };
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       {multiline ? <textarea {...field} rows={3} /> : <input {...field} />}
-      {hint && !error && <p className="max-w-sm text-sm text-amber-800">{hint}</p>}
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {hint && !error && <p className="max-w-sm text-sm text-warning">{hint}</p>}
+      {error && <FieldError>{error}</FieldError>}
     </div>
   );
 }

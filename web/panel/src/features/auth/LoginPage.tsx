@@ -1,12 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
+import { SplashScreen } from '../../app/SplashScreen';
 import { fieldCode, type Problem } from '../../shared/api/problem';
 import { digitsOnly, formatCountdown, toPersianDigits } from '../../shared/format/digits';
 import { errorMessage, t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
 import { BagMark } from '../../shared/ui/icons';
 import { TextField } from '../../shared/ui/TextField';
-import { SplashScreen } from '../../app/SplashScreen';
 import { developmentLoginCode, login, requestLoginCode } from './authApi';
 import { useSession } from './useSession';
 
@@ -83,7 +83,10 @@ export function LoginPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center px-4 py-10">
       {import.meta.env.DEV && step.name === 'code' && shownCode && (
-        <div role="status" className="fixed inset-x-0 top-0 z-10 bg-amber-100 px-4 py-3 text-center text-amber-950">
+        <div
+          role="status"
+          className="fixed inset-x-0 top-0 z-10 bg-warning-fill px-4 py-3 text-center text-warning-strong"
+        >
           <p className="text-lg font-bold">
             {t('login.devCode')} <span dir="ltr">{toPersianDigits(shownCode)}</span>
           </p>
@@ -94,12 +97,12 @@ export function LoginPage() {
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <BagMark className="size-14" />
           <div>
-            <p className="text-2xl font-bold text-stone-900">{t('app.name')}</p>
-            <p className="text-sm text-stone-500">{t('app.subtitle')}</p>
+            <p className="text-2xl font-bold text-ink">{t('app.name')}</p>
+            <p className="text-sm text-muted">{t('app.subtitle')}</p>
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
+        <div className="rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-line">
           <h1 className="mb-5 text-lg font-bold">{t('login.title')}</h1>
 
           {step.name === 'mobile' ? (
@@ -129,7 +132,7 @@ export function LoginPage() {
             </form>
           ) : (
             <form onSubmit={(event) => void submitCode(event, step.mobile)} className="flex flex-col gap-5" noValidate>
-              <p className="text-sm leading-6 text-stone-600">
+              <p className="text-sm leading-6 text-body">
                 {t('login.codeSentTo', { mobile: toPersianDigits(step.mobile) })}
               </p>
               <TextField
@@ -178,9 +181,7 @@ function ResendButton({ resendAt, disabled, onResend }: { resendAt: number; disa
 
   const secondsLeft = (resendAt - now) / 1000;
   if (secondsLeft > 0) {
-    return (
-      <span className="text-sm text-stone-500">{t('login.resendIn', { time: formatCountdown(secondsLeft) })}</span>
-    );
+    return <span className="text-sm text-muted">{t('login.resendIn', { time: formatCountdown(secondsLeft) })}</span>;
   }
 
   return (

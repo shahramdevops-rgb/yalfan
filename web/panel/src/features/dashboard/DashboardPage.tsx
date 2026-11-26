@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../shared/api/client';
 import { ProblemError, toProblem } from '../../shared/api/problem';
 import { errorMessage, t } from '../../shared/i18n/fa';
+import { Card } from '../../shared/ui/Card';
+import { PageHeader } from '../../shared/ui/PageHeader';
 
 /** Empty until the modules arrive; it already reads the user through the typed client. */
 export function DashboardPage() {
@@ -18,18 +20,18 @@ export function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">{t('nav.dashboard')}</h1>
+      <PageHeader title={t('nav.dashboard')} />
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-        {me.isPending && <div className="h-6 w-48 animate-pulse rounded bg-stone-200" />}
-        {me.isError && <p className="text-red-700">{errorMessage(toProblem(me.error).code)}</p>}
+      <Card>
+        {me.isPending && <div className="h-6 w-48 animate-pulse rounded bg-fill-strong" />}
+        {me.isError && <p className="text-danger">{errorMessage(toProblem(me.error).code)}</p>}
         {me.data && (
-          <>
+          <div>
             <p className="text-lg font-medium">{t('dashboard.greeting', { name: me.data.fullName })}</p>
-            <p className="mt-2 text-stone-500">{t('dashboard.empty')}</p>
-          </>
+            <p className="mt-2 text-muted">{t('dashboard.empty')}</p>
+          </div>
         )}
-      </section>
+      </Card>
     </div>
   );
 }

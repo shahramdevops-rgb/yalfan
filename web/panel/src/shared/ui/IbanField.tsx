@@ -1,5 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useRef, type ChangeEvent } from 'react';
 import { groupIbanDigits, readIbanInput } from '../format/iban';
+import { FieldError } from './Form';
 
 interface IbanFieldProps {
   label: string;
@@ -73,12 +74,12 @@ export function IbanField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="text-sm font-medium text-label">
         {label}
       </label>
       {/* Left to right, like the number on the card: IR on the left, then the digits. */}
       <div dir="ltr" className="relative sm:max-w-md">
-        <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-lg font-medium text-stone-500">
+        <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-lg font-medium text-muted">
           IR
         </span>
         <input
@@ -93,21 +94,17 @@ export function IbanField({
           disabled={disabled}
           aria-invalid={error ? true : undefined}
           aria-describedby={[hint && !error && hintId, error && errorId].filter(Boolean).join(' ') || undefined}
-          className={`h-12 w-full rounded-lg border bg-white ps-10 pe-3 text-lg tracking-wide text-stone-900 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:opacity-60 ${
-            error ? 'border-red-500' : 'border-stone-300'
+          className={`h-12 w-full rounded-lg border bg-surface ps-10 pe-3 text-lg tracking-wide text-ink outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow disabled:opacity-60 ${
+            error ? 'border-danger-line' : 'border-line-strong'
           }`}
         />
       </div>
       {hint && !error && (
-        <p id={hintId} className="text-sm text-stone-500">
+        <p id={hintId} className="text-sm text-muted">
           {hint}
         </p>
       )}
-      {error && (
-        <p id={errorId} role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={errorId}>{error}</FieldError>}
     </div>
   );
 }

@@ -6,7 +6,7 @@ export function SplashScreen() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4" role="status">
       <BagMark className="size-12 animate-pulse" />
-      <p className="text-sm text-stone-500">{t('app.loading')}</p>
+      <p className="text-sm text-muted">{t('app.loading')}</p>
     </div>
   );
 }

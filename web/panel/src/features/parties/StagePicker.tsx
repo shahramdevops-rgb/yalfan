@@ -24,7 +24,7 @@ interface StagePickerProps {
 export function StagePicker({ stages, ticked, onChange, keepOne = false, disabled = false }: StagePickerProps) {
   const choices = stageChoices(stages, ticked);
   if (choices.length === 0) {
-    return <p className="text-sm text-stone-500">{t('parties.noActiveStages')}</p>;
+    return <p className="text-sm text-muted">{t('parties.noActiveStages')}</p>;
   }
 
   const lastOne = lockedStage(ticked, keepOne);

@@ -2,10 +2,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { toPersianDigits } from '../../shared/format/digits';
 import { t } from '../../shared/i18n/fa';
+import { Card } from '../../shared/ui/Card';
 import { PlusIcon } from '../../shared/ui/icons';
+import { ButtonLink } from '../../shared/ui/Links';
 import { pageCount, useListAddress, usePageWithin } from '../../shared/ui/listAddress';
 import { Pager, SearchField } from '../../shared/ui/ListSearch';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
+import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { productSearchKey, productsApi, type ProductListItem } from './productsApi';
 
 const digits = (value: number) => toPersianDigits(String(value));
@@ -33,30 +37,27 @@ export function ModelsPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">{t('models.title')}</h1>
-        <Link
-          to="/models/new"
-          className="inline-flex h-12 items-center gap-2 rounded-lg bg-brand-700 px-5 font-medium text-white hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
-        >
-          <PlusIcon />
-          {t('models.new')}
-        </Link>
-      </div>
+      <PageHeader
+        title={t('models.title')}
+        actions={
+          <ButtonLink to="/models/new">
+            <PlusIcon />
+            {t('models.new')}
+          </ButtonLink>
+        }
+      />
 
-      <section className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6">
+      <Card gap={4}>
         <SearchField label={t('models.search')} value={list.typed} onChange={list.setTyped} />
 
         {/* A page past the last one is replaced by the last page; until then it is only loading. */}
         {(results.isPending || outOfRange) && <ListSkeleton />}
         {results.isError && <LoadError error={results.error} onRetry={() => void results.refetch()} />}
         {data && !outOfRange && data.items.length === 0 && (
-          <p className="py-6 text-center text-stone-500">
-            {search ? t('models.notFound', { search }) : t('models.empty')}
-          </p>
+          <p className="py-6 text-center text-muted">{search ? t('models.notFound', { search }) : t('models.empty')}</p>
         )}
         {data && !outOfRange && data.items.length > 0 && (
-          <ul className={`divide-y divide-stone-100 ${results.isPlaceholderData ? 'opacity-60' : ''}`}>
+          <ul className={`divide-y divide-line-soft ${results.isPlaceholderData ? 'opacity-60' : ''}`}>
             {data.items.map((item) => (
               <ModelRow key={item.id} item={item} />
             ))}
@@ -72,7 +73,7 @@ export function ModelsPage() {
             onGo={list.goToPage}
           />
         )}
-      </section>
+      </Card>
     </div>
   );
 }
@@ -84,22 +85,16 @@ function ModelRow({ item }: { item: ProductListItem }) {
     <li>
       <Link
         to={`/models/${item.id}`}
-        className="-mx-2 flex items-center gap-4 rounded-lg px-2 py-3 hover:bg-stone-50 focus-visible:outline-2 focus-visible:outline-brand-700"
+        className="-mx-2 flex items-center gap-4 rounded-lg px-2 py-3 hover:bg-subtle focus-visible:outline-2 focus-visible:outline-brand"
       >
-        <span className={`w-14 shrink-0 text-lg font-bold ${item.isActive ? 'text-brand-800' : 'text-stone-400'}`}>
+        <span className={`w-14 shrink-0 text-lg font-bold ${item.isActive ? 'text-brand-strong' : 'text-faint'}`}>
           {digits(item.number)}
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className={`truncate text-base ${item.isActive ? 'text-stone-900' : 'text-stone-400'}`}>
-            {item.name}
-          </span>
-          <span className="truncate text-sm text-stone-500">{details.join(t('models.separator'))}</span>
+          <span className={`truncate text-base ${item.isActive ? 'text-ink' : 'text-faint'}`}>{item.name}</span>
+          <span className="truncate text-sm text-muted">{details.join(t('models.separator'))}</span>
         </span>
-        {!item.isActive && (
-          <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
-            {t('list.inactive')}
-          </span>
-        )}
+        {!item.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
       </Link>
     </li>
   );

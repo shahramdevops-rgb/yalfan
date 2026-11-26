@@ -4,7 +4,8 @@ import { toPersianDigits } from '../../shared/format/digits';
 import { formatIban, ibanDigitCount, ibanLastFour } from '../../shared/format/iban';
 import { t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
-import { Card } from '../../shared/ui/Card';
+import { Card, CardHeader } from '../../shared/ui/Card';
+import { InsetForm } from '../../shared/ui/Form';
 import { IbanField } from '../../shared/ui/IbanField';
 import { useSession } from '../auth/useSession';
 import { partiesApi, type PartyDetails, type PartyKind, type Write } from './partiesApi';
@@ -40,12 +41,7 @@ export function IbanSection({ kind, party, write }: IbanSectionProps) {
 
   return (
     <Card labelledBy={headingId}>
-      <div>
-        <h2 id={headingId} className="text-lg font-bold">
-          {t('iban.title')}
-        </h2>
-        <p className="mt-1 text-sm text-stone-500">{t('iban.hint')}</p>
-      </div>
+      <CardHeader id={headingId} title={t('iban.title')} hint={t('iban.hint')} />
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
@@ -53,19 +49,19 @@ export function IbanSection({ kind, party, write }: IbanSectionProps) {
           onClick={() => setEditing(true)}
           aria-expanded={editing}
           title={masked ? t('iban.change') : t('iban.noneTap')}
-          className="-mx-2 rounded-md px-2 py-1 text-start hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-brand-700"
+          className="-mx-2 rounded-md px-2 py-1 text-start hover:bg-fill focus-visible:outline-2 focus-visible:outline-brand"
         >
           {masked ? (
             <>
-              <span dir="ltr" className="text-lg font-medium tracking-wider text-stone-900">
+              <span dir="ltr" className="text-lg font-medium tracking-wider text-ink">
                 {`•••• ${ibanLastFour(masked)}`}
               </span>
               <span className="sr-only">{t('iban.change')}</span>
             </>
           ) : (
             <span className="flex flex-col">
-              <span className="font-medium text-amber-800">{t('iban.none')}</span>
-              <span className="text-xs text-stone-500">{t('iban.noneTap')}</span>
+              <span className="font-medium text-warning">{t('iban.none')}</span>
+              <span className="text-xs text-muted">{t('iban.noneTap')}</span>
             </span>
           )}
         </button>
@@ -120,20 +116,20 @@ function WholeIban({ kind, partyId }: { kind: PartyKind; partyId: string }) {
         {whole ? t('iban.hide') : t('iban.show')}
       </Button>
       {whole && (
-        <div className="flex w-full flex-col gap-2 rounded-lg bg-stone-50 p-3">
+        <div className="flex w-full flex-col gap-2 rounded-lg bg-subtle p-3">
           <div className="flex flex-wrap items-center gap-3">
-            <span dir="ltr" className="text-lg font-medium tracking-wide text-stone-900 select-all">
+            <span dir="ltr" className="text-lg font-medium tracking-wide text-ink select-all">
               {formatIban(whole)}
             </span>
             <Button variant="secondary" className="h-10" onClick={() => void copy()}>
               {t('iban.copy')}
             </Button>
           </div>
-          <p className="text-xs text-stone-500">{t('iban.wholeNote')}</p>
+          <p className="text-xs text-muted">{t('iban.wholeNote')}</p>
         </div>
       )}
       {message && (
-        <p role="status" className="w-full text-sm text-stone-600">
+        <p role="status" className="w-full text-sm text-body">
           {message}
         </p>
       )}
@@ -178,13 +174,7 @@ function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose:
   }
 
   return (
-    <form
-      aria-labelledby={headingId}
-      onSubmit={save}
-      onKeyDown={onKeyDown}
-      noValidate
-      className="ring-brand-200 flex flex-col gap-4 rounded-xl p-4 ring-1"
-    >
+    <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown}>
       <h3 id={headingId} className="font-bold">
         {hasIban ? t('iban.changeTitle') : t('iban.newTitle')}
       </h3>
@@ -220,6 +210,6 @@ function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose:
           </Button>
         )}
       </div>
-    </form>
+    </InsetForm>
   );
 }

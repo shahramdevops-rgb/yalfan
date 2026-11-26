@@ -5,7 +5,10 @@ import { fieldCode, toProblem } from '../../shared/api/problem';
 import { attempt, refusalMessage } from '../../shared/api/refusal';
 import { t } from '../../shared/i18n/fa';
 import { AddNameForm } from '../../shared/ui/AddNameForm';
+import { Card } from '../../shared/ui/Card';
 import { NameList } from '../../shared/ui/NameList';
+import { Notice } from '../../shared/ui/Notice';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { moveItem } from '../../shared/ui/sortable';
 import { stagesApi, stagesKey, type Stage } from './stagesApi';
@@ -55,19 +58,12 @@ export function StagesPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t('stages.title')}</h1>
-        <p className="mt-1 text-stone-500">{t('stages.hint')}</p>
-      </div>
+      <PageHeader title={t('stages.title')} hint={t('stages.hint')} />
 
-      <section className="flex flex-col gap-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6">
+      <Card gap={6}>
         <AddNameForm label={t('stages.add')} onAdd={(name) => attempt(() => stagesApi.create(name), put, 'name')} />
 
-        {moveError && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
-            {moveError}
-          </p>
-        )}
+        {moveError && <Notice tone="danger">{moveError}</Notice>}
         {list.isPending && <ListSkeleton rows={3} />}
         {list.isError && <LoadError error={list.error} onRetry={() => void list.refetch()} />}
         {list.data && (
@@ -80,7 +76,7 @@ export function StagesPage() {
             emptyText={t('stages.empty')}
           />
         )}
-      </section>
+      </Card>
     </div>
   );
 }

@@ -1,11 +1,15 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router';
 import { fieldCode, toProblem } from '../../shared/api/problem';
 import { refusalMessage } from '../../shared/api/refusal';
 import { toPersianDigits } from '../../shared/format/digits';
 import { errorMessage, t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
+import { FormCard } from '../../shared/ui/Card';
+import { FormActions, FormFields, FormSection } from '../../shared/ui/Form';
+import { Notice } from '../../shared/ui/Notice';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { Switch } from '../../shared/ui/Switch';
 import { TextField } from '../../shared/ui/TextField';
@@ -30,7 +34,6 @@ interface Errors {
 export function NewModelPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const sizesId = useId();
   const fabrics = useQuery({ queryKey: catalogListKey('fabrics'), queryFn: catalogLists.fabrics.list });
   const colours = useQuery({ queryKey: catalogListKey('colours'), queryFn: catalogLists.colours.list });
   const categories = useQuery({ queryKey: catalogListKey('categories'), queryFn: catalogLists.categories.list });
@@ -83,19 +86,10 @@ export function NewModelPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div>
-        <Link to="/models" className="text-sm text-brand-700 hover:underline">
-          {t('models.back')}
-        </Link>
-        <h1 className="mt-1 text-2xl font-bold">{t('newModel.title')}</h1>
-      </div>
+      <PageHeader title={t('newModel.title')} back={{ to: '/models', label: t('models.back') }} />
 
-      <form
-        onSubmit={(event) => void submit(event)}
-        noValidate
-        className="flex flex-col gap-8 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6"
-      >
-        <div className="flex flex-col gap-5 sm:max-w-md">
+      <FormCard onSubmit={(event) => void submit(event)} gap={8}>
+        <FormFields>
           <TextField
             label={t('newModel.name')}
             value={name}
@@ -108,46 +102,38 @@ export function NewModelPage() {
           {categories.data && (
             <CategorySelect categories={categories.data} value={categoryId} onChange={setCategoryId} />
           )}
-        </div>
+        </FormFields>
 
-        <section className="flex flex-col gap-3" aria-labelledby={sizesId}>
-          <h2 id={sizesId} className="text-lg font-bold">
-            {t('newModel.sizes')}
-          </h2>
+        <FormSection title={t('newModel.sizes')}>
           <div className="flex items-center gap-3">
             <Switch checked={hasSizes} onChange={setHasSizes} label={t('newModel.hasSizes')} />
-            <span className="text-base text-stone-800" aria-hidden>
+            <span className="text-base text-ink-soft" aria-hidden>
               {t('newModel.hasSizes')}
             </span>
           </div>
-          <p className="text-sm text-stone-500">{hasSizes ? t('newModel.sizesHint') : t('newModel.noSizesHint')}</p>
+          <p className="text-sm text-muted">{hasSizes ? t('newModel.sizesHint') : t('newModel.noSizesHint')}</p>
           {hasSizes && <SizeNamesField sizes={sizes} onChange={setSizes} error={errors.sizes} />}
-        </section>
+        </FormSection>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-bold">{t('newModel.bags')}</h2>
-          <p className="text-sm text-stone-500">{t('newModel.bagsHint')}</p>
+        <FormSection title={t('newModel.bags')}>
+          <p className="text-sm text-muted">{t('newModel.bagsHint')}</p>
           {failed && <LoadError error={failed.error} onRetry={() => lists.forEach((list) => void list.refetch())} />}
           {(fabrics.isPending || colours.isPending) && !failed && <ListSkeleton rows={2} />}
           {fabrics.data && colours.data && (
             <BagPicker fabrics={fabrics.data} colours={colours.data} picks={picks} onChange={setPicks} />
           )}
-        </section>
+        </FormSection>
 
-        <div className="flex flex-col gap-3 border-t border-stone-100 pt-5">
-          <p className="text-sm text-stone-600" aria-live="polite">
+        <FormActions>
+          <p className="text-sm text-body" aria-live="polite">
             {count === 0 ? t('newModel.noBagsYet') : t('newModel.bagCount', { count: toPersianDigits(String(count)) })}
           </p>
-          {errors.form && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
-              {errors.form}
-            </p>
-          )}
+          {errors.form && <Notice tone="danger">{errors.form}</Notice>}
           <Button type="submit" busy={saving} className="self-start">
             {t('newModel.save')}
           </Button>
-        </div>
-      </form>
+        </FormActions>
+      </FormCard>
     </div>
   );
 }

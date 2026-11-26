@@ -1,6 +1,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import { t } from '../i18n/fa';
 import { Button } from './Button';
+import { FieldError } from './Form';
 
 interface AddNameFormProps {
   /** The field's label, such as «پارچهٔ تازه». */
@@ -49,11 +50,11 @@ export function AddNameForm({ label, hint, onAdd, maxLength = 100 }: AddNameForm
   return (
     <form onSubmit={(event) => void submit(event)} noValidate className="flex flex-col gap-1.5">
       <div className="flex items-center gap-3">
-        <label htmlFor={id} className="text-sm font-medium text-stone-700">
+        <label htmlFor={id} className="text-sm font-medium text-label">
           {label}
         </label>
         {sending > 0 && (
-          <span className="flex items-center gap-1.5 text-xs text-stone-500" role="status">
+          <span className="flex items-center gap-1.5 text-xs text-muted" role="status">
             <span
               className="size-3 animate-spin rounded-full border-2 border-current border-e-transparent"
               aria-hidden
@@ -71,8 +72,8 @@ export function AddNameForm({ label, hint, onAdd, maxLength = 100 }: AddNameForm
           aria-describedby={describedBy}
           maxLength={maxLength}
           autoComplete="off"
-          className={`h-12 min-w-0 flex-1 rounded-lg border bg-white px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 sm:max-w-sm ${
-            error ? 'border-red-500' : 'border-stone-300'
+          className={`h-12 min-w-0 flex-1 rounded-lg border bg-surface px-3 text-base outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow sm:max-w-sm ${
+            error ? 'border-danger-line' : 'border-line-strong'
           }`}
         />
         <Button type="submit" disabled={name.trim() === ''}>
@@ -80,15 +81,11 @@ export function AddNameForm({ label, hint, onAdd, maxLength = 100 }: AddNameForm
         </Button>
       </div>
       {hint && (
-        <p id={`${id}-hint`} className="text-sm text-stone-500">
+        <p id={`${id}-hint`} className="text-sm text-muted">
           {hint}
         </p>
       )}
-      {error && (
-        <p id={`${id}-error`} role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </form>
   );
 }

@@ -20,11 +20,11 @@ export function Switch({ checked, onChange, label, disabled = false }: SwitchPro
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:cursor-not-allowed disabled:opacity-60 ${
-        checked ? 'justify-end bg-brand-700' : 'justify-start bg-stone-300'
+      className={`inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60 ${
+        checked ? 'justify-end bg-brand' : 'justify-start bg-fill-off'
       }`}
     >
-      <span className="size-6 rounded-full bg-white shadow" aria-hidden />
+      <span className="size-6 rounded-full bg-surface shadow" aria-hidden />
     </button>
   );
 }

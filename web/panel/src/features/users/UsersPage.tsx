@@ -1,18 +1,22 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
 import { NotFoundPage } from '../../app/NotFoundPage';
+import { upsert } from '../../shared/api/listCache';
 import { toProblem } from '../../shared/api/problem';
 import { attempt } from '../../shared/api/refusal';
-import { upsert } from '../../shared/api/listCache';
 import { inTurn } from '../../shared/api/serialWrites';
 import { toPersianDigits } from '../../shared/format/digits';
 import { formatMobile } from '../../shared/format/mobile';
 import { errorMessage, t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
-import { Card } from '../../shared/ui/Card';
+import { Card, CardHeader, FormCard } from '../../shared/ui/Card';
 import { Chip } from '../../shared/ui/Chip';
+import { Field, FieldError, FormActions, FormFields } from '../../shared/ui/Form';
 import { InlineName } from '../../shared/ui/InlineName';
+import { Notice } from '../../shared/ui/Notice';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
+import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { Switch } from '../../shared/ui/Switch';
 import { TextField } from '../../shared/ui/TextField';
 import { logout } from '../auth/authApi';
@@ -62,10 +66,7 @@ function Users({ currentUserId }: { currentUserId: string }) {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t('users.title')}</h1>
-        <p className="mt-1 text-stone-500">{t('users.hint')}</p>
-      </div>
+      <PageHeader title={t('users.title')} hint={t('users.hint')} />
 
       {users.isPending && <ListSkeleton rows={4} />}
       {users.isError && <LoadError error={users.error} onRetry={() => void users.refetch()} />}
@@ -124,12 +125,12 @@ function UserCard({ user, isCurrentUser, save, endsOwnSessions, onOwnSessionsEnd
             maxLength={nameMaxLength}
             onSave={(fullName) => save(() => usersApi.rename(user.id, fullName), 'fullName')}
           />
-          {isCurrentUser && <Badge>{t('users.you')}</Badge>}
-          {!user.isActive && <Badge>{t('list.inactive')}</Badge>}
+          {isCurrentUser && <StatusBadge>{t('users.you')}</StatusBadge>}
+          {!user.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
         </div>
         {!user.isOwnerAccount && (
           <div className="flex shrink-0 flex-col items-center gap-1 pt-1">
-            <span className="text-xs text-stone-500">{t('list.columnActive')}</span>
+            <span className="text-xs text-muted">{t('list.columnActive')}</span>
             <Switch
               checked={user.isActive}
               onChange={(isActive) => void run(() => usersApi.setActive(user.id, isActive))}
@@ -140,15 +141,13 @@ function UserCard({ user, isCurrentUser, save, endsOwnSessions, onOwnSessionsEnd
         )}
       </div>
 
-      {!user.isActive && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{t('users.inactiveNote')}</p>
-      )}
+      {!user.isActive && <Notice tone="warning">{t('users.inactiveNote')}</Notice>}
 
       <Field label={t('users.role')}>
         {user.isOwnerAccount ? (
           <>
-            <p className="text-base text-stone-900">{t('role.owner')}</p>
-            <p className="text-sm text-stone-500">{t('users.ownerNote')}</p>
+            <p className="text-base text-ink">{t('role.owner')}</p>
+            <p className="text-sm text-muted">{t('users.ownerNote')}</p>
           </>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -172,7 +171,7 @@ function UserCard({ user, isCurrentUser, save, endsOwnSessions, onOwnSessionsEnd
       {user.isOwnerAccount ? (
         // The hint only where a number can be switched off: an account with one number has none.
         <Field label={t('users.numbers')} hint={user.loginNumbers.length > 1 ? t('users.numbersHint') : undefined}>
-          <ul className="divide-y divide-stone-100">
+          <ul className="divide-y divide-line-soft">
             {user.loginNumbers.map((number) => (
               <NumberRow
                 key={number.id}
@@ -202,11 +201,7 @@ function UserCard({ user, isCurrentUser, save, endsOwnSessions, onOwnSessionsEnd
         </Field>
       )}
 
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError>{error}</FieldError>}
     </Card>
   );
 }
@@ -224,13 +219,13 @@ function NumberRow({ number, lock, disabled, onChange }: NumberRowProps) {
     <li className="flex min-h-12 items-center gap-3 py-1.5">
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2">
-          <span dir="ltr" className={`text-base ${number.isActive ? 'text-stone-900' : 'text-stone-400'}`}>
+          <span dir="ltr" className={`text-base ${number.isActive ? 'text-ink' : 'text-faint'}`}>
             {shown}
           </span>
-          {!number.isActive && <Badge>{t('users.numberOff')}</Badge>}
+          {!number.isActive && <StatusBadge>{t('users.numberOff')}</StatusBadge>}
         </div>
         {lock && (
-          <span className="text-xs text-stone-500">{t(lock === 'last' ? 'users.lastNumber' : 'users.ownNumber')}</span>
+          <span className="text-xs text-muted">{t(lock === 'last' ? 'users.lastNumber' : 'users.ownNumber')}</span>
         )}
       </div>
       <Switch
@@ -257,6 +252,7 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
   const [errors, setErrors] = useState<Errors>({});
   const [saving, setSaving] = useState(false);
   const [added, setAdded] = useState<string>();
+  const titleId = useId();
 
   function check(): Errors {
     const found: Errors = {};
@@ -301,17 +297,10 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
   const clear = (field: UserField) => setErrors((before) => ({ ...before, [field]: undefined }));
 
   return (
-    <form
-      onSubmit={(event) => void submit(event)}
-      noValidate
-      className="flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6"
-    >
-      <div>
-        <h2 className="text-lg font-bold">{t('users.new')}</h2>
-        <p className="mt-1 text-sm text-stone-500">{t('users.newHint')}</p>
-      </div>
+    <FormCard onSubmit={(event) => void submit(event)} labelledBy={titleId}>
+      <CardHeader id={titleId} title={t('users.new')} hint={t('users.newHint')} />
 
-      <div className="flex flex-col gap-5 sm:max-w-md">
+      <FormFields>
         <TextField
           label={t('users.fullName')}
           value={fullName}
@@ -351,44 +340,21 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
               />
             ))}
           </div>
-          {errors.role && (
-            <p role="alert" className="text-sm text-red-700">
-              {errors.role}
-            </p>
-          )}
+          {errors.role && <FieldError>{errors.role}</FieldError>}
         </Field>
-      </div>
+      </FormFields>
 
-      {errors.form && (
-        <p role="alert" className="text-sm text-red-700">
-          {errors.form}
-        </p>
-      )}
-      {added && (
-        <p role="status" className="text-sm text-green-800">
-          {added}
-        </p>
-      )}
-
-      <div>
-        <Button type="submit" busy={saving}>
+      <FormActions>
+        {errors.form && <Notice tone="danger">{errors.form}</Notice>}
+        {added && (
+          <p role="status" className="text-sm text-success">
+            {added}
+          </p>
+        )}
+        <Button type="submit" busy={saving} className="self-start">
           {t('users.add')}
         </Button>
-      </div>
-    </form>
+      </FormActions>
+    </FormCard>
   );
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-sm font-medium text-stone-700">{label}</p>
-      {hint && <p className="-mt-1 text-sm text-stone-500">{hint}</p>}
-      {children}
-    </div>
-  );
-}
-
-function Badge({ children }: { children: ReactNode }) {
-  return <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">{children}</span>;
 }

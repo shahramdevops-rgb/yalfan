@@ -21,7 +21,7 @@ export function CategorySelect({ categories, value, onChange, disabled = false }
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="text-sm font-medium text-label">
         {t('model.category')}
       </label>
       <select
@@ -29,7 +29,7 @@ export function CategorySelect({ categories, value, onChange, disabled = false }
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value || null)}
         disabled={disabled}
-        className="h-12 rounded-lg border border-stone-300 bg-white px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:opacity-60 sm:max-w-xs"
+        className="h-12 rounded-lg border border-line-strong bg-surface px-3 text-base outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow disabled:opacity-60 sm:max-w-xs"
       >
         <option value="">{t('model.noCategory')}</option>
         {shown.map((category) => (

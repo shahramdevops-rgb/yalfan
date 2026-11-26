@@ -15,10 +15,10 @@ interface MoneyProps {
 export function Money({ amount, large = false, muted = false }: MoneyProps) {
   return (
     <span className="flex flex-col">
-      <span className={`${large ? 'text-lg font-bold' : 'font-medium'} ${muted ? 'text-stone-400' : 'text-stone-900'}`}>
+      <span className={`${large ? 'text-lg font-bold' : 'font-medium'} ${muted ? 'text-faint' : 'text-ink'}`}>
         {formatRial(amount)}
       </span>
-      <span className={`text-xs ${muted ? 'text-stone-400' : 'text-stone-500'}`}>{tomanLine(amount)}</span>
+      <span className={`text-xs ${muted ? 'text-faint' : 'text-muted'}`}>{tomanLine(amount)}</span>
     </span>
   );
 }

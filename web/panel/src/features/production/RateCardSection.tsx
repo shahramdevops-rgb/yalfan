@@ -7,10 +7,13 @@ import { toJalali } from '../../shared/format/jalali';
 import { t } from '../../shared/i18n/fa';
 import { AmountField } from '../../shared/ui/AmountField';
 import { Button } from '../../shared/ui/Button';
-import { Card } from '../../shared/ui/Card';
+import { Card, CardHeader } from '../../shared/ui/Card';
+import { InsetForm } from '../../shared/ui/Form';
 import { JalaliDateField } from '../../shared/ui/JalaliDateField';
 import { Money } from '../../shared/ui/Money';
+import { Notice } from '../../shared/ui/Notice';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
+import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { correctedBy, entriesOf, entryState, inForceOn, upcomingRate, type EntryState } from './rates';
 import { rateCardKey, rateHistoryKey, ratesApi, ratesKey, type RateEntry, type StageRate } from './ratesApi';
 
@@ -24,12 +27,12 @@ interface Editing {
 const yearsBack = 10;
 const yearsAhead = 1;
 
-const stateStyle: Record<EntryState, string> = {
-  current: 'bg-brand-50 text-brand-800',
-  future: 'bg-amber-50 text-amber-900',
-  past: 'bg-stone-100 text-stone-600',
-  replaced: 'bg-stone-100 text-stone-500',
-};
+const stateTone = {
+  current: 'brand',
+  future: 'warning',
+  past: 'neutral',
+  replaced: 'muted',
+} as const satisfies Record<EntryState, string>;
 
 /**
  * A model's piece rates (ADR 0021): every active stage in the order of the work with the rate in
@@ -58,16 +61,9 @@ export function RateCardSection({ productId, productIsActive }: { productId: str
 
   return (
     <Card labelledBy={headingId}>
-      <div>
-        <h2 id={headingId} className="text-lg font-bold">
-          {t('rates.title')}
-        </h2>
-        <p className="mt-1 text-sm text-stone-500">{t('rates.hint')}</p>
-      </div>
+      <CardHeader id={headingId} title={t('rates.title')} hint={t('rates.hint')} />
 
-      {!productIsActive && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{t('rates.inactiveNoAdd')}</p>
-      )}
+      {!productIsActive && <Notice tone="warning">{t('rates.inactiveNoAdd')}</Notice>}
 
       {(card.isPending || history.isPending) && !card.isError && !history.isError && <ListSkeleton rows={3} />}
       {(card.isError || history.isError) && (
@@ -81,11 +77,11 @@ export function RateCardSection({ productId, productIsActive }: { productId: str
       )}
 
       {card.data && history.data && card.data.stages.length === 0 && (
-        <p className="text-stone-500">{t('rates.noStages')}</p>
+        <p className="text-muted">{t('rates.noStages')}</p>
       )}
 
       {card.data && history.data && card.data.stages.length > 0 && (
-        <ul className="divide-y divide-stone-100">
+        <ul className="divide-y divide-line-soft">
           {card.data.stages.map((rate) => (
             <StageRow
               key={rate.stage.id}
@@ -142,26 +138,26 @@ function StageRow({
     rate.amount != null && rate.startsOn != null ? (
       <span className="flex flex-col gap-0.5">
         <Money amount={rate.amount} large />
-        <span className="text-sm text-stone-500">{t('rates.since', { date: formatDay(rate.startsOn) })}</span>
+        <span className="text-sm text-muted">{t('rates.since', { date: formatDay(rate.startsOn) })}</span>
       </span>
     ) : (
       <span className="flex flex-col">
-        <span className="font-medium text-amber-800">{t('rates.none')}</span>
-        {canAdd && <span className="text-xs text-stone-500">{t('rates.noneTap')}</span>}
+        <span className="font-medium text-warning">{t('rates.none')}</span>
+        {canAdd && <span className="text-xs text-muted">{t('rates.noneTap')}</span>}
       </span>
     );
 
   return (
     <li className="flex flex-col gap-3 py-4">
       <div className="flex gap-4">
-        <p className={`w-24 shrink-0 pt-1 font-bold sm:w-32 ${stage.isActive ? '' : 'text-stone-400'}`}>{stage.name}</p>
+        <p className={`w-24 shrink-0 pt-1 font-bold sm:w-32 ${stage.isActive ? '' : 'text-faint'}`}>{stage.name}</p>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
           {canAdd ? (
             <button
               type="button"
               onClick={() => onEdit()}
               title={t('rates.change', { stage: stage.name })}
-              className="-mx-2 rounded-md px-2 py-1 text-start hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-brand-700"
+              className="-mx-2 rounded-md px-2 py-1 text-start hover:bg-fill focus-visible:outline-2 focus-visible:outline-brand"
             >
               {current}
               <span className="sr-only">{t('rates.change', { stage: stage.name })}</span>
@@ -171,10 +167,12 @@ function StageRow({
           )}
 
           {upcoming && (
-            <div className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              <span className="shrink-0 pt-0.5">{t('rates.upcoming', { date: formatDay(upcoming.startsOn) })}</span>
-              <Money amount={upcoming.amount} />
-            </div>
+            <Notice tone="warning">
+              <span className="flex items-start gap-2">
+                <span className="shrink-0 pt-0.5">{t('rates.upcoming', { date: formatDay(upcoming.startsOn) })}</span>
+                <Money amount={upcoming.amount} />
+              </span>
+            </Notice>
           )}
 
           {entries.length > 0 && (
@@ -183,7 +181,7 @@ function StageRow({
               aria-expanded={historyOpen}
               aria-controls={historyId}
               onClick={() => onToggleHistory()}
-              className="text-sm text-brand-700 hover:underline"
+              className="text-sm text-brand hover:underline"
             >
               {t('rates.history', { count: toPersianDigits(String(entries.length)) })}
             </button>
@@ -192,7 +190,7 @@ function StageRow({
       </div>
 
       {historyOpen && entries.length > 0 && (
-        <ol id={historyId} className="flex flex-col divide-y divide-stone-200 rounded-lg bg-stone-50 px-3">
+        <ol id={historyId} className="flex flex-col divide-y divide-line rounded-lg bg-subtle px-3">
           {entries.map((entry) => (
             <HistoryRow
               key={entry.id}
@@ -231,7 +229,7 @@ function HistoryRow({ entry, state, onCorrect }: { entry: RateEntry; state: Entr
           type="button"
           onClick={onCorrect}
           title={t('rates.correct')}
-          className="-mx-2 rounded-md px-2 py-1 text-start hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-brand-700"
+          className="-mx-2 rounded-md px-2 py-1 text-start hover:bg-fill focus-visible:outline-2 focus-visible:outline-brand"
         >
           {amount}
           <span className="sr-only">{t('rates.correct')}</span>
@@ -239,10 +237,10 @@ function HistoryRow({ entry, state, onCorrect }: { entry: RateEntry; state: Entr
       ) : (
         <div className="py-1">{amount}</div>
       )}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-600">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-body">
         <span>{t('rates.since', { date: formatDay(entry.startsOn) })}</span>
-        <span className={`rounded-full px-2 py-0.5 text-xs ${stateStyle[state]}`}>{t(`rates.state.${state}`)}</span>
-        <span className="text-xs text-stone-500">{t('rates.enteredOn', { date: formatDate(entry.enteredAt) })}</span>
+        <StatusBadge tone={stateTone[state]}>{t(`rates.state.${state}`)}</StatusBadge>
+        <span className="text-xs text-muted">{t('rates.enteredOn', { date: formatDate(entry.enteredAt) })}</span>
       </div>
     </li>
   );
@@ -330,19 +328,13 @@ function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose,
   }
 
   return (
-    <form
-      aria-labelledby={headingId}
-      onSubmit={(event) => void save(event)}
-      onKeyDown={onKeyDown}
-      noValidate
-      className="ring-brand-200 flex flex-col gap-4 rounded-xl p-4 ring-1"
-    >
+    <InsetForm labelledBy={headingId} onSubmit={(event) => void save(event)} onKeyDown={onKeyDown}>
       <h3 id={headingId} className="font-bold">
         {t(corrected ? 'rates.form.correctTitle' : 'rates.form.title', { stage: rate.stage.name })}
       </h3>
 
       {reference && (
-        <div className="flex items-start gap-2 text-sm text-stone-600">
+        <div className="flex items-start gap-2 text-sm text-body">
           <span className="shrink-0 pt-0.5">{reference.label}</span>
           <Money amount={reference.amount} />
         </div>
@@ -377,6 +369,6 @@ function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose,
           {t('rates.form.cancel')}
         </Button>
       </div>
-    </form>
+    </InsetForm>
   );
 }

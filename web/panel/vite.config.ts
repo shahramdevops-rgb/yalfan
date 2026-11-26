@@ -18,7 +18,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'checks/**/*.test.ts'],
     // Far from Tehran on purpose: a formatter that leaned on the machine's time zone instead
     // of Asia/Tehran fails here (ADR 0005).
     env: { TZ: 'America/Los_Angeles' },

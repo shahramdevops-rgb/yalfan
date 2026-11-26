@@ -46,9 +46,21 @@ export function LogoutIcon({ className = 'size-5' }: { className?: string }) {
 export function BagMark({ className = 'size-9' }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className={className} aria-hidden>
-      <rect width="32" height="32" rx="8" className="fill-brand-700" />
-      <path d="M9 11h14l-1.5 13h-11z" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinejoin="round" />
-      <path d="M12.5 11a3.5 3.5 0 0 1 7 0" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+      <rect width="32" height="32" rx="8" className="fill-brand" />
+      <path
+        d="M9 11h14l-1.5 13h-11z"
+        fill="none"
+        className="stroke-on-brand"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12.5 11a3.5 3.5 0 0 1 7 0"
+        fill="none"
+        className="stroke-on-brand"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

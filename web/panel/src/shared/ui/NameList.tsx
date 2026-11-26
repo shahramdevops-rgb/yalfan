@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { t } from '../i18n/fa';
+import { FieldError } from './Form';
 import { InlineName } from './InlineName';
 import { SortableList } from './SortableList';
+import { StatusBadge } from './StatusBadge';
 import { Switch } from './Switch';
 
 /** A row of a simple list of names: a fabric, a colour, a category, a stage. */
@@ -31,14 +33,14 @@ interface NameListProps {
  */
 export function NameList({ items, onRename, onSetActive, onMove, moving = false, emptyText }: NameListProps) {
   if (items.length === 0) {
-    return <p className="py-6 text-center text-stone-500">{emptyText}</p>;
+    return <p className="py-6 text-center text-muted">{emptyText}</p>;
   }
 
   const row = (item: NamedItem) => <Row item={item} onRename={onRename} onSetActive={onSetActive} />;
 
   return (
     <div>
-      <div className="flex items-center justify-between border-b border-stone-200 pb-2 text-sm text-stone-500">
+      <div className="flex items-center justify-between border-b border-line pb-2 text-sm text-muted">
         <span className={onMove ? 'ps-11' : ''}>{t('list.columnName')}</span>
         {onSetActive && <span>{t('list.columnActive')}</span>}
       </div>
@@ -52,7 +54,7 @@ export function NameList({ items, onRename, onSetActive, onMove, moving = false,
           renderItem={row}
         />
       ) : (
-        <ul className="divide-y divide-stone-100">
+        <ul className="divide-y divide-line-soft">
           {items.map((item) => (
             <li key={item.id} className="flex items-center gap-2 py-2">
               {row(item)}
@@ -91,11 +93,7 @@ function Row({
       <div className="flex min-h-10 items-center gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <InlineName value={item.name} onSave={(name) => onRename(item.id, name)} muted={!item.isActive} />
-          {!item.isActive && (
-            <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
-              {t('list.inactive')}
-            </span>
-          )}
+          {!item.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
         </div>
         {onSetActive && (
           <Switch
@@ -106,11 +104,7 @@ function Row({
           />
         )}
       </div>
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError>{error}</FieldError>}
     </div>
   );
 }

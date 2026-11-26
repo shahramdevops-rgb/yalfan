@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useId } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { NotFoundPage } from '../../app/NotFoundPage';
 import { toProblem } from '../../shared/api/problem';
 import { formatDate, formatTime } from '../../shared/format/dates';
@@ -9,6 +9,7 @@ import { t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
 import { Card } from '../../shared/ui/Card';
 import { Money } from '../../shared/ui/Money';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { useSession } from '../auth/useSession';
 import { productKey, productsApi, type ProductDetails } from '../catalog/productsApi';
@@ -45,16 +46,12 @@ function OwnerHistory({ kind }: { kind: HistoryKind }) {
     getNextPageParam: (page) => page.before ?? undefined,
   });
 
-  const back = (
-    <Link to={`/${kind}/${id}`} className="self-start text-sm text-brand-700 hover:underline">
-      {t(`history.back.${kind}`)}
-    </Link>
-  );
+  const back = { to: `/${kind}/${id}`, label: t(`history.back.${kind}`) };
 
   if (history.isPending) {
     return (
       <div className="flex max-w-3xl flex-col gap-4">
-        {back}
+        <PageHeader back={back} />
         <ListSkeleton rows={4} />
       </div>
     );
@@ -64,9 +61,9 @@ function OwnerHistory({ kind }: { kind: HistoryKind }) {
     const missing = missingCodes.includes(toProblem(history.error).code ?? '');
     return (
       <div className="flex max-w-3xl flex-col gap-4">
-        {back}
+        <PageHeader back={back} />
         {missing ? (
-          <p className="text-stone-600">{t(kind === 'models' ? 'model.notFound' : `parties.${kind}.missing`)}</p>
+          <p className="text-body">{t(kind === 'models' ? 'model.notFound' : `parties.${kind}.missing`)}</p>
         ) : (
           <LoadError error={history.error} onRetry={() => void history.refetch()} />
         )}
@@ -78,16 +75,15 @@ function OwnerHistory({ kind }: { kind: HistoryKind }) {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      {back}
-      <div className="flex flex-col gap-1">
-        <h1 id={headingId} className="text-xl font-bold text-stone-900">
-          {title ? t('history.titleOf', { name: title }) : t('history.title')}
-        </h1>
-        <p className="text-sm text-stone-500">{t('history.hint')}</p>
-      </div>
+      <PageHeader
+        back={back}
+        title={title ? t('history.titleOf', { name: title }) : t('history.title')}
+        titleId={headingId}
+        hint={t('history.hint')}
+      />
 
       {saves.length === 0 ? (
-        <p className="text-stone-600">{t('history.empty')}</p>
+        <p className="text-body">{t('history.empty')}</p>
       ) : (
         <ol aria-labelledby={headingId} className="flex flex-col gap-4">
           {saves.map((save, index) => (
@@ -130,9 +126,9 @@ function useRecordTitle(kind: HistoryKind, id: string): string | null {
 function SaveCard({ save }: { save: HistorySave }) {
   return (
     <Card>
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-muted">
         {/* Isolated, so a name in Latin letters does not pull the date around it. */}
-        <bdi className="font-medium text-stone-800">{save.by ?? t('history.system')}</bdi>
+        <bdi className="font-medium text-ink-soft">{save.by ?? t('history.system')}</bdi>
         {' · '}
         {t('history.when', { date: formatDate(save.at), time: formatTime(save.at) })}
       </p>
@@ -149,7 +145,7 @@ function SaveCard({ save }: { save: HistorySave }) {
 
 function Line({ line }: { line: HistoryLine }) {
   const details = line.details && line.details.length > 0 && (
-    <ul className="mt-1 flex list-disc flex-col gap-0.5 ps-5 text-sm text-stone-600">
+    <ul className="mt-1 flex list-disc flex-col gap-0.5 ps-5 text-sm text-body">
       {line.details.map((detail, index) => (
         <li key={index}>{detail}</li>
       ))}
@@ -159,7 +155,7 @@ function Line({ line }: { line: HistoryLine }) {
   if (line.folded) {
     return (
       <details>
-        <summary className="cursor-pointer text-stone-900">{line.text}</summary>
+        <summary className="cursor-pointer text-ink">{line.text}</summary>
         {details}
       </details>
     );
@@ -167,7 +163,7 @@ function Line({ line }: { line: HistoryLine }) {
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-stone-900">{line.text}</p>
+      <p className="text-ink">{line.text}</p>
       {line.amount && <Money amount={line.amount as `${number}`} />}
       {details}
     </div>

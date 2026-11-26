@@ -1,5 +1,5 @@
-import { Link } from 'react-router';
 import { t } from '../../shared/i18n/fa';
+import { TextLink } from '../../shared/ui/Links';
 import { useSession } from '../auth/useSession';
 import type { HistoryKind } from './historyApi';
 
@@ -13,9 +13,5 @@ export function HistoryLink({ kind, id }: { kind: HistoryKind; id: string }) {
     return null;
   }
 
-  return (
-    <Link to={`/${kind}/${id}/history`} className="text-sm text-brand-700 hover:underline">
-      {t('history.link')}
-    </Link>
-  );
+  return <TextLink to={`/${kind}/${id}/history`}>{t('history.link')}</TextLink>;
 }

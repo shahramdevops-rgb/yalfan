@@ -47,7 +47,7 @@ export function AppLayout() {
 
   return (
     <div className="min-h-dvh lg:flex">
-      <aside className="hidden w-64 shrink-0 border-e border-stone-200 bg-white lg:block">
+      <aside className="hidden w-64 shrink-0 border-e border-line bg-surface lg:block">
         <Sidebar />
       </aside>
 
@@ -55,14 +55,14 @@ export function AppLayout() {
         <div className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-stone-900/40"
+            className="absolute inset-0 bg-ink/40"
             aria-label={t('nav.closeMenu')}
             onClick={closeMenu}
           />
-          <aside className="absolute inset-y-0 start-0 w-72 max-w-[85%] bg-white shadow-xl">
+          <aside className="absolute inset-y-0 start-0 w-72 max-w-[85%] bg-surface shadow-xl">
             <button
               type="button"
-              className="absolute end-3 top-4 rounded-lg p-2 text-stone-500 hover:bg-stone-100"
+              className="absolute end-3 top-4 rounded-lg p-2 text-muted hover:bg-fill"
               aria-label={t('nav.closeMenu')}
               onClick={closeMenu}
             >
@@ -94,7 +94,7 @@ function Sidebar() {
         <BagMark />
         <div>
           <p className="leading-tight font-bold">{t('app.name')}</p>
-          <p className="text-xs text-stone-500">{t('app.subtitle')}</p>
+          <p className="text-xs text-muted">{t('app.subtitle')}</p>
         </div>
       </div>
       <ul className="flex flex-col gap-1">
@@ -106,7 +106,7 @@ function Sidebar() {
               end={to === '/'}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2.5 text-base transition-colors ${
-                  isActive ? 'bg-brand-50 font-medium text-brand-800' : 'text-stone-700 hover:bg-stone-100'
+                  isActive ? 'bg-brand-soft font-medium text-brand-strong' : 'text-label hover:bg-fill'
                 }`
               }
             >
@@ -134,32 +134,30 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
   }
 
   return (
-    <header className="flex h-16 items-center gap-3 border-b border-stone-200 bg-white px-4 lg:px-8">
+    <header className="flex h-16 items-center gap-3 border-b border-line bg-surface px-4 lg:px-8">
       <button
         type="button"
-        className="-ms-2 rounded-lg p-2 text-stone-600 hover:bg-stone-100 lg:hidden"
+        className="-ms-2 rounded-lg p-2 text-body hover:bg-fill lg:hidden"
         aria-label={t('nav.openMenu')}
         onClick={onOpenMenu}
       >
         <MenuIcon />
       </button>
 
-      <p className="hidden text-sm text-stone-500 sm:block">
-        {t('header.today', { date: formatWeekdayDate(new Date()) })}
-      </p>
+      <p className="hidden text-sm text-muted sm:block">{t('header.today', { date: formatWeekdayDate(new Date()) })}</p>
 
       <div className="ms-auto flex items-center gap-3">
         {user && (
           <div className="text-end leading-tight">
             <p className="text-sm font-medium">{user.fullName}</p>
-            <p className="text-xs text-stone-500">{t(`role.${user.role}`)}</p>
+            <p className="text-xs text-muted">{t(`role.${user.role}`)}</p>
           </div>
         )}
         <button
           type="button"
           onClick={() => void signOut()}
           disabled={leaving}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-stone-600 ring-1 ring-stone-200 hover:bg-stone-50 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-body ring-1 ring-line hover:bg-subtle disabled:opacity-50"
         >
           <LogoutIcon />
           <span className="hidden sm:inline">{t('header.logout')}</span>

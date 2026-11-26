@@ -35,13 +35,13 @@ export function BagPicker({ fabrics, colours, picks, onChange, locked = [] }: Ba
   }
 
   if (shownFabrics.length === 0) {
-    return <p className="text-stone-500">{t('bags.noFabrics')}</p>;
+    return <p className="text-muted">{t('bags.noFabrics')}</p>;
   }
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-stone-700">{t('bags.fabrics')}</p>
+        <p className="text-sm font-medium text-label">{t('bags.fabrics')}</p>
         <div className="flex flex-wrap gap-2">
           {shownFabrics.map((fabric) => (
             <Chip
@@ -66,10 +66,10 @@ export function BagPicker({ fabrics, colours, picks, onChange, locked = [] }: Ba
         );
 
         return (
-          <div key={fabric.id} className="flex flex-col gap-2 border-s-2 border-brand-100 ps-3">
-            <p className="text-sm font-medium text-stone-700">{t('bags.coloursOf', { fabric: fabric.name })}</p>
+          <div key={fabric.id} className="flex flex-col gap-2 border-s-2 border-brand-glow ps-3">
+            <p className="text-sm font-medium text-label">{t('bags.coloursOf', { fabric: fabric.name })}</p>
             {shownColours.length === 0 ? (
-              <p className="text-sm text-stone-500">{t('bags.noColours')}</p>
+              <p className="text-sm text-muted">{t('bags.noColours')}</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {shownColours.map((colour) => (

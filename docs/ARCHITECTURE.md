@@ -343,6 +343,10 @@ Decisions:
   (Pointer Events, no library), `InlineName`, `Switch` and `AddNameForm` (ADR 0022). A step
   that cannot be undone, such as adding bags that get codes, collects the ticks and is saved
   with one button that says what it makes («افزودن ۶ کیف»), not on each tap (ADR 0023).
+- **The design system** (1.7, ADR 0028 and ADR 0029): colours named by their role in
+  `src/index.css` with Tailwind's palette switched off, a test that fails on any other colour,
+  shared page parts (`PageHeader`, `Card`, `StatusBadge`, `Notice`, the form layout), and
+  screenshots of the main pages. The rules for building a screen are in `docs/design/UI.md`.
 - `web/shared` is created with the second app (Phase 10), not before.
 
 ## 10. Three languages
@@ -591,3 +595,4 @@ server in the developer's.
 | 0026 | The users screen; owner accounts with several login numbers from the configuration; a 10-minute access token | 1.6.5 (written) |
 | 0027 | The change history of a model, a contractor and a worker; an IBAN as set, replaced or removed | 1.6.6 (written) |
 | 0028 | Screenshots of the panel: Playwright in its pinned image, the API answered by sample data | 1.7 (written) |
+| 0029 | The panel's colours by role, Tailwind's palette off, and the shared page parts | 1.7b (written) |

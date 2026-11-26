@@ -1,4 +1,5 @@
 import { useId, type InputHTMLAttributes } from 'react';
+import { FieldError } from './Form';
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -14,7 +15,7 @@ export function TextField({ label, hint, error, className = '', ...props }: Text
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="text-sm font-medium text-label">
         {label}
       </label>
       <input
@@ -22,18 +23,14 @@ export function TextField({ label, hint, error, className = '', ...props }: Text
         {...props}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={`h-12 rounded-lg border bg-white px-3 text-lg tracking-wide text-stone-900 transition-colors outline-none placeholder:text-stone-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 ${error ? 'border-red-500' : 'border-stone-300'} ${className}`}
+        className={`h-12 rounded-lg border bg-surface px-3 text-lg tracking-wide text-ink transition-colors outline-none placeholder:text-faint focus:border-brand-line focus:ring-2 focus:ring-brand-glow ${error ? 'border-danger-line' : 'border-line-strong'} ${className}`}
       />
       {hint && !error && (
-        <p id={hintId} className="text-sm text-stone-500">
+        <p id={hintId} className="text-sm text-muted">
           {hint}
         </p>
       )}
-      {error && (
-        <p id={errorId} role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={errorId}>{error}</FieldError>}
     </div>
   );
 }

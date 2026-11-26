@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router';
+import { useId, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useParams } from 'react-router';
 import { toProblem } from '../../shared/api/problem';
 import { attempt } from '../../shared/api/refusal';
 import { useSerialWrites } from '../../shared/api/serialWrites';
@@ -11,8 +11,11 @@ import { formatMobile } from '../../shared/format/mobile';
 import { t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
 import { Card } from '../../shared/ui/Card';
+import { Field, FieldError, InsetForm } from '../../shared/ui/Form';
 import { InlineName } from '../../shared/ui/InlineName';
 import { JalaliDateField } from '../../shared/ui/JalaliDateField';
+import { Notice } from '../../shared/ui/Notice';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { Switch } from '../../shared/ui/Switch';
 import { HistoryLink } from '../history/HistoryLink';
@@ -64,9 +67,9 @@ export function PartyPage({ kind }: { kind: PartyKind }) {
     const missing = code === 'parties.contractor_not_found' || code === 'parties.worker_not_found';
     return (
       <div className="flex max-w-3xl flex-col gap-4">
-        <BackLink kind={kind} />
+        <PageHeader back={backTo(kind)} />
         {missing ? (
-          <p className="text-stone-600">{t(`parties.${kind}.missing`)}</p>
+          <p className="text-body">{t(`parties.${kind}.missing`)}</p>
         ) : (
           <LoadError error={party.error} onRetry={() => void party.refetch()} />
         )}
@@ -78,23 +81,14 @@ export function PartyPage({ kind }: { kind: PartyKind }) {
   // person and must not stay on the page when it goes straight to another person.
   return (
     <div key={party.data.id} className="flex max-w-3xl flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <BackLink kind={kind} />
-        <HistoryLink kind={kind} id={party.data.id} />
-      </div>
+      <PageHeader back={backTo(kind)} actions={<HistoryLink kind={kind} id={party.data.id} />} />
       <Profile kind={kind} party={party.data} write={write} />
       <IbanSection kind={kind} party={party.data} write={write} />
     </div>
   );
 }
 
-function BackLink({ kind }: { kind: PartyKind }) {
-  return (
-    <Link to={`/${kind}`} className="self-start text-sm text-brand-700 hover:underline">
-      {t(`parties.${kind}.back`)}
-    </Link>
-  );
-}
+const backTo = (kind: PartyKind) => ({ to: `/${kind}`, label: t(`parties.${kind}.back`) });
 
 function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails; write: Write }) {
   const stages = useQuery({ queryKey: stagesKey, queryFn: stagesApi.list });
@@ -119,6 +113,7 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
         <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
           <InlineName
             large
+            heading
             value={party.fullName}
             muted={!party.isActive}
             maxLength={nameMaxLength}
@@ -126,7 +121,7 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
           />
         </div>
         <div className="flex shrink-0 flex-col items-center gap-1 pt-1">
-          <span className="text-xs text-stone-500">{t('list.columnActive')}</span>
+          <span className="text-xs text-muted">{t('list.columnActive')}</span>
           <Switch
             checked={party.isActive}
             onChange={(isActive) =>
@@ -138,15 +133,9 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
         </div>
       </div>
 
-      {!party.isActive && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{t(`parties.${kind}.inactiveNote`)}</p>
-      )}
+      {!party.isActive && <Notice tone="warning">{t(`parties.${kind}.inactiveNote`)}</Notice>}
 
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError>{error}</FieldError>}
 
       <Field label={t('parties.mobile')}>
         {/* A row, so the left-to-right number sits at the start of the line, not across it. */}
@@ -177,11 +166,7 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
             disabled={busy}
           />
         )}
-        {stagesError && (
-          <p role="alert" className="text-sm text-red-700">
-            {stagesError}
-          </p>
-        )}
+        {stagesError && <FieldError>{stagesError}</FieldError>}
       </Field>
 
       <Field label={t('parties.notes')}>
@@ -200,16 +185,6 @@ function Profile({ kind, party, write }: { kind: PartyKind; party: PartyDetails;
 }
 
 const ignore = () => undefined;
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-sm font-medium text-stone-700">{label}</p>
-      {hint && <p className="-mt-1 text-sm text-stone-500">{hint}</p>}
-      {children}
-    </div>
-  );
-}
 
 interface StartDateProps {
   startDate: string;
@@ -264,20 +239,14 @@ function StartDate({ startDate, update }: StartDateProps) {
             type="button"
             onClick={open}
             title={t('parties.changeStartDate')}
-            className="-mx-2 rounded-md px-2 py-1 text-start text-base text-stone-900 hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-brand-700"
+            className="-mx-2 rounded-md px-2 py-1 text-start text-base text-ink hover:bg-fill focus-visible:outline-2 focus-visible:outline-brand"
           >
             {formatDay(startDate)}
             <span className="sr-only">{t('parties.changeStartDate')}</span>
           </button>
         </div>
       ) : (
-        <form
-          aria-labelledby={headingId}
-          onSubmit={(event) => void save(event)}
-          onKeyDown={onKeyDown}
-          noValidate
-          className="ring-brand-200 flex w-full flex-col gap-4 rounded-xl p-4 ring-1"
-        >
+        <InsetForm labelledBy={headingId} onSubmit={(event) => void save(event)} onKeyDown={onKeyDown}>
           <h3 id={headingId} className="sr-only">
             {t('parties.changeStartDate')}
           </h3>
@@ -301,7 +270,7 @@ function StartDate({ startDate, update }: StartDateProps) {
               {t('parties.form.cancel')}
             </Button>
           </div>
-        </form>
+        </InsetForm>
       )}
     </Field>
   );

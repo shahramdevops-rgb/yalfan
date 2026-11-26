@@ -5,7 +5,9 @@ import { attempt } from '../../shared/api/refusal';
 import { byPersianName } from '../../shared/format/persianOrder';
 import { t } from '../../shared/i18n/fa';
 import { AddNameForm } from '../../shared/ui/AddNameForm';
+import { Card } from '../../shared/ui/Card';
 import { NameList } from '../../shared/ui/NameList';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import {
   catalogKinds,
@@ -29,21 +31,16 @@ export function CatalogListsPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t('lists.title')}</h1>
-        <p className="mt-1 text-stone-500">{t('lists.hint')}</p>
-      </div>
+      <PageHeader title={t('lists.title')} hint={t('lists.hint')} />
 
-      <nav className="flex gap-1 border-b border-stone-200">
+      <nav className="flex gap-1 border-b border-line">
         {catalogKinds.map((tab) => (
           <NavLink
             key={tab}
             to={`/lists/${tab}`}
             className={({ isActive }) =>
               `-mb-px border-b-2 px-4 py-2.5 text-base transition-colors ${
-                isActive
-                  ? 'border-brand-700 font-medium text-brand-800'
-                  : 'border-transparent text-stone-600 hover:text-stone-900'
+                isActive ? 'border-brand font-medium text-brand-strong' : 'border-transparent text-body hover:text-ink'
               }`
             }
           >
@@ -52,9 +49,9 @@ export function CatalogListsPage() {
         ))}
       </nav>
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 sm:p-6">
+      <Card>
         <CatalogList key={kind} kind={kind} />
-      </section>
+      </Card>
     </div>
   );
 }

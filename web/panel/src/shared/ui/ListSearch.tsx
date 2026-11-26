@@ -20,11 +20,11 @@ export function SearchField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="text-sm font-medium text-label">
         {label}
       </label>
       <div className="relative sm:max-w-sm">
-        <SearchIcon className="pointer-events-none absolute start-3 top-3.5 size-5 text-stone-400" />
+        <SearchIcon className="pointer-events-none absolute start-3 top-3.5 size-5 text-faint" />
         <input
           id={id}
           type="search"
@@ -32,7 +32,7 @@ export function SearchField({
           onChange={(event) => onChange(event.target.value)}
           maxLength={100}
           autoComplete="off"
-          className="h-12 w-full rounded-lg border border-stone-300 bg-white ps-10 pe-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+          className="h-12 w-full rounded-lg border border-line-strong bg-surface ps-10 pe-3 text-base outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow"
         />
       </div>
     </div>
@@ -60,11 +60,11 @@ export function Pager({
   }
 
   return (
-    <nav className="flex items-center justify-between gap-3 border-t border-stone-100 pt-4" aria-label={label}>
+    <nav className="flex items-center justify-between gap-3 border-t border-line-soft pt-4" aria-label={label}>
       <Button variant="secondary" disabled={page <= 1} onClick={() => onGo(page - 1)}>
         {t('pager.previous')}
       </Button>
-      <span className="text-sm text-stone-600">{t('pager.pageOf', { page: digits(page), pages: digits(pages) })}</span>
+      <span className="text-sm text-body">{t('pager.pageOf', { page: digits(page), pages: digits(pages) })}</span>
       <Button variant="secondary" disabled={page >= pages} onClick={() => onGo(page + 1)}>
         {t('pager.next')}
       </Button>

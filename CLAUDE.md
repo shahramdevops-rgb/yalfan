@@ -16,6 +16,7 @@ works alone; the workshop owner is his brother and is treated as a client.
   (search it for the task number; do not read it whole)
 - Layers, modules, core models, attendance, languages: docs/ARCHITECTURE.md
 - Architecture decisions, once written: docs/adr/
+- How panel screens are built (colours, sizes, shared parts): docs/design/UI.md
 - CI (GitHub Actions; build and every test on each push): .github/workflows/ci.yml
 
 ## How to answer the developer
@@ -39,6 +40,9 @@ works alone; the workshop owner is his brother and is treated as a client.
 - Product names and descriptions live in translation rows, never in a single Persian column.
 - Use logical CSS utilities (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`), never `left`/`right`
   ones, because fa and ar are right-to-left and en is left-to-right.
+- Panel colours only by their role names in `web/panel/src/index.css` (`text-muted`,
+  `bg-danger-soft`; docs/design/UI.md, ADR 0029), never a Tailwind colour or a written-out one;
+  a raw colour fails the tests.
 - The backend stores Gregorian UTC only. Jalali, Hijri or Gregorian is a display choice.
 - Money is Rial: stored, in the API, typed and shown (ADR 0002), and every amount shown is
   labelled «ریال». Under every Rial amount shown, a quieter line says it in words, in Toman,

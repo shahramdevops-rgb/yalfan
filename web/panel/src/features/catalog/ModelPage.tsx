@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { fieldCode, toProblem } from '../../shared/api/problem';
 import { attempt, refusalMessage } from '../../shared/api/refusal';
 import { useSerialWrites, type Write } from '../../shared/api/serialWrites';
@@ -8,11 +8,15 @@ import { toPersianDigits } from '../../shared/format/digits';
 import { t } from '../../shared/i18n/fa';
 import { AddNameForm } from '../../shared/ui/AddNameForm';
 import { Button } from '../../shared/ui/Button';
-import { Card } from '../../shared/ui/Card';
+import { Card, CardHeader } from '../../shared/ui/Card';
+import { Field, FieldError } from '../../shared/ui/Form';
 import { InlineName } from '../../shared/ui/InlineName';
 import { NameList } from '../../shared/ui/NameList';
+import { Notice } from '../../shared/ui/Notice';
+import { PageHeader } from '../../shared/ui/PageHeader';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { moveItem } from '../../shared/ui/sortable';
+import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { Switch } from '../../shared/ui/Switch';
 import { HistoryLink } from '../history/HistoryLink';
 import { RateCardSection } from '../production/RateCardSection';
@@ -68,9 +72,9 @@ export function ModelPage() {
     const missing = toProblem(product.error).code === 'catalog.product_not_found';
     return (
       <div className="flex max-w-3xl flex-col gap-4">
-        <BackLink />
+        <PageHeader back={back} />
         {missing ? (
-          <p className="text-stone-600">{t('model.notFound')}</p>
+          <p className="text-body">{t('model.notFound')}</p>
         ) : (
           <LoadError error={product.error} onRetry={() => void product.refetch()} />
         )}
@@ -83,10 +87,7 @@ export function ModelPage() {
   // when the page goes from model to model without leaving.
   return (
     <div key={model.id} className="flex max-w-3xl flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <BackLink />
-        <HistoryLink kind="models" id={model.id} />
-      </div>
+      <PageHeader back={back} actions={<HistoryLink kind="models" id={model.id} />} />
       <Profile product={model} write={write} />
       <RateCardSection productId={model.id} productIsActive={model.isActive} />
       <Sizes product={model} write={write} />
@@ -95,13 +96,7 @@ export function ModelPage() {
   );
 }
 
-function BackLink() {
-  return (
-    <Link to="/models" className="self-start text-sm text-brand-700 hover:underline">
-      {t('models.back')}
-    </Link>
-  );
-}
+const back = { to: '/models', label: t('models.back') };
 
 function Profile({ product, write }: { product: ProductDetails; write: ModelWrite }) {
   const categories = useQuery({ queryKey: catalogListKey('categories'), queryFn: catalogLists.categories.list });
@@ -122,16 +117,22 @@ function Profile({ product, write }: { product: ProductDetails; write: ModelWrit
     <Card>
       <div className="flex items-start gap-4">
         <div className="shrink-0 text-center">
-          <p className="text-xs text-stone-500">{t('model.number')}</p>
-          <p className={`text-3xl font-bold ${product.isActive ? 'text-brand-800' : 'text-stone-400'}`}>
+          <p className="text-xs text-muted">{t('model.number')}</p>
+          <p className={`text-3xl font-bold ${product.isActive ? 'text-brand-strong' : 'text-faint'}`}>
             {digits(product.number)}
           </p>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1 pt-3">
-          <InlineName large value={product.name} muted={!product.isActive} onSave={(name) => save({ name }, 'name')} />
+          <InlineName
+            large
+            heading
+            value={product.name}
+            muted={!product.isActive}
+            onSave={(name) => save({ name }, 'name')}
+          />
         </div>
         <div className="flex shrink-0 flex-col items-center gap-1 pt-1">
-          <span className="text-xs text-stone-500">{t('list.columnActive')}</span>
+          <span className="text-xs text-muted">{t('list.columnActive')}</span>
           <Switch
             checked={product.isActive}
             onChange={(isActive) => void run(() => write(() => productsApi.setActive(product.id, isActive)))}
@@ -141,9 +142,7 @@ function Profile({ product, write }: { product: ProductDetails; write: ModelWrit
         </div>
       </div>
 
-      {!product.isActive && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{t('model.inactiveNote')}</p>
-      )}
+      {!product.isActive && <Notice tone="warning">{t('model.inactiveNote')}</Notice>}
 
       {categories.data && (
         <CategorySelect
@@ -154,8 +153,7 @@ function Profile({ product, write }: { product: ProductDetails; write: ModelWrit
         />
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <p className="text-sm font-medium text-stone-700">{t('model.description')}</p>
+      <Field label={t('model.description')}>
         <InlineName
           multiline
           allowEmpty
@@ -165,13 +163,9 @@ function Profile({ product, write }: { product: ProductDetails; write: ModelWrit
           placeholder={t('model.descriptionEmpty')}
           onSave={(description) => save({ description: description || null }, 'description')}
         />
-      </div>
+      </Field>
 
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError>{error}</FieldError>}
     </Card>
   );
 }
@@ -229,12 +223,7 @@ function Sizes({ product, write }: { product: ProductDetails; write: ModelWrite 
 
   return (
     <Card labelledBy={headingId}>
-      <div>
-        <h2 id={headingId} className="text-lg font-bold">
-          {t('model.sizes')}
-        </h2>
-        {hasSizes && <p className="mt-1 text-sm text-stone-500">{t('model.sizesHint')}</p>}
-      </div>
+      <CardHeader id={headingId} title={t('model.sizes')} hint={hasSizes ? t('model.sizesHint') : undefined} />
 
       {hasSizes ? (
         <NameList
@@ -247,14 +236,10 @@ function Sizes({ product, write }: { product: ProductDetails; write: ModelWrite 
           emptyText=""
         />
       ) : (
-        <p className="text-stone-500">{t('model.noSizes')}</p>
+        <p className="text-muted">{t('model.noSizes')}</p>
       )}
 
-      {moveError && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
-          {moveError}
-        </p>
-      )}
+      {moveError && <Notice tone="danger">{moveError}</Notice>}
 
       {product.isActive ? (
         <AddNameForm
@@ -264,7 +249,7 @@ function Sizes({ product, write }: { product: ProductDetails; write: ModelWrite 
           onAdd={(name) => attempt(() => write(() => productsApi.addSize(product.id, name)), ignore, 'name')}
         />
       ) : (
-        <p className="text-sm text-stone-500">{t('model.inactiveNoAdd')}</p>
+        <p className="text-sm text-muted">{t('model.inactiveNoAdd')}</p>
       )}
     </Card>
   );
@@ -297,19 +282,24 @@ function Bags({ product, write }: { product: ProductDetails; write: ModelWrite }
 
   return (
     <Card labelledBy={headingId}>
-      <h2 id={headingId} className="text-lg font-bold">
-        {t('model.bags')}
-        {product.variants.length > 0 && (
-          <span className="ms-2 text-base font-normal text-stone-500">
-            {t('models.bagCount', { count: digits(product.variants.length) })}
-          </span>
-        )}
-      </h2>
+      <CardHeader
+        id={headingId}
+        title={
+          <>
+            {t('model.bags')}
+            {product.variants.length > 0 && (
+              <span className="ms-2 text-base font-normal text-muted">
+                {t('models.bagCount', { count: digits(product.variants.length) })}
+              </span>
+            )}
+          </>
+        }
+      />
 
       {product.variants.length === 0 ? (
-        <p className="text-stone-500">{t('model.noBags')}</p>
+        <p className="text-muted">{t('model.noBags')}</p>
       ) : (
-        <ul className="divide-y divide-stone-100">
+        <ul className="divide-y divide-line-soft">
           {product.variants.map((bag) => (
             <BagRow key={bag.id} productId={product.id} bag={bag} write={write} />
           ))}
@@ -317,12 +307,12 @@ function Bags({ product, write }: { product: ProductDetails; write: ModelWrite }
       )}
 
       {!product.isActive ? (
-        <p className="text-sm text-stone-500">{t('model.inactiveNoAdd')}</p>
+        <p className="text-sm text-muted">{t('model.inactiveNoAdd')}</p>
       ) : (
-        <div className="flex flex-col gap-4 border-t border-stone-100 pt-5">
+        <div className="flex flex-col gap-4 border-t border-line-soft pt-5">
           <div>
             <h3 className="font-bold">{t('model.addBags')}</h3>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-muted">
               {product.sizes.length > 0 ? t('model.addBagsSizesHint') : t('model.addBagsHint')}
             </p>
           </div>
@@ -337,11 +327,7 @@ function Bags({ product, write }: { product: ProductDetails; write: ModelWrite }
           ) : (
             <ListSkeleton rows={2} />
           )}
-          {addError && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
-              {addError}
-            </p>
-          )}
+          {addError && <Notice tone="danger">{addError}</Notice>}
           <Button className="self-start" busy={adding} disabled={toAdd.length === 0} onClick={() => void add()}>
             {toAdd.length === 0 ? t('model.addBagsNone') : t('model.addBagsButton', { count: digits(toAdd.length) })}
           </Button>
@@ -368,20 +354,13 @@ function BagRow({ productId, bag, write }: { productId: string; bag: Bag; write:
     <li className="flex flex-col gap-1 py-2">
       <div className="flex min-h-10 items-center gap-3">
         {/* The code reads left to right, as it is written on paper and on a label. */}
-        <span
-          dir="ltr"
-          className={`w-16 shrink-0 text-end font-bold ${bag.isActive ? 'text-stone-900' : 'text-stone-400'}`}
-        >
+        <span dir="ltr" className={`w-16 shrink-0 text-end font-bold ${bag.isActive ? 'text-ink' : 'text-faint'}`}>
           {toPersianDigits(bag.sku)}
         </span>
-        <span className={`min-w-0 flex-1 text-base ${bag.isActive ? 'text-stone-800' : 'text-stone-400'}`}>
+        <span className={`min-w-0 flex-1 text-base ${bag.isActive ? 'text-ink-soft' : 'text-faint'}`}>
           {parts.join(t('models.separator'))}
         </span>
-        {!bag.isActive && (
-          <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
-            {t('list.inactive')}
-          </span>
-        )}
+        {!bag.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
         <Switch
           checked={bag.isActive}
           onChange={(isActive) => void toggle(isActive)}
@@ -389,11 +368,7 @@ function BagRow({ productId, bag, write }: { productId: string; bag: Bag; write:
           disabled={busy}
         />
       </div>
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError>{error}</FieldError>}
     </li>
   );
 }

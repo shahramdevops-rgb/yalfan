@@ -2,6 +2,7 @@ import { useId, useLayoutEffect, useRef, type ChangeEvent } from 'react';
 import { groupDigits, readAmountInput } from '../format/amountInput';
 import { tomanLine } from '../format/money';
 import { t } from '../i18n/fa';
+import { FieldError } from './Form';
 
 interface AmountFieldProps {
   label: string;
@@ -54,7 +55,7 @@ export function AmountField({ label, value, onChange, error, autoFocus, disabled
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="text-sm font-medium text-label">
         {label} ({t('money.rial')})
       </label>
       <div className="relative sm:max-w-xs">
@@ -71,23 +72,19 @@ export function AmountField({ label, value, onChange, error, autoFocus, disabled
           disabled={disabled}
           aria-invalid={error ? true : undefined}
           aria-describedby={[value && helpId, error && errorId].filter(Boolean).join(' ') || undefined}
-          className={`h-12 w-full rounded-lg border bg-white ps-14 pe-3 text-end text-lg font-medium tracking-wide text-stone-900 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:opacity-60 ${
-            error ? 'border-red-500' : 'border-stone-300'
+          className={`h-12 w-full rounded-lg border bg-surface ps-14 pe-3 text-end text-lg font-medium tracking-wide text-ink outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow disabled:opacity-60 ${
+            error ? 'border-danger-line' : 'border-line-strong'
           }`}
         />
-        <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-sm text-stone-500">
+        <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-sm text-muted">
           {t('money.rial')}
         </span>
       </div>
       {/* Always present, so the form does not jump when the first digit is typed. */}
-      <p id={helpId} className="min-h-5 text-sm text-stone-600" aria-live="polite">
+      <p id={helpId} className="min-h-5 text-sm text-body" aria-live="polite">
         {value ? tomanLine(value as `${number}`) : ''}
       </p>
-      {error && (
-        <p id={errorId} role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={errorId}>{error}</FieldError>}
     </div>
   );
 }

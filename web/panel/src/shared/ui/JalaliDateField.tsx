@@ -3,6 +3,7 @@ import { formatWeekdayDay } from '../format/dates';
 import { toPersianDigits } from '../format/digits';
 import { daysInJalaliMonth, fromJalali, jalaliMonthNames, toJalali, type JalaliDay } from '../format/jalali';
 import { t } from '../i18n/fa';
+import { FieldError } from './Form';
 
 interface JalaliDateFieldProps {
   label: string;
@@ -26,7 +27,7 @@ interface JalaliDateFieldProps {
 const leapYear = 1403;
 
 const selectClass =
-  'h-12 rounded-lg border bg-white px-2 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:opacity-60';
+  'h-12 rounded-lg border bg-surface px-2 text-base outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow disabled:opacity-60';
 
 /**
  * A Jalali day picked from three lists, day, month and year, in the order a Persian date is
@@ -74,11 +75,11 @@ export function JalaliDateField({
   }
 
   const empty = value === null;
-  const border = error ? 'border-red-500' : 'border-stone-300';
+  const border = error ? 'border-danger-line' : 'border-line-strong';
 
   return (
     <fieldset className="flex flex-col gap-1.5" disabled={disabled}>
-      <legend className="mb-1.5 text-sm font-medium text-stone-700">{label}</legend>
+      <legend className="mb-1.5 text-sm font-medium text-label">{label}</legend>
       {/* One row even on a phone: the month takes what the day and the year leave. */}
       <div className="grid max-w-sm grid-cols-[4rem_minmax(0,1fr)_5rem] gap-2">
         <select
@@ -134,16 +135,12 @@ export function JalaliDateField({
         </select>
       </div>
       {!empty && (
-        <p className="text-sm text-stone-600" aria-live="polite">
+        <p className="text-sm text-body" aria-live="polite">
           {formatWeekdayDay(value)}
         </p>
       )}
-      {hint && !error && <p className="text-sm text-stone-500">{hint}</p>}
-      {error && (
-        <p role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {hint && !error && <p className="text-sm text-muted">{hint}</p>}
+      {error && <FieldError>{error}</FieldError>}
     </fieldset>
   );
 }

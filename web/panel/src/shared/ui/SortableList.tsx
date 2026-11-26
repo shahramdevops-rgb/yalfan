@@ -132,7 +132,7 @@ export function SortableList<T>({ items, getId, getName, onMove, locked = false,
 
   return (
     <>
-      <ul ref={listRef} className={`divide-y divide-stone-100 ${drag ? 'select-none' : ''}`}>
+      <ul ref={listRef} className={`divide-y divide-line-soft ${drag ? 'select-none' : ''}`}>
         {items.map((item, index) => {
           const id = getId(item);
           const dragged = drag?.from === index;
@@ -143,12 +143,8 @@ export function SortableList<T>({ items, getId, getName, onMove, locked = false,
             <li
               key={id}
               style={offset ? { transform: `translateY(${offset}px)` } : undefined}
-              className={`relative flex items-center gap-2 bg-white py-2 ${
-                dragged
-                  ? 'z-10 rounded-lg shadow-lg ring-1 ring-stone-200'
-                  : drag
-                    ? 'transition-transform duration-150'
-                    : ''
+              className={`relative flex items-center gap-2 bg-surface py-2 ${
+                dragged ? 'z-10 rounded-lg shadow-lg ring-1 ring-line' : drag ? 'transition-transform duration-150' : ''
               }`}
             >
               <button
@@ -161,7 +157,7 @@ export function SortableList<T>({ items, getId, getName, onMove, locked = false,
                 onPointerUp={(event) => end(event, true)}
                 onPointerCancel={(event) => end(event, false)}
                 onKeyDown={(event) => onKeyDown(event, index)}
-                className={`shrink-0 touch-none rounded-md p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 focus-visible:outline-2 focus-visible:outline-brand-700 ${
+                className={`shrink-0 touch-none rounded-md p-2 text-faint hover:bg-fill hover:text-body focus-visible:outline-2 focus-visible:outline-brand ${
                   locked ? 'cursor-wait opacity-40' : dragged ? 'cursor-grabbing' : 'cursor-grab'
                 }`}
               >

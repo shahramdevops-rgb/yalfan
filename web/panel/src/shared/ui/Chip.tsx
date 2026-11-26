@@ -25,15 +25,15 @@ export function Chip({ label, on, onToggle, locked = false, disabled = false, ti
       disabled={locked || disabled}
       title={title}
       onClick={onToggle}
-      className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3.5 text-sm ring-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 ${
+      className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3.5 text-sm ring-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
         on
-          ? 'bg-brand-50 font-medium text-brand-800 ring-brand-600'
-          : 'bg-white text-stone-700 ring-stone-300 hover:bg-stone-50'
+          ? 'bg-brand-soft font-medium text-brand-strong ring-brand-line'
+          : 'bg-surface text-label ring-line-strong hover:bg-subtle'
       } ${locked ? 'cursor-default opacity-75' : ''} ${disabled && !locked ? 'cursor-wait' : ''}`}
     >
       {on && <CheckIcon />}
       {label}
-      {note && <span className="text-xs font-normal text-stone-500">{note}</span>}
+      {note && <span className="text-xs font-normal text-muted">{note}</span>}
     </button>
   );
 }
