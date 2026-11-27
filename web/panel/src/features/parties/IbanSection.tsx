@@ -5,8 +5,10 @@ import { formatIban, ibanDigitCount, ibanLastFour } from '../../shared/format/ib
 import { t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
 import { Card, CardHeader } from '../../shared/ui/Card';
+import { ConfirmDialog } from '../../shared/ui/Dialog';
 import { InsetForm } from '../../shared/ui/Form';
 import { IbanField } from '../../shared/ui/IbanField';
+import { toast } from '../../shared/ui/toasts';
 import { useSession } from '../auth/useSession';
 import { partiesApi, type PartyDetails, type PartyKind, type Write } from './partiesApi';
 
@@ -101,11 +103,14 @@ function WholeIban({ kind, partyId }: { kind: PartyKind; partyId: string }) {
       return;
     }
 
+    setMessage(undefined);
     try {
       // Latin digits with no spaces: what a bank's app takes when it is pasted.
       await navigator.clipboard.writeText(whole);
-      setMessage(t('iban.copied'));
+      // Nothing on the page shows that it was copied, so a short message says it (ADR 0030).
+      toast(t('iban.copied'));
     } catch {
+      // A failure stays beside the number, with what to do instead.
       setMessage(t('iban.copyFailed'));
     }
   }
@@ -142,7 +147,11 @@ function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose:
   const [digits, setDigits] = useState('');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState<'save' | 'remove' | null>(null);
-  const hasIban = party.maskedIban != null;
+  // Removing asks first: the number is not shown again and must be typed anew from the card
+  // (ADR 0030).
+  const [askingToRemove, setAskingToRemove] = useState(false);
+  const masked = party.maskedIban;
+  const hasIban = masked != null;
 
   async function send(request: () => Promise<PartyDetails>, which: 'save' | 'remove') {
     setBusy(which);
@@ -174,42 +183,63 @@ function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose:
   }
 
   return (
-    <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown}>
-      <h3 id={headingId} className="font-bold">
-        {hasIban ? t('iban.changeTitle') : t('iban.newTitle')}
-      </h3>
-      <IbanField
-        label={t('iban.field')}
-        value={digits}
-        onChange={(typed) => {
-          setDigits(typed);
-          setError(undefined);
-        }}
-        hint={hasIban ? `${t('iban.fieldHint')} ${t('iban.replaceNote')}` : t('iban.fieldHint')}
-        error={error}
-        autoFocus
-        disabled={busy !== null}
-        focusOnError
-      />
-      <div className="flex flex-wrap gap-3">
-        <Button type="submit" busy={busy === 'save'} disabled={digits === '' || busy !== null}>
-          {t('iban.save')}
-        </Button>
-        <Button variant="secondary" onClick={onClose} disabled={busy !== null}>
-          {t('parties.form.cancel')}
-        </Button>
-        {hasIban && (
-          <Button
-            variant="danger"
-            className="ms-auto"
-            busy={busy === 'remove'}
-            disabled={busy !== null}
-            onClick={() => void send(() => partiesApi[kind].removeIban(party.id), 'remove')}
-          >
-            {t('iban.remove')}
+    <>
+      <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown}>
+        <h3 id={headingId} className="font-bold">
+          {hasIban ? t('iban.changeTitle') : t('iban.newTitle')}
+        </h3>
+        <IbanField
+          label={t('iban.field')}
+          value={digits}
+          onChange={(typed) => {
+            setDigits(typed);
+            setError(undefined);
+          }}
+          hint={hasIban ? `${t('iban.fieldHint')} ${t('iban.replaceNote')}` : t('iban.fieldHint')}
+          error={error}
+          autoFocus
+          disabled={busy !== null}
+          focusOnError
+        />
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit" busy={busy === 'save'} disabled={digits === '' || busy !== null}>
+            {t('iban.save')}
           </Button>
-        )}
-      </div>
-    </InsetForm>
+          <Button variant="secondary" onClick={onClose} disabled={busy !== null}>
+            {t('parties.form.cancel')}
+          </Button>
+          {hasIban && (
+            <Button
+              variant="danger"
+              className="ms-auto"
+              busy={busy === 'remove'}
+              disabled={busy !== null}
+              onClick={() => setAskingToRemove(true)}
+            >
+              {t('iban.remove')}
+            </Button>
+          )}
+        </div>
+      </InsetForm>
+      {/* Outside the form, so nothing in the question can reach the form's own keys. */}
+      {askingToRemove && masked && (
+        <ConfirmDialog
+          title={t('iban.removeTitle')}
+          confirmLabel={t('iban.remove')}
+          onCancel={() => setAskingToRemove(false)}
+          onConfirm={() => {
+            setAskingToRemove(false);
+            void send(() => partiesApi[kind].removeIban(party.id), 'remove');
+          }}
+        >
+          <p>{t('iban.removeQuestion', { name: party.fullName })}</p>
+          <p>
+            <span dir="ltr" className="text-lg font-medium tracking-wider text-ink">
+              {`•••• ${ibanLastFour(masked)}`}
+            </span>
+          </p>
+        </ConfirmDialog>
+      )}
+    </>
   );
 }

@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { logout } from '../features/auth/authApi';
 import { useSession } from '../features/auth/useSession';
 import { formatWeekdayDate } from '../shared/format/dates';
 import { t, type MessageKey } from '../shared/i18n/fa';
+import { Drawer } from '../shared/ui/Dialog';
 import {
   BagIcon,
   BagMark,
@@ -31,6 +32,9 @@ const navigation: { to: string; label: MessageKey; icon: typeof HomeIcon; ownerO
   { to: '/users', label: 'nav.users', icon: KeyIcon, ownerOnly: true },
 ];
 
+/** Tailwind's `lg`, where the sidebar stands beside the page and the menu button goes. */
+const desktopWidth = '(min-width: 64rem)';
+
 /**
  * The frame of every page behind the login. The sidebar sits on the inline start, which is the
  * right in a right-to-left page; on a phone it becomes a drawer, because the owner checks the
@@ -45,32 +49,45 @@ export function AppLayout() {
   const menuOpen = menuOpenedOn === location.pathname;
   const closeMenu = () => setMenuOpenedOn(null);
 
+  // A phone or tablet turned sideways to the desktop's width shows the sidebar itself: the drawer
+  // closes, so it does not stay over a page it leaves inert.
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    const wide = window.matchMedia(desktopWidth);
+    const closeWhenWide = () => {
+      if (wide.matches) {
+        setMenuOpenedOn(null);
+      }
+    };
+    wide.addEventListener('change', closeWhenWide);
+    return () => wide.removeEventListener('change', closeWhenWide);
+  }, [menuOpen]);
+
   return (
     <div className="min-h-dvh lg:flex">
       <aside className="hidden w-64 shrink-0 border-e border-line bg-surface lg:block">
         <Sidebar />
       </aside>
 
+      {/* The drawer is the browser's own dialog (ADR 0030): Escape and a tap beside it close it,
+          the focus stays inside it, and goes back to the menu button when it closes. */}
       {menuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-ink/40"
-            aria-label={t('nav.closeMenu')}
-            onClick={closeMenu}
-          />
-          <aside className="absolute inset-y-0 start-0 w-72 max-w-[85%] bg-surface shadow-xl">
+        <Drawer label={t('nav.menu')} onClose={closeMenu}>
+          <div className="relative h-full">
             <button
               type="button"
-              className="absolute end-3 top-4 rounded-lg p-2 text-muted hover:bg-fill"
+              className="absolute end-3 top-4 rounded-lg p-2 text-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-brand"
               aria-label={t('nav.closeMenu')}
               onClick={closeMenu}
             >
               <CloseIcon />
             </button>
             <Sidebar />
-          </aside>
-        </div>
+          </div>
+        </Drawer>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">

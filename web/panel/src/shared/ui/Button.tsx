@@ -1,9 +1,11 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, Ref } from 'react';
 import { buttonClass, type ButtonVariant } from './buttonStyle';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   busy?: boolean;
+  /** For a dialog that gives one of its buttons the focus when it opens. */
+  ref?: Ref<HTMLButtonElement>;
 }
 
 /** Large and clear on purpose: the office operator is not technical (CLAUDE.md). */

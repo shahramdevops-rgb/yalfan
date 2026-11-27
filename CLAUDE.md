@@ -147,7 +147,8 @@ Run from the repository root. Keep this section up to date when commands change.
   pinned Docker image (Docker must be running; `check.ps1` runs it too). A failure leaves the
   expected, actual and diff pictures in `artifacts/check/screens`. When a page changes on
   purpose, `npm run screens:update`, look at the new pictures and commit them with the change.
-  A page that calls a new API route needs its answer in `screens/api.ts`
+  A page that calls a new API route needs its answer in `screens/api.ts`. The same run holds the
+  panel's behaviour tests (focus, keyboard, overlays; `screens/overlays.spec.ts`, ADR 0030)
 - Panel API types: generated from `web/panel/openapi/panel.json` before every dev, build and
   test run. When `PanelDocumentTests` fails, it has rewritten that file from the API: review and
   commit it

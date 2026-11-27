@@ -517,3 +517,53 @@ The entry of 1.7 itself stays in the roadmap until its last part (1.7d) is finis
     with it, and a text field never goes inside one; the new-user `FormCard` is a named form
     because it is one part among several; the docs now say that only the colours are enforced
     by a tool, the parts by the review.
+  - **1.7c Overlays.** The confirmation dialog, toasts and the phone drawer on the browser's
+    `<dialog>`; behaviour tests in the screenshots' Playwright image. Found while planning: an
+    IBAN is removed with one click and no question, and the phone drawer neither closes on
+    Escape nor keeps the focus inside it. Proposed and accepted: switching off a login number of
+    one's own account also asks first, because it logs the owner out at once and only another
+    owner account can switch it back on (ADR 0026); the other switches do not, because they are
+    undone by switching back.
+    Decided with the developer on 1405/09/06, who accepted every proposal of the plan as written:
+    1.7c split in three (the keyboard and data entry became 1.7d, the data table and print 1.7e);
+    the overlays on the browser's own `<dialog>`, with no package; the searchable picker moved to
+    2.1, its first screen; the behaviour tests in Playwright in the screenshots' image, which
+    closes the question of component tests open since 1.6.4.
+    **Done 1405/09/06:** 535 .NET tests and 167 panel tests pass (8 new: the toasts' time, pause
+    and limits), and 33 Playwright tests in the pinned image: the 28 pictures, unchanged to the
+    pixel, and 5 behaviour tests holding 4 new pictures. Build has 0 warnings. ADR 0030;
+    `docs/design/UI.md`, `docs/ARCHITECTURE.md` section 9, ADR 0028 and `CLAUDE.md` updated.
+    - `shared/ui/Dialog.tsx`: `Modal` on `showModal()` (drawn only while open; Escape and a tap
+      on the dimmed page call the page's `onClose`; the focus goes back to the opener; a tap
+      counts only when it begins and ends outside); `ConfirmDialog` (an `alertdialog`, «انصراف»
+      focused, only the question); `Drawer`. The page behind does not scroll while one is open
+      (`index.css`).
+    - Removing an IBAN asks «شبا پاک شود؟» with the person's name and `•••• ` and the last four
+      digits; switching off a number of one's own account asks first and, confirmed, still logs
+      the page out (ADR 0026). No other step asks.
+    - The phone drawer is a `Drawer`: Escape, a tap beside it, a link or a window grown to the
+      desktop's width closes it, and the focus stays inside it.
+    - `shared/ui/toasts.ts` and `Toaster.tsx`: one `role="status"` region, always present; five
+      seconds, held while the pointer is on a message; the same message once; at most three.
+      «کپی شد» (the IBAN) and «… اضافه شد» (a new user) moved from lines in the page to toasts;
+      the copy failure stays beside the number.
+    - `screens/overlays.spec.ts` with `screens/open.ts` (the page-opening steps, shared with the
+      screenshots); the sample API answers the IBAN's `DELETE`, a new user, a number switched off
+      and the logout, keeping nothing.
+    How it was checked: the behaviour tests in Chromium (the drawer through twelve Tabs, Escape,
+    a tap, a link and a wider window; the IBAN's question through Enter, Escape, a tap outside
+    and a press slid in from outside, none sending the `DELETE`, then its own button sending it
+    once; the own number's question cancelled and confirmed, ending on the login page; the
+    toast in the status region). The 4 new pictures were looked at: the IBAN's question at both
+    widths, the open drawer on a phone, the toast. Not seen by eye: the keyboard's focus ring in
+    the dialog and the drawer; the real API (the browser tests use the sample API, and no API
+    route changed); an iPhone and the Android back gesture.
+    Reviewed the same day by the `reviewer` agent on Sonnet (the developer's choice): nothing
+    blocking; no IBAN digit beyond the last four reaches a dialog or a toast, no refusal is a
+    toast, only one's own number asks and cancelling sends nothing. Its findings, fixed: an open
+    drawer stayed over a window grown to the desktop's width (it now closes); a press begun
+    outside and slid onto a button closed the dialog (both ends now count); the toasts' pause
+    never ended if the message under the pointer was pushed out (it now ends); the test worked out
+    the last four digits with the panel's own formatter (now written out). Its questions,
+    answered in ADR 0030: Escape stopping at the dialog is a guard, since the IBAN's question is
+    drawn beside its form; the focus on an iPhone and after a disabled opener is left for 1.7d.

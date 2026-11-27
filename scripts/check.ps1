@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     The steps of .github/workflows/ci.yml for .NET and the panel: format, lint, build, tests and
-    the panel's screenshots (ADR 0028).
+    the panel's screenshots and behaviour tests (ADR 0028, ADR 0030).
     Each step's full output goes to artifacts/check/<step>.log. The console gets one line per
     step with the test counts, and for a failed step only what is needed to fix it: compiler
     messages once each, failed tests grouped by their error. Why (ADR 0017): one failing test run

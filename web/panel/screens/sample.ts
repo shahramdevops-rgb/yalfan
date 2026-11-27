@@ -286,6 +286,17 @@ export const users: Schemas['StaffUserDetails'][] = [
   },
 ];
 
+/** What the API answers to the new user the behaviour tests add (overlays.spec.ts). */
+export const newUser: Schemas['StaffUserDetails'] = {
+  id: id(6),
+  fullName: 'نسرین اکبری',
+  role: 'operator',
+  isActive: true,
+  isOwnerAccount: false,
+  loginNumbers: [number(7)],
+  createdAt: '2026-11-25T06:30:00Z',
+};
+
 /** The change history of contractor 2: made, corrected, an IBAN set and replaced, a stage ticked. */
 export const contractorHistory: Schemas['HistoryPage'] = {
   saves: [

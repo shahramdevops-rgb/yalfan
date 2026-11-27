@@ -1,7 +1,7 @@
 # Yalfan — Roadmap
 
-Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7c (overlays and
-the keyboard; the design system was split into 1.7 to 1.7d, and 1.7 and 1.7b are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: the check of 1.6
+Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7d (the keyboard and
+data entry; the design system was split into 1.7 to 1.7e, and 1.7 to 1.7c are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: the check of 1.6
 (waits for the developer, who does the operator's work for now).
 
 How to use this file:
@@ -275,6 +275,23 @@ were accepted as written):
   stay; the Toman figure is dropped («دوازده هزار تومان», not «۱۲٬۰۰۰ تومان · دوازده هزار
   تومان»), so the screen shows one figure.
 
+Answered by the developer on 1405/09/06, for 1.7c (ADR 0030; every proposal of the plan was
+accepted as written):
+- **1.7c is split in three** (1.7c overlays, 1.7d the keyboard and data entry, 1.7e the data
+  table and print, which was 1.7d), because each part needs its own small diff and review.
+- **The dialog and the phone drawer are built on the browser's own `<dialog>`**, with no
+  package: the browser makes the page behind it inert, closes it on Escape and gives the focus
+  back, which is what a hand-made overlay gets wrong; Radix's dialog alone brings 15 direct
+  dependencies, its toast 12.
+- **The searchable picker waits for 2.1**, the first screen that picks a model: no Phase 1 screen
+  picks a model or a contractor, a part nothing uses is seen by no picture and no test, and the
+  prototypes of 2.0 may show that the five to fifteen contractors of one stage are better as
+  buttons than behind a search box.
+- **The panel's behaviour tests (focus, Escape, the keyboard) run in Playwright, in the
+  screenshots' pinned image**, against the same sample API, not in Vitest with jsdom: no new
+  package, and a real Chromium, where jsdom does not fully model the dialog or the focus. This
+  closes the question of component tests, open since 1.6.4.
+
 - **1.1 Catalog core.** Done 1405/09/01 (ADR 0006, ADR 0016).
 - **1.2 Stages.** Done 1405/09/01 (ADR 0018).
 - **1.3 Contractors.** Done 1405/09/02 (ADR 0019).
@@ -296,7 +313,7 @@ were accepted as written):
   - **1.6.3 Rates and the money display.** Done 1405/09/04 (ADR 0024), except the check of 1.6
     (a real model entered with its rates without help), which waits for the developer.
   - **1.6.4 Contractors and workers.** Done 1405/09/04 (ADR 0025); left open for the
-    developer: Q.13 and whether the panel gets component tests.
+    developer: Q.13. (Component tests: answered for 1.7c, behaviour tests in Playwright, ADR 0030.)
   - **1.6.5 Users and login numbers.** Done 1405/09/05 (ADR 0026).
   - **1.6.5b Housekeeping.** Done 1405/09/05 (rules in CLAUDE.md and `.claude/agents/reviewer.md`).
   - **1.6.6 Change history.** Done 1405/09/05 (ADR 0027); an IBAN now reads set, replaced or
@@ -336,13 +353,18 @@ were accepted as written):
   - **1.7b Tokens and the simple parts.** Done 1405/09/06 (ADR 0029, `docs/design/UI.md`);
     the panel took the olive green and cream of the workshop's logo. Left open: the logo's own
     file (O.12b); the pointer and focus states were not seen by eye.
-  - **1.7c Overlays and the keyboard.** The confirmation dialog, toasts, the searchable picker
-    and the phone drawer on accessible primitives; the data entry rules (Enter to the next
-    field, the first field focused, the last choices remembered, a summary before every money
-    action); a page used start to finish with the keyboard alone, as a test. Found while
-    planning: an IBAN is removed with one click and no question, and the phone drawer neither
-    closes on Escape nor keeps the focus inside it.
-  - **1.7d Data table and print.** The data table (sticky header, totals row, paging, empty
+  Split again on 1405/09/06 (1.7c into 1.7c and 1.7d; the old 1.7d is now 1.7e), and the
+  searchable picker moved to 2.1, both with the developer's answers above.
+  - **1.7c Overlays.** Done 1405/09/06 (ADR 0030). Left open: the focus after an IBAN is saved
+    or removed, and on an iPhone after any dialog (1.7d); the Android back gesture, not tried.
+  - **1.7d The keyboard and data entry.** The data entry rules (Enter to the next field, the first
+    field focused, the last choices remembered, a summary before every money action); a page
+    used start to finish with the keyboard alone, as a test. Its questions: whether saving a
+    rate also shows a summary first; and «today's date by default» against a new worker's start
+    date, which the developer chose to start empty (ADR 0025). Left to it by 1.7c (ADR 0030):
+    where the focus goes when an IBAN's small form closes, and after a dialog on an iPhone,
+    where Safari does not focus a tapped button.
+  - **1.7e Data table and print.** The data table (sticky header, totals row, paging, empty
     state, rows as cards on a phone); the print stylesheet and the A5/A4 layout.
 
 ## Phase 2 — Contractor work and accounts
@@ -361,7 +383,9 @@ the system refuse to issue cutting to a contractor (decided in 2.2).
   Why: changing a drawing takes minutes, changing a built screen takes hours. *Done when:* one
   variant of each flow is chosen and saved in `docs/design/`.
 - **2.1 Production orders.** Model, colours and quantities, due date, status. *Done when:* an order
-  can be opened, changed while unstarted, and closed.
+  can be opened, changed while unstarted, and closed. Builds the shared searchable picker
+  (moved from 1.7c on 1405/09/06), as 2.0's chosen prototype shows it, operable by keyboard and
+  tested in the Playwright image (ADR 0030); 2.2 reuses it for the contractor.
 - **2.2 Work orders: issue.** A stage of a production order given to a contractor: quantity, date,
   expected return date, rate snapshot. ADR on snapshots. *Done when:* changing the rate card
   afterwards does not change an issued work order.

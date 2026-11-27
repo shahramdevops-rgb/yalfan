@@ -87,5 +87,6 @@ Three things stand in the way of a picture that is the same on every run:
 - The container runs as root. On Windows (Docker Desktop) and in CI this changes nothing; on a
   Linux PC the files it writes in `web/panel` (the generated API types, updated pictures) would
   belong to root. Left as it is while the developer works on Windows.
-- Not seen by the pictures: behaviour (clicks, the keyboard; a keyboard-only test comes in 1.7c),
+- Not seen by the pictures: behaviour (clicks, the keyboard; tested since 1.7c by Playwright tests
+  in the same image, ADR 0030),
   other browsers, and Chrome's Auto Dark Mode (ADR 0014).

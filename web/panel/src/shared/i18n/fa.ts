@@ -29,6 +29,9 @@ const messages = {
   'nav.users': 'کاربران',
   'nav.openMenu': 'باز کردن منو',
   'nav.closeMenu': 'بستن منو',
+  'nav.menu': 'منو',
+
+  'dialog.cancel': 'انصراف',
 
   'header.logout': 'خروج',
   'header.today': 'امروز {date}',
@@ -62,6 +65,10 @@ const messages = {
   'users.numberOff': 'خاموش',
   'users.lastNumber': 'آخرین شمارهٔ روشن این حساب است و خاموش نمی‌شود.',
   'users.ownNumber': 'این شماره را فقط حساب مالک دیگری دوباره روشن می‌کند، تا اگر دست دزد باشد او نتواند روشنش کند.',
+  'users.ownNumberOffTitle': 'شمارهٔ خودتان خاموش شود؟',
+  'users.ownNumberOffQuestion':
+    'از همهٔ دستگاه‌های خودتان، همین یکی هم، بیرون می‌روید و باید با شمارهٔ دیگرتان وارد شوید. این شماره را بعد از آن فقط حساب مالک دیگری دوباره روشن می‌کند.',
+  'users.ownNumberOff': 'خاموش کردن و خروج',
   'users.new': 'کاربر تازه',
   'users.newHint': 'کاربر تازه با پیامکی که به این شماره می‌رود وارد می‌شود.',
   'users.fullName': 'نام و نام خانوادگی',
@@ -274,6 +281,8 @@ const messages = {
   'iban.replaceNote': 'شبای تازه جای شبای قبلی را می‌گیرد.',
   'iban.save': 'ثبت شبا',
   'iban.remove': 'پاک کردن شبا',
+  'iban.removeTitle': 'شبا پاک شود؟',
+  'iban.removeQuestion': 'شبای {name} پاک می‌شود. برای ثبت دوباره باید آن را از روی کارت یا دفترچه بنویسید.',
   'iban.show': 'نمایش کامل',
   'iban.hide': 'پنهان کردن',
   'iban.copy': 'کپی',

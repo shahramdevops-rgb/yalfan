@@ -1,5 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { answerApi } from './api';
+import { waitUntilLoaded } from './open';
 import * as sample from './sample';
 
 interface Screen {
@@ -39,18 +40,6 @@ const screens: Screen[] = [
   { name: 'users', path: '/users', shows: sample.users[2]!.fullName },
 ];
 
-/** Loaded: what the page is about is on it, and no grey placeholder or splash is left. */
-async function waitUntilLoaded(page: Page, screen: Screen) {
-  const main =
-    screen.shows === null
-      ? page.getByRole('heading', { level: 1 })
-      : page.getByText(screen.shows, { exact: true }).first();
-  await expect(main).toBeVisible();
-  await expect(page.locator('.animate-pulse')).toHaveCount(0);
-  await page.waitForLoadState('networkidle');
-  await page.evaluate(() => document.fonts.ready);
-}
-
 for (const screen of screens) {
   test(screen.name, async ({ page }) => {
     const pageErrors: string[] = [];
@@ -60,7 +49,7 @@ for (const screen of screens) {
 
     try {
       await page.goto(screen.path);
-      await waitUntilLoaded(page, screen);
+      await waitUntilLoaded(page, screen.shows);
     } finally {
       // The cause, when there is one, is reported instead of its symptom (a page that never
       // showed its data), with the request or the error named.

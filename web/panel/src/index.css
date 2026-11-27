@@ -66,4 +66,9 @@
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
   }
+
+  /* While a dialog or the phone's drawer is open, the page behind it stays still (ADR 0030). */
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
 }

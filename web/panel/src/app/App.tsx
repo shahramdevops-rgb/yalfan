@@ -15,6 +15,7 @@ import { PartyPage } from '../features/parties/PartyPage';
 import { StagesPage } from '../features/production/StagesPage';
 import { UsersPage } from '../features/users/UsersPage';
 import { sessionStore } from '../shared/api/client';
+import { Toaster } from '../shared/ui/Toaster';
 import { AppLayout } from './AppLayout';
 import { ErrorPage } from './ErrorPage';
 import { NotFoundPage } from './NotFoundPage';
@@ -77,6 +78,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster />
     </QueryClientProvider>
   );
 }

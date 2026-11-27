@@ -11,6 +11,7 @@ import { errorMessage, t } from '../../shared/i18n/fa';
 import { Button } from '../../shared/ui/Button';
 import { Card, CardHeader, FormCard } from '../../shared/ui/Card';
 import { Chip } from '../../shared/ui/Chip';
+import { ConfirmDialog } from '../../shared/ui/Dialog';
 import { Field, FieldError, FormActions, FormFields } from '../../shared/ui/Form';
 import { InlineName } from '../../shared/ui/InlineName';
 import { Notice } from '../../shared/ui/Notice';
@@ -19,6 +20,7 @@ import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { Switch } from '../../shared/ui/Switch';
 import { TextField } from '../../shared/ui/TextField';
+import { toast } from '../../shared/ui/toasts';
 import { logout } from '../auth/authApi';
 import { useSession } from '../auth/useSession';
 import { endsOwnSessions, numberLock, placeUserRefusal, staffRoles, type UserField } from './users';
@@ -97,6 +99,9 @@ interface UserCardProps {
 function UserCard({ user, isCurrentUser, save, endsOwnSessions, onOwnSessionsEnded }: UserCardProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  // Switching off a number of one's own account asks first: it logs this page out at once, and
+  // only another owner account can switch the number back on (ADR 0026, ADR 0030).
+  const [askingToSwitchOff, setAskingToSwitchOff] = useState<LoginNumber | null>(null);
 
   async function run(send: () => Promise<StaffUser>) {
     setBusy(true);
@@ -178,10 +183,30 @@ function UserCard({ user, isCurrentUser, save, endsOwnSessions, onOwnSessionsEnd
                 number={number}
                 lock={numberLock(user, number, isCurrentUser ? user.id : undefined)}
                 disabled={busy}
-                onChange={(isActive) => void switchNumber(number, isActive)}
+                onChange={(isActive) =>
+                  !isActive && endsOwnSessions ? setAskingToSwitchOff(number) : void switchNumber(number, isActive)
+                }
               />
             ))}
           </ul>
+          {askingToSwitchOff && (
+            <ConfirmDialog
+              title={t('users.ownNumberOffTitle')}
+              confirmLabel={t('users.ownNumberOff')}
+              onCancel={() => setAskingToSwitchOff(null)}
+              onConfirm={() => {
+                setAskingToSwitchOff(null);
+                void switchNumber(askingToSwitchOff, false);
+              }}
+            >
+              <p>
+                <span dir="ltr" className="text-lg font-medium text-ink">
+                  {formatMobile(askingToSwitchOff.mobileNumber)}
+                </span>
+              </p>
+              <p>{t('users.ownNumberOffQuestion')}</p>
+            </ConfirmDialog>
+          )}
         </Field>
       ) : (
         <Field label={t('users.mobile')}>
@@ -251,7 +276,6 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
   const [role, setRole] = useState<StaffRole>('operator');
   const [errors, setErrors] = useState<Errors>({});
   const [saving, setSaving] = useState(false);
-  const [added, setAdded] = useState<string>();
   const titleId = useId();
 
   function check(): Errors {
@@ -269,7 +293,6 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    setAdded(undefined);
     const found = check();
     setErrors(found);
     if (Object.keys(found).length > 0) {
@@ -285,7 +308,9 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
       setFullName('');
       setMobileNumber('');
       setRole('operator');
-      setAdded(t('users.added', { name: created.fullName }));
+      // The new card appears among the others, perhaps off the screen: a short message says it
+      // was added (ADR 0030).
+      toast(t('users.added', { name: created.fullName }));
     } catch (error) {
       const placed = placeUserRefusal(toProblem(error));
       setErrors(Object.fromEntries(Object.entries(placed).map(([field, code]) => [field, errorMessage(code)])));
@@ -346,11 +371,6 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
 
       <FormActions>
         {errors.form && <Notice tone="danger">{errors.form}</Notice>}
-        {added && (
-          <p role="status" className="text-sm text-success">
-            {added}
-          </p>
-        )}
         <Button type="submit" busy={saving} className="self-start">
           {t('users.add')}
         </Button>

@@ -59,6 +59,35 @@ function routes(signedIn: boolean): [method: string, path: RegExp, handler: Hand
         id === sample.workerDetails.id ? { body: sample.workerDetails } : notFound('parties.worker_not_found'),
     ],
     ['GET', /^\/panel\/users$/, () => ({ body: sample.users })],
+    // The writes the behaviour tests make (overlays.spec.ts). Each answers what the API would,
+    // without keeping anything: a later read answers the sample data again.
+    [
+      'DELETE',
+      new RegExp(`^/panel/parties/contractors/${uuid}/iban$`),
+      ([, id]) =>
+        id === sample.contractorDetails.id
+          ? { body: { ...sample.contractorDetails, maskedIban: null } }
+          : notFound('parties.contractor_not_found'),
+    ],
+    ['POST', /^\/panel\/users$/, () => ({ body: sample.newUser })],
+    [
+      'POST',
+      new RegExp(`^/panel/users/${uuid}/numbers/${uuid}/deactivate$`),
+      ([, userId, numberId]) => {
+        const user = sample.users.find((each) => each.id === userId);
+        return user
+          ? {
+              body: {
+                ...user,
+                loginNumbers: user.loginNumbers.map((each) =>
+                  each.id === numberId ? { ...each, isActive: false } : each,
+                ),
+              },
+            }
+          : notFound('identity.user_not_found');
+      },
+    ],
+    ['POST', /^\/panel\/auth\/logout$/, () => ({ status: 204 })],
     [
       'GET',
       new RegExp(`^/panel/history/contractors/${uuid}$`),

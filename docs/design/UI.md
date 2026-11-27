@@ -1,14 +1,15 @@
 # The panel's UI rules
 
 How screens of the staff panel (`web/panel`) are built, so every session builds them the same way.
-Begun in task 1.7b (ADR 0029); 1.7c adds the overlays and the keyboard rules, 1.7d the data table
-and printing. Read this before building or changing a screen.
+Begun in task 1.7b (ADR 0029); 1.7c added the overlays (ADR 0030); 1.7d adds the keyboard rules,
+1.7e the data table and printing. Read this before building or changing a screen.
 
 Where things are:
 - Colours: `web/panel/src/index.css`, the only place a colour value is written.
 - Shared parts: `web/panel/src/shared/ui/`.
 - The colour check: `web/panel/checks/colours.test.ts` (part of `npm test`).
-- The screenshots of the main pages: `web/panel/screens/` (ADR 0028).
+- The screenshots of the main pages and the behaviour tests: `web/panel/screens/` (ADR 0028,
+  ADR 0030).
 
 ## Who it is for
 
@@ -103,6 +104,10 @@ this (only the colours are checked by a test); the review does.
 | `NameList`, `SortableList`, `AddNameForm` | The simple lists: a name, a switch, a handle to drag; adding names one after another |
 | `SearchField`, `Pager` | A long list's search box and its pages |
 | `ListSkeleton`, `LoadError` | A list still loading; a list that did not load, with «تلاش دوباره» |
+| `ConfirmDialog` | The question before a step its person cannot take back from the panel: removing an IBAN, switching off one's own login number. Says what happens and to which record; its button says what it does; «انصراف» has the focus (ADR 0030) |
+| `Drawer` | A panel sliding over the page from the inline start: the sidebar on a phone |
+| `Modal` | The base of both, the browser's own `<dialog>`; a new overlay is built on it, never on a positioned `div` |
+| `toast()` | A short message at the bottom that goes by itself, for something done that the page does not show («کپی شد»). `Toaster` is drawn once, in `App` |
 
 ## Rules
 
@@ -110,9 +115,16 @@ this (only the colours are checked by a test); the review does.
 - One `h1` per page; card titles are `h2`.
 - A form checks its own fields and says what is wrong in Persian (`noValidate`). The rules for
   entering data by keyboard (the first field focused, Enter to the next one, the last choices
-  remembered) come in 1.7c.
+  remembered) come in 1.7d.
 - A step that cannot be undone says what it will do on its button («افزودن ۶ کیف»; ADR 0023). The
-  summary before every money action comes in 1.7c.
+  summary before every money action comes in 1.7d.
+- **When to ask first** (`ConfirmDialog`): only for a step that takes away what its person cannot
+  bring back from the panel himself. A switch is undone by switching back and asks nothing; a
+  button that says what it makes asks nothing. A question on every step is pressed through
+  unread, and then protects nothing when it matters (ADR 0030).
+- **A short confirmation is a `toast()`**, never a line left in the page. A refusal is never a
+  toast: it stays beside its field (`FieldError`) or at the end of the form (`Notice`) until it
+  is put right.
 - The login page and the page shown after a crash are the two pages outside the frame; they keep
   their own centred layout and do not use `PageHeader`.
 
@@ -123,3 +135,7 @@ this (only the colours are checked by a test); the review does.
   (ADR 0028). A change that should look the same must leave every picture as it is. A change
   meant to show is taken with `npm run screens:update`, looked at, and committed with its
   pictures. The pictures show neither the pointer nor the keyboard's focus.
+- What only a browser shows (the focus, the keyboard, an overlay opening and closing) is tested in
+  `screens/*.spec.ts` with Playwright, in the same image and against the same sample API
+  (`screens/overlays.spec.ts`, ADR 0030); `npm run screens` runs them with the pictures. Logic
+  without a page stays in Vitest.
