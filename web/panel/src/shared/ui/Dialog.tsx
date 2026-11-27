@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { t } from '../i18n/fa';
 import { Button } from './Button';
+import { openedBy } from './focusReturn';
 
 interface ModalProps {
   /** Called when the person closes it: Escape, a tap outside it, or one of its own buttons. */
@@ -31,7 +32,8 @@ interface ModalProps {
  * above everything and makes the rest of the page inert, so neither Tab nor a screen reader
  * reaches what is behind it; Escape closes it. It exists only while it is open: drawing it opens
  * it, and the page closes it by no longer drawing it, so the page's own state is the one truth.
- * When it closes, the focus goes back to what opened it.
+ * When it closes, the focus goes back to what opened it: the button pressed, also on an iPhone,
+ * where Safari does not focus a tapped button (ADR 0031).
  */
 export function Modal({
   onClose,
@@ -50,7 +52,7 @@ export function Modal({
 
   useLayoutEffect(() => {
     const dialog = ref.current!;
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const opener = openedBy();
     dialog.showModal();
     (initialFocus?.current ?? dialog).focus();
 

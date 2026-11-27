@@ -1,7 +1,7 @@
 # Yalfan — Roadmap
 
-Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7d (the keyboard and
-data entry; the design system was split into 1.7 to 1.7e, and 1.7 to 1.7c are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: the check of 1.6
+Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7e (the data table
+and print; the design system was split into 1.7 to 1.7e, and 1.7 to 1.7d are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: the check of 1.6
 (waits for the developer, who does the operator's work for now).
 
 How to use this file:
@@ -292,6 +292,24 @@ accepted as written):
   package, and a real Chromium, where jsdom does not fully model the dialog or the focus. This
   closes the question of component tests, open since 1.6.4.
 
+Answered by the developer on 1405/09/06, for 1.7d (ADR 0031; every proposal of the plan was
+accepted as written):
+- **Enter goes forward** in the panel's forms: from a field to the next one, from the last to the
+  form's main button, and on a button it presses it; a row of chips is one field (Enter leaves
+  it, Space ticks), the notes keep Enter for a new line, and the forms that add one name at a
+  time keep Enter for adding. Why: the "Enter for Tab" of Iranian office software and the
+  numpad's Enter, and no form is sent half filled by an Enter pressed from habit.
+- **No summary dialog before saving a rate**: a rate is corrected from the same card by the
+  operator himself (ADR 0024), and a question before a step that can be taken back trains
+  pressing through it (ADR 0030). Instead the form warns when the new rate is five times the one
+  it is measured against or more, or a fifth or less, the size of a zero too many or of Toman
+  typed into a Rial field. The summary dialog comes with the first payment (2.6).
+- **A worker's start date still starts empty** (ADR 0025); the rule is written: a date starts on
+  today, except one that is almost always in the past, where a forgotten today costs.
+- **Only the start date of a new rate is remembered**, while the model's page is open, for a
+  raise entered stage after stage on one date; the rest (the last contractor, stage, date of a
+  work order) comes with 2.2, where the repetition is.
+
 - **1.1 Catalog core.** Done 1405/09/01 (ADR 0006, ADR 0016).
 - **1.2 Stages.** Done 1405/09/01 (ADR 0018).
 - **1.3 Contractors.** Done 1405/09/02 (ADR 0019).
@@ -357,13 +375,9 @@ accepted as written):
   searchable picker moved to 2.1, both with the developer's answers above.
   - **1.7c Overlays.** Done 1405/09/06 (ADR 0030). Left open: the focus after an IBAN is saved
     or removed, and on an iPhone after any dialog (1.7d); the Android back gesture, not tried.
-  - **1.7d The keyboard and data entry.** The data entry rules (Enter to the next field, the first
-    field focused, the last choices remembered, a summary before every money action); a page
-    used start to finish with the keyboard alone, as a test. Its questions: whether saving a
-    rate also shows a summary first; and «today's date by default» against a new worker's start
-    date, which the developer chose to start empty (ADR 0025). Left to it by 1.7c (ADR 0030):
-    where the focus goes when an IBAN's small form closes, and after a dialog on an iPhone,
-    where Safari does not focus a tapped button.
+  - **1.7d The keyboard and data entry.** Done 1405/09/06 (ADR 0031). Left open: not tried by
+    hand on an iPhone, nor Enter in an open list of Chrome on Windows; Escape in a date list
+    still does not close its small form.
   - **1.7e Data table and print.** The data table (sticky header, totals row, paging, empty
     state, rows as cards on a phone); the print stylesheet and the A5/A4 layout.
 

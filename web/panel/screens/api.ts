@@ -59,8 +59,18 @@ function routes(signedIn: boolean): [method: string, path: RegExp, handler: Hand
         id === sample.workerDetails.id ? { body: sample.workerDetails } : notFound('parties.worker_not_found'),
     ],
     ['GET', /^\/panel\/users$/, () => ({ body: sample.users })],
-    // The writes the behaviour tests make (overlays.spec.ts). Each answers what the API would,
-    // without keeping anything: a later read answers the sample data again.
+    // The writes the behaviour tests make (overlays.spec.ts, keyboard.spec.ts). Each answers what
+    // the API would, without keeping anything: a later read answers the sample data again.
+    ['POST', /^\/panel\/parties\/contractors$/, () => ({ body: sample.contractorDetails })],
+    [
+      'PUT',
+      new RegExp(`^/panel/parties/contractors/${uuid}/iban$`),
+      ([, id]) =>
+        id === sample.contractorDetails.id
+          ? { body: sample.contractorDetails }
+          : notFound('parties.contractor_not_found'),
+    ],
+    ['POST', /^\/panel\/production\/rates$/, () => ({ body: sample.rateHistory[0] })],
     [
       'DELETE',
       new RegExp(`^/panel/parties/contractors/${uuid}/iban$`),

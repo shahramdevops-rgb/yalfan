@@ -40,9 +40,10 @@ export function SizeNamesField({ sizes, onChange, error }: SizeNamesFieldProps) 
     setDuplicate(false);
   }
 
-  // Enter adds the size; it must not send the whole form.
+  // Enter adds the size, and the field is ready for the next one. In an empty field it moves on
+  // to the next field of the form, as Enter does everywhere else (ADR 0031).
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && draft.trim() !== '') {
       event.preventDefault();
       add();
     }

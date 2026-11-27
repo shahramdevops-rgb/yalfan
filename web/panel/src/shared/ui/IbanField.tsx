@@ -1,6 +1,7 @@
-import { useEffect, useId, useLayoutEffect, useRef, type ChangeEvent } from 'react';
+import { useContext, useEffect, useId, useLayoutEffect, useRef, type ChangeEvent } from 'react';
 import { groupIbanDigits, readIbanInput } from '../format/iban';
 import { FieldError } from './Form';
+import { EnterMovesOn } from './formKeys';
 
 interface IbanFieldProps {
   label: string;
@@ -38,6 +39,7 @@ export function IbanField({
   const input = useRef<HTMLInputElement>(null);
   // Where the caret goes once the grouped text is drawn; grouping moves the characters under it.
   const caret = useRef<number | null>(null);
+  const movesOn = useContext(EnterMovesOn);
 
   useLayoutEffect(() => {
     if (caret.current !== null && input.current === document.activeElement) {
@@ -86,6 +88,7 @@ export function IbanField({
           ref={input}
           id={id}
           inputMode="numeric"
+          enterKeyHint={movesOn ? 'next' : undefined}
           autoComplete="off"
           spellCheck={false}
           value={groupIbanDigits(value)}

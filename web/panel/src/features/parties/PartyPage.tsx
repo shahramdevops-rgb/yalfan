@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useParams } from 'react-router';
 import { toProblem } from '../../shared/api/problem';
 import { attempt } from '../../shared/api/refusal';
@@ -194,6 +194,8 @@ interface StartDateProps {
 /** A worker's start date: shown as a date; a tap opens the three lists with «ثبت» and «انصراف». */
 function StartDate({ startDate, update }: StartDateProps) {
   const headingId = useId();
+  // The date's line, drawn anew when the form closes, which then gets the focus back.
+  const line = useRef<HTMLButtonElement>(null);
   const [editing, setEditing] = useState(false);
   const [day, setDay] = useState(startDate);
   const [error, setError] = useState<string>();
@@ -236,6 +238,7 @@ function StartDate({ startDate, update }: StartDateProps) {
       {!editing ? (
         <div className="flex">
           <button
+            ref={line}
             type="button"
             onClick={open}
             title={t('parties.changeStartDate')}
@@ -246,7 +249,7 @@ function StartDate({ startDate, update }: StartDateProps) {
           </button>
         </div>
       ) : (
-        <InsetForm labelledBy={headingId} onSubmit={(event) => void save(event)} onKeyDown={onKeyDown}>
+        <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown} returnFocus={line}>
           <h3 id={headingId} className="sr-only">
             {t('parties.changeStartDate')}
           </h3>
@@ -261,6 +264,8 @@ function StartDate({ startDate, update }: StartDateProps) {
             newestFirst
             error={error}
             disabled={busy}
+            // The line it opened from is gone while it is open; the focus starts in it instead.
+            autoFocus
           />
           <div className="flex flex-wrap gap-3">
             <Button type="submit" busy={busy}>

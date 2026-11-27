@@ -1,4 +1,6 @@
-import { useId, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, type FormEvent, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
+import { EnterMovesOn, moveOnEnter, submitThenFocusError } from './formKeys';
+import { useReturnFocus } from './focusReturn';
 
 /**
  * A label over something that is not a single text field: a row of chips, a name edited where it
@@ -17,10 +19,13 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   );
 }
 
-/** What is wrong with one field, under it, announced by screen readers as soon as it appears. */
+/**
+ * What is wrong with one field, under it, announced by screen readers as soon as it appears. A
+ * refused save puts the focus on the first field that has one (ADR 0031).
+ */
 export function FieldError({ id, children }: { id?: string; children: ReactNode }) {
   return (
-    <p id={id} role="alert" className="text-sm text-danger">
+    <p id={id} role="alert" data-field-error className="text-sm text-danger">
       {children}
     </p>
   );
@@ -54,25 +59,35 @@ export function FormActions({ children }: { children: ReactNode }) {
 
 interface InsetFormProps {
   children: ReactNode;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  /** Saves; answer its promise, so a refusal can put the focus on the wrong field. */
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void | Promise<void>;
   onKeyDown?: (event: KeyboardEvent<HTMLFormElement>) => void;
   labelledBy: string;
+  /** The line that opened it, which gets the focus back when it closes (ADR 0031). */
+  returnFocus: RefObject<HTMLElement | null>;
 }
 
 /**
  * A small form opened inside a card by a tap, such as a new IBAN or a new rate, framed in the
- * workshop's colour so it is seen as open; it closes on «ثبت» or «انصراف».
+ * workshop's colour so it is seen as open; it closes on «ثبت» or «انصراف», and the focus goes
+ * back to the line that opened it. Enter moves from field to field as in every form (ADR 0031).
  */
-export function InsetForm({ children, onSubmit, onKeyDown, labelledBy }: InsetFormProps) {
+export function InsetForm({ children, onSubmit, onKeyDown, labelledBy, returnFocus }: InsetFormProps) {
+  const box = useReturnFocus(returnFocus);
+
   return (
     <form
+      ref={box}
       aria-labelledby={labelledBy}
-      onSubmit={onSubmit}
-      onKeyDown={onKeyDown}
+      onSubmit={(event) => submitThenFocusError(event.currentTarget, onSubmit(event))}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        moveOnEnter(event);
+      }}
       noValidate
       className="flex flex-col gap-4 rounded-xl p-4 ring-1 ring-brand-edge"
     >
-      {children}
+      <EnterMovesOn value>{children}</EnterMovesOn>
     </form>
   );
 }

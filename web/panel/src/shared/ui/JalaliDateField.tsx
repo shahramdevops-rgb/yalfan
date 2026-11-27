@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 import { formatWeekdayDay } from '../format/dates';
 import { toPersianDigits } from '../format/digits';
 import { daysInJalaliMonth, fromJalali, jalaliMonthNames, toJalali, type JalaliDay } from '../format/jalali';
+import { readTypedNumber, typedDigit } from '../format/typedNumber';
 import { t } from '../i18n/fa';
 import { FieldError } from './Form';
 
@@ -21,10 +22,15 @@ interface JalaliDateFieldProps {
   hint?: string;
   error?: string;
   disabled?: boolean;
+  /** The day list takes the focus when it is drawn: the first field of a small form opened by a tap. */
+  autoFocus?: boolean;
 }
 
 /** A leap year, so Esfand offers its 30th until the year is picked; picking a year clamps it. */
 const leapYear = 1403;
+
+/** How long a list waits for the next digit of one number, as a list's own type-ahead does. */
+const typingPause = 1000;
 
 const selectClass =
   'h-12 rounded-lg border bg-surface px-2 text-base outline-none focus:border-brand-line focus:ring-2 focus:ring-brand-glow disabled:opacity-60';
@@ -35,6 +41,10 @@ const selectClass =
  * list. The day list follows the month (Esfand has its 30th only in a leap year), and the chosen
  * day is written out with its weekday under the lists (ADR 0024). A day that must be chosen on
  * purpose, such as a worker's start date, starts empty instead of on today (ADR 0025).
+ *
+ * A number typed on a list picks it, with Latin, Persian or Arabic digits: «۱۵» the 15th, «۹»
+ * Azar, «۱۴۰۳» the year (ADR 0031). The lists show Persian digits, which the browser's own
+ * type-ahead matches only to Persian digits typed, never to the numpad's.
  */
 export function JalaliDateField({
   label,
@@ -45,9 +55,12 @@ export function JalaliDateField({
   hint,
   error,
   disabled,
+  autoFocus,
 }: JalaliDateFieldProps) {
   // The lists picked so far while the day is not whole yet.
   const [partial, setPartial] = useState<Partial<JalaliDay>>({});
+  // The digits typed so far into one list, and when the last one was.
+  const typing = useRef({ list: '', typed: '', at: 0 });
   const chosen: Partial<JalaliDay> = value ? toJalali(value) : partial;
 
   function pick(change: Partial<JalaliDay>) {
@@ -74,6 +87,25 @@ export function JalaliDateField({
     yearList.reverse();
   }
 
+  /** A digit typed on a list: added to the number being typed, which is picked once it is whole. */
+  function typeDigit(list: keyof JalaliDay, values: readonly number[], event: KeyboardEvent<HTMLSelectElement>) {
+    const digit = typedDigit(event.key);
+    if (digit === null || event.ctrlKey || event.altKey || event.metaKey) {
+      return;
+    }
+
+    // The browser's own type-ahead would act on the same key, matching the label's text.
+    event.preventDefault();
+    const before = typing.current;
+    const goesOn = before.list === list && event.timeStamp - before.at < typingPause;
+    const read = readTypedNumber((goesOn ? before.typed : '') + digit, values);
+    typing.current = { list, typed: read.kept, at: event.timeStamp };
+    if (read.pick !== undefined && read.pick !== chosen[list]) {
+      pick({ [list]: read.pick });
+    }
+  }
+
+  const months = jalaliMonthNames.map((_, index) => index + 1);
   const empty = value === null;
   const border = error ? 'border-danger-line' : 'border-line-strong';
 
@@ -84,9 +116,12 @@ export function JalaliDateField({
       <div className="grid max-w-sm grid-cols-[4rem_minmax(0,1fr)_5rem] gap-2">
         <select
           aria-label={t('date.day')}
+          aria-invalid={error ? true : undefined}
+          autoFocus={autoFocus}
           className={`${selectClass} ${border}`}
           value={chosen.day ?? ''}
           onChange={(event) => pick({ day: Number(event.target.value) })}
+          onKeyDown={(event) => typeDigit('day', days, event)}
         >
           {chosen.day === undefined && (
             <option value="" disabled>
@@ -101,9 +136,11 @@ export function JalaliDateField({
         </select>
         <select
           aria-label={t('date.month')}
+          aria-invalid={error ? true : undefined}
           className={`${selectClass} ${border}`}
           value={chosen.month ?? ''}
           onChange={(event) => pick({ month: Number(event.target.value) })}
+          onKeyDown={(event) => typeDigit('month', months, event)}
         >
           {chosen.month === undefined && (
             <option value="" disabled>
@@ -118,9 +155,11 @@ export function JalaliDateField({
         </select>
         <select
           aria-label={t('date.year')}
+          aria-invalid={error ? true : undefined}
           className={`${selectClass} ${border}`}
           value={chosen.year ?? ''}
           onChange={(event) => pick({ year: Number(event.target.value) })}
+          onKeyDown={(event) => typeDigit('year', yearList, event)}
         >
           {chosen.year === undefined && (
             <option value="" disabled>

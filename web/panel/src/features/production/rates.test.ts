@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { correctedBy, entriesOf, entryState, inForceOn, upcomingRate, type RateHistoryEntry } from './rates';
+import {
+  correctedBy,
+  entriesOf,
+  entryState,
+  inForceBefore,
+  inForceOn,
+  mistypedAmount,
+  upcomingRate,
+  type RateHistoryEntry,
+} from './rates';
 
 const today = '2026-11-25';
 const sewing = 'sewing';
@@ -60,5 +69,47 @@ describe('entryState', () => {
   it('calls a rate that starts today the current one', () => {
     const fromToday = entry('today', today, 130_000);
     expect(entryState(fromToday, [fromToday, ...history], today)).toBe('current');
+  });
+});
+
+describe('mistypedAmount', () => {
+  it('warns of a zero too many and of Toman typed into the Rial field', () => {
+    expect(mistypedAmount(1_500_000, 150_000)).toBe('higher');
+    expect(mistypedAmount(15_000, 150_000)).toBe('lower');
+  });
+
+  it('warns from five times, and from a fifth, on', () => {
+    expect(mistypedAmount(750_000, 150_000)).toBe('higher');
+    expect(mistypedAmount(749_999, 150_000)).toBeNull();
+    expect(mistypedAmount(30_000, 150_000)).toBe('lower');
+    expect(mistypedAmount(30_001, 150_000)).toBeNull();
+  });
+
+  it('says nothing of a real raise or cut', () => {
+    expect(mistypedAmount(210_000, 150_000)).toBeNull();
+    expect(mistypedAmount(100_000, 150_000)).toBeNull();
+  });
+});
+
+describe('inForceBefore', () => {
+  const entries = [
+    entry('raise', '2026-12-22', 180_000),
+    entry('typo', '2026-11-20', 1_500_000),
+    entry('old', '2026-10-01', 140_000),
+  ];
+
+  it('is the rate before the date, never the one starting on it, which a correction replaces', () => {
+    expect(inForceBefore(entries, '2026-11-20')?.id).toBe('old');
+    expect(inForceBefore(entries, '2026-12-22')?.id).toBe('typo');
+  });
+
+  it('skips a corrected entry, and is nothing before the first', () => {
+    expect(inForceBefore([entry('gone', '2026-10-01', 140_000, true)], '2026-11-20')).toBeUndefined();
+    expect(inForceBefore(entries, '2026-10-01')).toBeUndefined();
+  });
+
+  it('lets a correction of a zero too many pass without a warning', () => {
+    // Correcting the typo of 1,500,000 to 150,000 is measured against 140,000, not the typo.
+    expect(mistypedAmount(150_000, inForceBefore(entries, '2026-11-20')!.amount)).toBeNull();
   });
 });

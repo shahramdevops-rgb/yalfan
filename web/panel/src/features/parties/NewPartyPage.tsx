@@ -108,7 +108,7 @@ export function NewPartyPage({ kind }: { kind: PartyKind }) {
     <div className="flex max-w-3xl flex-col gap-6">
       <PageHeader title={t(`parties.${kind}.new`)} back={{ to: `/${kind}`, label: t(`parties.${kind}.back`) }} />
 
-      <FormCard onSubmit={(event) => void submit(event)} gap={6}>
+      <FormCard onSubmit={submit} gap={6}>
         <FormFields>
           <TextField
             label={t('parties.fullName')}

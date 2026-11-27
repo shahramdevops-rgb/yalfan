@@ -322,7 +322,7 @@ function NewUserForm({ onCreated }: { onCreated: (user: StaffUser) => void }) {
   const clear = (field: UserField) => setErrors((before) => ({ ...before, [field]: undefined }));
 
   return (
-    <FormCard onSubmit={(event) => void submit(event)} labelledBy={titleId}>
+    <FormCard onSubmit={submit} labelledBy={titleId}>
       <CardHeader id={titleId} title={t('users.new')} hint={t('users.newHint')} />
 
       <FormFields>

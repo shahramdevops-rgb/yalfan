@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useId, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject } from 'react';
 import { refusalMessage } from '../../shared/api/refusal';
 import { toPersianDigits } from '../../shared/format/digits';
 import { formatIban, ibanDigitCount, ibanLastFour } from '../../shared/format/iban';
@@ -30,6 +30,8 @@ export function IbanSection({ kind, party, write }: IbanSectionProps) {
   const session = useSession();
   const isOwner = session.status === 'signedIn' && session.user.role === 'owner';
   const [editing, setEditing] = useState(false);
+  // The IBAN's line, which opens its small form and gets the focus back when it closes.
+  const line = useRef<HTMLButtonElement>(null);
   // Counts the changes made here; a new count draws the whole number afresh, so one on show
   // never outlives the IBAN it belongs to, even when the new one ends in the same four digits.
   const [changes, setChanges] = useState(0);
@@ -47,6 +49,7 @@ export function IbanSection({ kind, party, write }: IbanSectionProps) {
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
+          ref={line}
           type="button"
           onClick={() => setEditing(true)}
           aria-expanded={editing}
@@ -70,7 +73,7 @@ export function IbanSection({ kind, party, write }: IbanSectionProps) {
         {masked && isOwner && <WholeIban key={changes} kind={kind} partyId={party.id} />}
       </div>
 
-      {editing && <IbanForm kind={kind} party={party} write={changed} onClose={() => setEditing(false)} />}
+      {editing && <IbanForm kind={kind} party={party} write={changed} line={line} onClose={() => setEditing(false)} />}
     </Card>
   );
 }
@@ -142,7 +145,13 @@ function WholeIban({ kind, partyId }: { kind: PartyKind; partyId: string }) {
   );
 }
 
-function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose: () => void }) {
+interface IbanFormProps extends IbanSectionProps {
+  /** The IBAN's line, which gets the focus back when the form closes. */
+  line: RefObject<HTMLButtonElement | null>;
+  onClose: () => void;
+}
+
+function IbanForm({ kind, party, write, line, onClose }: IbanFormProps) {
   const headingId = useId();
   const [digits, setDigits] = useState('');
   const [error, setError] = useState<string>();
@@ -165,14 +174,14 @@ function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose:
     }
   }
 
-  function save(event: FormEvent) {
+  async function save(event: FormEvent) {
     event.preventDefault();
     if (digits.length !== ibanDigitCount) {
       setError(t('iban.incomplete', { count: toPersianDigits(String(digits.length)) }));
       return;
     }
 
-    void send(() => partiesApi[kind].setIban(party.id, `IR${digits}`), 'save');
+    await send(() => partiesApi[kind].setIban(party.id, `IR${digits}`), 'save');
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLFormElement>) {
@@ -184,7 +193,7 @@ function IbanForm({ kind, party, write, onClose }: IbanSectionProps & { onClose:
 
   return (
     <>
-      <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown}>
+      <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown} returnFocus={line}>
         <h3 id={headingId} className="font-bold">
           {hasIban ? t('iban.changeTitle') : t('iban.newTitle')}
         </h3>

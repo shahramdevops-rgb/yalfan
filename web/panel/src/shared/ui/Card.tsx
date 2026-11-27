@@ -1,4 +1,5 @@
 import type { FormEvent, ReactNode } from 'react';
+import { EnterMovesOn, moveOnEnter, submitThenFocusError } from './formKeys';
 
 /** Room between the parts of a card: tighter for a list, wider for a long form. */
 const gaps = { 4: 'gap-4', 5: 'gap-5', 6: 'gap-6', 8: 'gap-8' } as const;
@@ -17,19 +18,27 @@ export function Card({ children, labelledBy, gap = 5 }: { children: ReactNode; l
 
 interface FormCardProps {
   children: ReactNode;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  /** Saves; answer its promise, so a refusal can put the focus on the wrong field. */
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void | Promise<void>;
   labelledBy?: string;
   gap?: Gap;
 }
 
 /**
  * A whole page's form in a card: a new model, a new contractor. The panel checks the fields
- * itself and says what is wrong in Persian, so the browser's own checks are off.
+ * itself and says what is wrong in Persian, so the browser's own checks are off; a refusal puts
+ * the focus on the first wrong field, and Enter moves from field to field (ADR 0031).
  */
 export function FormCard({ children, onSubmit, labelledBy, gap = 5 }: FormCardProps) {
   return (
-    <form onSubmit={onSubmit} noValidate aria-labelledby={labelledBy} className={`${card} ${gaps[gap]}`}>
-      {children}
+    <form
+      onSubmit={(event) => submitThenFocusError(event.currentTarget, onSubmit(event))}
+      onKeyDown={moveOnEnter}
+      noValidate
+      aria-labelledby={labelledBy}
+      className={`${card} ${gaps[gap]}`}
+    >
+      <EnterMovesOn value>{children}</EnterMovesOn>
     </form>
   );
 }

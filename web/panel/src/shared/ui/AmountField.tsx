@@ -1,8 +1,9 @@
-import { useId, useLayoutEffect, useRef, type ChangeEvent } from 'react';
+import { useContext, useId, useLayoutEffect, useRef, type ChangeEvent } from 'react';
 import { groupDigits, readAmountInput } from '../format/amountInput';
 import { tomanLine } from '../format/money';
 import { t } from '../i18n/fa';
 import { FieldError } from './Form';
+import { EnterMovesOn } from './formKeys';
 
 interface AmountFieldProps {
   label: string;
@@ -25,6 +26,7 @@ export function AmountField({ label, value, onChange, error, autoFocus, disabled
   const input = useRef<HTMLInputElement>(null);
   // Where the caret goes once the grouped text is drawn; grouping moves the characters under it.
   const caret = useRef<number | null>(null);
+  const movesOn = useContext(EnterMovesOn);
 
   useLayoutEffect(() => {
     if (caret.current !== null && input.current === document.activeElement) {
@@ -65,6 +67,7 @@ export function AmountField({ label, value, onChange, error, autoFocus, disabled
           id={id}
           dir="ltr"
           inputMode="numeric"
+          enterKeyHint={movesOn ? 'next' : undefined}
           autoComplete="off"
           value={groupDigits(value)}
           onChange={change}

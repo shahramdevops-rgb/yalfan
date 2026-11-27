@@ -349,6 +349,9 @@ Decisions:
   screenshots of the main pages. The rules for building a screen are in `docs/design/UI.md`.
   The overlays (1.7c, ADR 0030) are the browser's own `<dialog>`, with no package: a question
   only before a step its person cannot take back, a toast only for what the page does not show.
+  In a form Enter goes forward, from field to field and from the last one to its button, a
+  refusal puts the focus on the wrong field, and a small form gives the focus back to the line
+  that opened it (1.7d, ADR 0031).
 - `web/shared` is created with the second app (Phase 10), not before.
 
 ## 10. Three languages
@@ -448,9 +451,9 @@ A future `Assistant` module would call existing handlers. It needs no change to 
   frontend logic; Playwright for the main flows (from 2.9), and since 1.7 for screenshots of
   the panel's main pages at desktop and phone width, run in Playwright's pinned Docker image with
   the API answered by sample data, one changed pixel failing (ADR 0028), and since 1.7c for the
-  panel's behaviour tests (focus, keyboard, overlays) in the same image (ADR 0030). CI (GitHub Actions,
-  `.github/workflows/ci.yml`) builds and runs every test on each push, on Linux like the
-  production image.
+  panel's behaviour tests (focus, keyboard, overlays) in the same image (ADR 0030, ADR 0031). CI
+  (GitHub Actions, `.github/workflows/ci.yml`) builds and runs every test on each push, on Linux
+  like the production image.
   - Format and lint (decided in task 0.9, ADR 0015): the .NET analyzers and code style rules run
     inside the build, so a violation is a build error everywhere; `dotnet format whitespace`,
     ESLint and Prettier are CI steps. CI runs every check even after one fails, so one push
@@ -600,3 +603,4 @@ server in the developer's.
 | 0028 | Screenshots of the panel: Playwright in its pinned image, the API answered by sample data | 1.7 (written) |
 | 0029 | The panel's colours by role, Tailwind's palette off, and the shared page parts | 1.7b (written) |
 | 0030 | The panel's overlays on the browser's own dialog; toasts; behaviour tests in Playwright | 1.7c (written) |
+| 0031 | The panel's keyboard and data entry: Enter goes forward, the focus on a refusal and after a small form, typed dates, a rate's warning | 1.7d (written) |

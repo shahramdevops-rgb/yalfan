@@ -1,5 +1,6 @@
-import { useId, type InputHTMLAttributes } from 'react';
+import { useContext, useId, type InputHTMLAttributes } from 'react';
 import { FieldError } from './Form';
+import { EnterMovesOn } from './formKeys';
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -12,6 +13,7 @@ export function TextField({ label, hint, error, className = '', ...props }: Text
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined;
+  const movesOn = useContext(EnterMovesOn);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -20,6 +22,7 @@ export function TextField({ label, hint, error, className = '', ...props }: Text
       </label>
       <input
         id={id}
+        enterKeyHint={movesOn ? 'next' : undefined}
         {...props}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}

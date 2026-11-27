@@ -567,3 +567,51 @@ The entry of 1.7 itself stays in the roadmap until its last part (1.7d) is finis
     the last four digits with the panel's own formatter (now written out). Its questions,
     answered in ADR 0030: Escape stopping at the dialog is a guard, since the IBAN's question is
     drawn beside its form; the focus on an iPhone and after a disabled opener is left for 1.7d.
+  - **1.7d The keyboard and data entry.** The data entry rules (Enter to the next field, the first
+    field focused, the last choices remembered, a summary before every money action); a page
+    used start to finish with the keyboard alone, as a test. Its questions: whether saving a
+    rate also shows a summary first; and «today's date by default» against a new worker's start
+    date, which the developer chose to start empty (ADR 0025). Left to it by 1.7c (ADR 0030):
+    where the focus goes when an IBAN's small form closes, and after a dialog on an iPhone,
+    where Safari does not focus a tapped button.
+    Found while planning: Enter in any field sent the whole form (Enter after a new contractor's
+    name came back with three refusals); a refusal left the focus where it was; a small form that
+    closed, or the start date's form opening, dropped the focus to the start of the page; the
+    date lists, labelled in Persian digits, could not be typed from the numpad.
+    Decided with the developer on 1405/09/06, who accepted every proposal of the plan as written
+    (ROADMAP, answers for 1.7d): Enter goes forward; no summary dialog before a rate, but a
+    warning at five times or a fifth; a worker's start date still starts empty; only the start
+    date of a new rate is remembered, on its model's page.
+    **Done 1405/09/06:** 535 .NET tests and 180 panel tests pass (13 new: the digits typed on a
+    list, the mistyped rate, the rate before a correction), and 40 Playwright tests in the pinned
+    image: the 32 pictures, unchanged to the pixel, the 5 behaviour tests of 1.7c, and 7 new
+    keyboard tests at desktop width. Build has 0 warnings. ADR 0031; `docs/design/UI.md` (a
+    section on the keyboard), `docs/ARCHITECTURE.md` section 9 and the testing line updated.
+    - `shared/ui/formKeys.ts`: Enter goes forward in `FormCard` and `InsetForm` (a field, a
+      list, a chip or a switch to the next field, the last to the main button; a row of chips is
+      one field, Space ticks; notes keep their Enter); a refused save focuses the first wrong
+      field, once the save's promise has answered (the pages now pass `onSubmit={submit}`); the
+      phone's Enter key says «بعدی» in these forms (`enterKeyHint`).
+    - `shared/ui/focusReturn.ts`: `InsetForm` takes `returnFocus`, the line that opened it, and
+      gives it the focus when it closes (the IBAN, a stage's rate, a worker's start date, whose
+      form now focuses its day list as it opens); `Modal` gives the focus back to the button
+      pressed, also when Safari did not focus it.
+    - `JalaliDateField`: a number typed on a list picks it, in Latin, Persian or Arabic digits
+      (`shared/format/typedNumber.ts`); its lists are marked `aria-invalid` with an error.
+    - The rate form warns while the amount is typed, at five times today's rate or more, or a
+      fifth or less (a correction against the rate before the corrected entry, found while
+      building); the next new rate on a model's page opens on the last one's start date.
+    - A model's size field: Enter in an empty field moves on.
+    - `screens/keyboard.spec.ts`; the sample API answers a new contractor, an IBAN set and a new
+      rate, keeping nothing.
+    How it was checked: the keyboard tests in Chromium (a whole new contractor with the keyboard
+    alone, nothing sent before the Enter on its button, the body sent written out; each refusal
+    focusing its field, the stages' first chip for a group; a new model's switch, list, sizes and
+    rows of chips; the rate form by keyboard, its warning, `۱۰` and `10` typed on the lists,
+    `2026-12-31` sent for 10 Dey 1405, the next form opening on it; the IBAN's and the start
+    date's focus back on their line; a tap as Safari makes it, a press and a click with no
+    focus, the question and the form giving the focus to the button and the line). With the new
+    behaviour switched off, all seven failed. Not seen by eye: Chrome on Windows (whether Enter
+    in an open list reaches the page: either way the list takes the choice) and an iPhone.
+    Escape in a date list still does not close its small form, as before.
+    Not reviewed by the `reviewer` agent: the developer chose not to run it for this task.

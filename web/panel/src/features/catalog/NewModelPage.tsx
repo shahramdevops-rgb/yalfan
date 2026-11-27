@@ -88,7 +88,7 @@ export function NewModelPage() {
     <div className="flex max-w-3xl flex-col gap-6">
       <PageHeader title={t('newModel.title')} back={{ to: '/models', label: t('models.back') }} />
 
-      <FormCard onSubmit={(event) => void submit(event)} gap={8}>
+      <FormCard onSubmit={submit} gap={8}>
         <FormFields>
           <TextField
             label={t('newModel.name')}

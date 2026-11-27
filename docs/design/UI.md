@@ -1,8 +1,8 @@
 # The panel's UI rules
 
 How screens of the staff panel (`web/panel`) are built, so every session builds them the same way.
-Begun in task 1.7b (ADR 0029); 1.7c added the overlays (ADR 0030); 1.7d adds the keyboard rules,
-1.7e the data table and printing. Read this before building or changing a screen.
+Begun in task 1.7b (ADR 0029); 1.7c added the overlays (ADR 0030), 1.7d the keyboard and data
+entry (ADR 0031); 1.7e adds the data table and printing. Read this before building or changing a screen.
 
 Where things are:
 - Colours: `web/panel/src/index.css`, the only place a colour value is written.
@@ -82,11 +82,11 @@ this (only the colours are checked by a test); the review does.
 |---|---|
 | `PageHeader` | The top of every page in the frame: the back link, the one `h1`, a sentence under it, the page's own button or link. On a record's own page it carries only the back link and «تاریخچه», and the record's name is the `h1` (`InlineName heading`) |
 | `Card`, `CardHeader` | One part of a page in a white panel, with its title and hint. `gap` 4 for a list, 5 by default, 6 or 8 for a long form |
-| `FormCard` | A whole page's form in a card (a new model). Give it `labelledBy` when it is one part among several on the page (the new user under the users) |
+| `FormCard` | A whole page's form in a card (a new model). Give it `labelledBy` when it is one part among several on the page (the new user under the users). Pass the save itself (`onSubmit={submit}`), not `() => void submit()`: a refusal moves the focus once the save's promise has answered |
 | `FormFields` | The short fields of a form, one under the other, no wider than they need (`sm:max-w-md`) |
 | `FormSection` | A part of a long form with its own title |
 | `FormActions` | The end of a form, under a thin line: what saving will do, the refusal (`Notice`), the button (`self-start`) |
-| `InsetForm` | A small form opened inside a card by a tap (a new IBAN, a new rate), with «ثبت» and «انصراف» |
+| `InsetForm` | A small form opened inside a card by a tap (a new IBAN, a new rate), with «ثبت» and «انصراف». `returnFocus` is the line that opened it, which gets the focus back when it closes; its first field takes the focus when it opens |
 | `Field` | A label over something that is not one text field: chips, a name edited in place, a date. It is a group named by the label; never put a `TextField` in it, which has its own |
 | `FieldError` | What is wrong with one field, under it |
 | `Notice` | A sentence in a soft box: `warning` before going on, `danger` for a refused save |
@@ -96,7 +96,7 @@ this (only the colours are checked by a test); the review does.
 | `TextLink` | A quiet link to another page («بازگشت به فهرست», «تاریخچه») |
 | `TextField`, `TextAreaField` | Text typed with its label, hint and error |
 | `AmountField`, `Money` | An amount typed, or shown: always Rial, with the Toman words under it (ADR 0002, ADR 0024). Never write an amount out by hand |
-| `JalaliDateField` | A day picked from three lists (ADR 0024) |
+| `JalaliDateField` | A day picked from three lists (ADR 0024); a number typed on a list picks it, in Latin or Persian digits (ADR 0031) |
 | `IbanField` | An IBAN typed (ADR 0025) |
 | `Chip` | A choice ticked by pressing it (a fabric, a stage, a role) |
 | `Switch` | On and off, instead of two buttons |
@@ -113,11 +113,39 @@ this (only the colours are checked by a test); the review does.
 
 - Every word comes from `src/shared/i18n/fa.ts` (the lint refuses Persian in a component).
 - One `h1` per page; card titles are `h2`.
-- A form checks its own fields and says what is wrong in Persian (`noValidate`). The rules for
-  entering data by keyboard (the first field focused, Enter to the next one, the last choices
-  remembered) come in 1.7d.
-- A step that cannot be undone says what it will do on its button («افزودن ۶ کیف»; ADR 0023). The
-  summary before every money action comes in 1.7d.
+- A form checks its own fields and says what is wrong in Persian (`noValidate`), and a refused
+  save puts the focus on the first wrong field: one marked `aria-invalid`, or the first control
+  of a group with a `FieldError` (ADR 0031).
+- A step that cannot be undone says what it will do on its button («افزودن ۶ کیف»; ADR 0023).
+  The summary dialog before a money action («به … مبلغ … ریال بابت …») comes with the first
+  payment (2.6); a rate, corrected from its own card, has none, and its form warns of an amount
+  five times the one it is measured against, or a fifth of it (ADR 0031).
+
+## The keyboard and data entry
+
+The operator copies from paper with one hand on the numpad; a page must be usable from start to
+finish with the keyboard alone (ADR 0031). `FormCard` and `InsetForm` do all of this with no code
+in the page:
+- **Enter goes forward**: from a field, a list, a chip or a switch to the next field, from the
+  last field to the form's main button, and on a button it presses it. No form is sent by an
+  Enter in the middle.
+- **A row of chips is one field**: Enter leaves the row, Space ticks a chip (and flips a
+  switch), Tab walks chip by chip. A row is the chips' common parent, so give each row its own
+  element.
+- **Notes keep Enter for a new line**; Tab leaves them.
+- **A field that adds one thing at a time** (`AddNameForm`, a model's sizes, `InlineName`) adds on
+  Enter; such a field inside a form calls `preventDefault` on that Enter, and lets an empty
+  field's Enter move on.
+- **The first field takes the focus** on a page whose purpose is entry (a new model) and in a
+  small form opened by a tap; never on a page where the form is one part among others (the new
+  user under the users, a name added under a list), where it would scroll past the page's point.
+- **When a small form closes**, the focus goes back to the line that opened it (`returnFocus`);
+  a dialog gives it back to the button that opened it, also on an iPhone.
+- **A date starts on today**, except one that is almost always in the past, where a forgotten
+  today costs (a worker's start date starts empty, ADR 0025).
+- **A choice is remembered only where it repeats**, and only while the page is open: the start
+  date of the last new rate on a model's page. Nothing is written to the browser's storage for
+  it.
 - **When to ask first** (`ConfirmDialog`): only for a step that takes away what its person cannot
   bring back from the panel himself. A switch is undone by switching back and asks nothing; a
   button that says what it makes asks nothing. A question on every step is pressed through
@@ -137,5 +165,6 @@ this (only the colours are checked by a test); the review does.
   pictures. The pictures show neither the pointer nor the keyboard's focus.
 - What only a browser shows (the focus, the keyboard, an overlay opening and closing) is tested in
   `screens/*.spec.ts` with Playwright, in the same image and against the same sample API
-  (`screens/overlays.spec.ts`, ADR 0030); `npm run screens` runs them with the pictures. Logic
-  without a page stays in Vitest.
+  (`screens/overlays.spec.ts`, ADR 0030; `screens/keyboard.spec.ts`, ADR 0031); `npm run screens`
+  runs them with the pictures. A new entry form gets a keyboard test: its fields reached by Enter,
+  nothing sent before the Enter on its button. Logic without a page stays in Vitest.

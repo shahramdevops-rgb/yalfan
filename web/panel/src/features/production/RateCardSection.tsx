@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useId, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject } from 'react';
 import { attempt } from '../../shared/api/refusal';
 import { formatDate, formatDay } from '../../shared/format/dates';
 import { toPersianDigits } from '../../shared/format/digits';
@@ -14,7 +14,16 @@ import { Money } from '../../shared/ui/Money';
 import { Notice } from '../../shared/ui/Notice';
 import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
 import { StatusBadge } from '../../shared/ui/StatusBadge';
-import { correctedBy, entriesOf, entryState, inForceOn, upcomingRate, type EntryState } from './rates';
+import {
+  correctedBy,
+  entriesOf,
+  entryState,
+  inForceBefore,
+  inForceOn,
+  mistypedAmount,
+  upcomingRate,
+  type EntryState,
+} from './rates';
 import { rateCardKey, rateHistoryKey, ratesApi, ratesKey, type RateEntry, type StageRate } from './ratesApi';
 
 /** The stage whose form is open, and the start date it opens with when it corrects an entry. */
@@ -39,12 +48,16 @@ const stateTone = {
  * force today, a raise already entered for later, and the stage's history. A tap on a rate opens
  * the form for a new one; a tap on an entry of the history opens it on that entry's start date,
  * which corrects it. Nothing is edited or deleted: every rate is a new entry (ADR 0024).
+ *
+ * The start date of the last new rate saved is remembered while the page is open, and the next
+ * new rate opens on it: a raise is entered stage after stage on one date (ADR 0031).
  */
 export function RateCardSection({ productId, productIsActive }: { productId: string; productIsActive: boolean }) {
   const headingId = useId();
   const card = useQuery({ queryKey: rateCardKey(productId), queryFn: () => ratesApi.card(productId) });
   const history = useQuery({ queryKey: rateHistoryKey(productId), queryFn: () => ratesApi.history(productId) });
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [lastStartsOn, setLastStartsOn] = useState<string>();
   const [openHistories, setOpenHistories] = useState<ReadonlySet<string>>(new Set());
 
   const toggleHistory = (stageId: string, open?: boolean) =>
@@ -91,7 +104,14 @@ export function RateCardSection({ productId, productIsActive }: { productId: str
               on={card.data.on}
               canAdd={productIsActive}
               editing={editing?.stageId === rate.stage.id ? editing : null}
+              lastStartsOn={lastStartsOn}
               onEdit={(startsOn) => setEditing({ stageId: rate.stage.id, startsOn })}
+              onSaved={(startsOn, corrected) => {
+                // A correction opens on its entry's date; only a date chosen for a new rate is kept.
+                if (!corrected) {
+                  setLastStartsOn(startsOn);
+                }
+              }}
               onClose={() => setEditing(null)}
               historyOpen={openHistories.has(rate.stage.id)}
               onToggleHistory={(open) => toggleHistory(rate.stage.id, open)}
@@ -112,7 +132,11 @@ interface StageRowProps {
   on: string;
   canAdd: boolean;
   editing: Editing | null;
+  /** The start date of the last new rate saved on this page, which a new one opens on. */
+  lastStartsOn?: string;
   onEdit: (startsOn?: string) => void;
+  /** Called with the start date of a saved rate, and whether it was a correction. */
+  onSaved: (startsOn: string, corrected: boolean) => void;
   onClose: () => void;
   historyOpen: boolean;
   onToggleHistory: (open?: boolean) => void;
@@ -125,12 +149,16 @@ function StageRow({
   on,
   canAdd,
   editing,
+  lastStartsOn,
   onEdit,
+  onSaved,
   onClose,
   historyOpen,
   onToggleHistory,
 }: StageRowProps) {
   const historyId = useId();
+  // The stage's rate, which opens its form and gets the focus back when the form closes.
+  const line = useRef<HTMLButtonElement>(null);
   const upcoming = upcomingRate(entries, on);
   const { stage } = rate;
 
@@ -154,6 +182,7 @@ function StageRow({
         <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
           {canAdd ? (
             <button
+              ref={line}
               type="button"
               onClick={() => onEdit()}
               title={t('rates.change', { stage: stage.name })}
@@ -211,6 +240,9 @@ function StageRow({
           entries={entries}
           on={on}
           startsOn={editing.startsOn}
+          opensOn={editing.startsOn ?? lastStartsOn ?? on}
+          line={line}
+          onSaved={onSaved}
           onClose={onClose}
           onHidden={() => onToggleHistory(true)}
         />
@@ -251,18 +283,34 @@ interface RateFormProps {
   rate: StageRate;
   entries: RateEntry[];
   on: string;
-  /** Set when the form corrects an entry: its start date. Otherwise the form starts on today. */
+  /** Set when the form corrects an entry: its start date. */
   startsOn?: string;
+  /** The day the form opens on: a corrected entry's, else the last new rate's, else today. */
+  opensOn: string;
+  /** The stage's rate, which gets the focus back when the form closes. */
+  line: RefObject<HTMLButtonElement | null>;
+  onSaved: (startsOn: string, corrected: boolean) => void;
   onClose: () => void;
   /** Called when the saved rate is neither today's nor the next one, so only the history shows it. */
   onHidden: () => void;
 }
 
-function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose, onHidden }: RateFormProps) {
+function RateForm({
+  productId,
+  rate,
+  entries,
+  on,
+  startsOn: correcting,
+  opensOn,
+  line,
+  onSaved,
+  onClose,
+  onHidden,
+}: RateFormProps) {
   const queryClient = useQueryClient();
   const headingId = useId();
   const [digits, setDigits] = useState('');
-  const [startsOn, setStartsOn] = useState(correcting ?? on);
+  const [startsOn, setStartsOn] = useState(opensOn);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
 
@@ -285,6 +333,15 @@ function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose,
   const reference = corrected
     ? { label: t('rates.form.onThatDay'), amount: corrected.amount }
     : current && { label: t('rates.form.current'), amount: current.amount };
+
+  // A zero too many, or Toman typed into the Rial field, is caught while it is typed (ADR 0031),
+  // against today's rate; a correction against the rate before the corrected one, which may be the
+  // very mistake being put right.
+  const before = corrected && inForceBefore(entries, startsOn);
+  const measure = corrected
+    ? before && { name: t('rates.form.rateBefore'), amount: before.amount }
+    : current && { name: t('rates.form.todaysRate'), amount: current.amount };
+  const mistyped = measure && digits !== '' ? mistypedAmount(Number(digits), measure.amount) : null;
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -316,6 +373,7 @@ function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose,
       onHidden();
     }
 
+    onSaved(startsOn, correcting !== undefined);
     onClose();
   }
 
@@ -328,7 +386,7 @@ function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose,
   }
 
   return (
-    <InsetForm labelledBy={headingId} onSubmit={(event) => void save(event)} onKeyDown={onKeyDown}>
+    <InsetForm labelledBy={headingId} onSubmit={save} onKeyDown={onKeyDown} returnFocus={line}>
       <h3 id={headingId} className="font-bold">
         {t(corrected ? 'rates.form.correctTitle' : 'rates.form.title', { stage: rate.stage.name })}
       </h3>
@@ -351,6 +409,15 @@ function RateForm({ productId, rate, entries, on, startsOn: correcting, onClose,
         autoFocus
         disabled={busy}
       />
+
+      {/* Always present, so a screen reader hears the warning when it appears. */}
+      <div aria-live="polite">
+        {mistyped && measure && (
+          <Notice tone="warning">
+            {t(mistyped === 'higher' ? 'rates.form.muchHigher' : 'rates.form.muchLower', { rate: measure.name })}
+          </Notice>
+        )}
+      </div>
 
       <JalaliDateField
         label={t('rates.form.startsOn')}

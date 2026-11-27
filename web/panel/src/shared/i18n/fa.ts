@@ -219,6 +219,10 @@ const messages = {
   'rates.form.superseded':
     'از {date} نرخ دیگری شروع شده که بعد از این تاریخ است؛ پس این نرخ امروز اجرا نمی‌شود و فقط در تاریخچه می‌ماند.',
   'rates.form.past': 'تاریخ گذشته است. کاری که قبلاً به کنتراتی داده شده، نرخ خودش را نگه می‌دارد.',
+  'rates.form.todaysRate': 'نرخ امروز',
+  'rates.form.rateBefore': 'نرخ پیش از آن',
+  'rates.form.muchHigher': 'این مبلغ پنج برابر {rate} یا بیشتر است. یک صفر اضافه نزده‌اید؟',
+  'rates.form.muchLower': 'این مبلغ یک‌پنجم {rate} یا کمتر است. مبلغ به ریال است، نه تومان.',
 
   'parties.contractors.title': 'کنتراتی‌ها',
   'parties.workers.title': 'کارگران ثابت',
