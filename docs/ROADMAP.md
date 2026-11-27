@@ -1,9 +1,8 @@
 # Yalfan — Roadmap
 
 Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7c (overlays and
-the keyboard; the design system was split into 1.7 to 1.7d, and 1.7 and 1.7b are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: 0.9's red run on
-GitHub (waits for a push, which closes Phase 0) and the check of 1.6 (waits for the developer,
-who does the operator's work for now).
+the keyboard; the design system was split into 1.7 to 1.7d, and 1.7 and 1.7b are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: the check of 1.6
+(waits for the developer, who does the operator's work for now).
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session, and each runs in a new one.
@@ -76,8 +75,8 @@ Goal: an empty but real system: solution, database, login, an empty Persian pane
 - **0.6 Audit.** Done 1405/08/28 (ADR 0013).
 - **0.7 Integration test base.** Done 1405/08/28.
 - **0.8 Panel shell.** Done 1405/08/28 (ADR 0014).
-- **0.9 CI.** Done locally 1405/08/29 (ADR 0015); the red run on GitHub waits for the
-  developer's push, which closes Phase 0 (the steps are in `docs/roadmap-done.md`).
+- **0.9 CI.** Done 1405/09/06 (ADR 0015); proven on GitHub, green on `main` and red where
+  expected on `ci/prove-red`. Phase 0 is closed.
 
 ## Phase 1 — Master data
 

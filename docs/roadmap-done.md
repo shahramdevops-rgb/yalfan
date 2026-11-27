@@ -89,6 +89,9 @@ in the roadmap with anything still open.
   CA1716 without it; the image builds now). Proof on GitHub: push `main` (the first CI run ever, expected green),
   then the throwaway branch `ci/prove-red`; expected red at .NET Format and Test and panel Lint,
   Format and Test, with both Builds green; then delete the branch.
+  *Proven 1405/09/06:* `ci/prove-red` (run 44955474489) failed at exactly those five steps with
+  both Builds green; `main` at `ccfb26a` (run 45979151572) passed. The branch was deleted on
+  GitHub and locally. Read with `gh`, installed that day so a session can read CI results itself.
 
 ## Phase 1 — Master data
 

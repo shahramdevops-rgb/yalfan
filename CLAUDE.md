@@ -121,6 +121,10 @@ Run from the repository root. Keep this section up to date when commands change.
   `Encryption:IbanKey` come from user-secrets (the API does not start without either; ADR 0019)
 - Run the stack in Docker: `docker compose up --build --wait` (needs `.env`, copied from
   `.env.example`); health at `http://localhost:8080/health`; stop with `docker compose down`
+- CI on GitHub, after the developer pushes: `gh run list --limit 5`, and
+  `gh run view <id> --log-failed` for a red run's errors (`gh` installed 1405/09/06; if the shell
+  does not find it, `C:\Program Files\GitHub CLI\gh.exe`). Read only: never push, open a pull
+  request or change the repository with `gh`
 - Logs: console; in Development also Seq at `http://localhost:5342` (compose service `seq`)
 - Run the API from the host: `docker compose up db seq --wait`, then
   `dotnet run --project src/Yalfan.Api` (`http://localhost:5080`; the connection string comes
