@@ -1,8 +1,9 @@
 # Yalfan — Roadmap
 
 Status: **Phase 1 finished** on 1405/09/06, except the check of 1.6 (waits for the developer,
-who does the operator's work for now). Planned on 1405/08/24 (2026-11-15). Next: Phase 2, its
-open questions first, then 2.0 (the prototypes). Read `docs/ARCHITECTURE.md` first.
+who does the operator's work for now). Planned on 1405/08/24 (2026-11-15). Phase 2's open
+questions were answered on 1405/09/06, except how in-house workers are counted. Next: 2.0 (the
+prototypes). Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session, and each runs in a new one.
@@ -366,6 +367,57 @@ rejected pieces deducted or only recorded; who approves QC. Added 1405/09/01 wit
 is the number of cut pieces recorded (cutting is in-house); are bags sewn by in-house day-wage
 workers counted, so that progress (2.8) shows all sewing and not only the contractors'; does
 the system refuse to issue cutting to a contractor (decided in 2.2).
+
+Answered by the developer on 1405/09/06, first round (the rest is asked again below it):
+- **A contractor receives cut pieces and the hardware (یراق‌آلات)**, sews the parts given to him
+  at their set rate and brings the work back (Q.4). The materials and hardware handed over are
+  tracked with stock in Phase 6, not here; a Phase 2 work order holds the number of pieces,
+  because a stock built half now would be rebuilt in Phase 6.
+- **A person checks the work brought back and marks it checked on a phone**; only checked work
+  is credited to the contractor's account and can then be paid. So receiving and QC (2.3, 2.9)
+  are designed for a phone first.
+- **Advances are at the owner's discretion, and the settlement comes after the work is brought
+  back and checked** (Q.12). **No cash**: every payment, advances included, goes to the IBAN the
+  contractor gave, because the workshop wants every payout to go through the system.
+
+Answered by the developer on 1405/09/06, second round (at his word, what he left unanswered takes
+the proposal as written, marked "proposal"):
+- **A bad piece goes back to the contractor to be fixed, and only pieces done right are paid**
+  (Q.2): a piece sent back for rework is paid once, when it comes back right. **While a
+  contractor still has pieces out for rework, every payment to him warns** («فلانی ۵ تکه‌ی ناقص
+  دارد که هنوز تحویل نداده») **and lets the owner pay anyway**, because holding money back is
+  the owner's call, not the system's. A piece that cannot be fixed is not paid; a deduction for
+  it, if any, is a separate entry the operator types with its reason (proposal), because the
+  loss differs each time and a separate entry can be reversed.
+- **The person who checks** is a staff user; if he is neither the manager nor the operator, he
+  gets a login that sees only receiving and checking (proposal), because his mark puts money
+  into a contractor's account, so he must not reach rates, accounts or IBANs.
+- **Payments stay by hand until Phase 15, which stays where it is**: the owner transfers from his
+  bank to the IBAN on file and the operator records it with the bank's reference; no cash is
+  recorded. **A payment cannot be recorded for a contractor with no IBAN** (proposal), while the
+  IBAN stays optional on the profile, because the operator types contractors from the paper book
+  before every IBAN is known.
+- **Work can move to another contractor, all of it or part** (it happens when someone cannot sew
+  it). The work order itself is not moved: the unfinished pieces are taken back from the first
+  contractor, unpaid, and a new work order is issued to the second (proposal), so it stays clear
+  where each piece was and at which rate, and the second one's work never reaches the first
+  one's account. The screen may offer it as one step; 2.0 decides.
+- **The cut count is recorded** on the production order, with no worker's name (proposal),
+  because the owner wants to know how many were cut, and cutting is day-wage work whose pay does
+  not depend on the count.
+- **A work order may come back in several deliveries**, everything at the end being the simple
+  case (proposal). **An advance larger than the checked work** leaves the rest as the
+  contractor's debt, taken from his next work (proposal), because an advance is paid ahead, not
+  given.
+- **Two users saving the same record** (Q.13): a record that holds counts or money refuses a save
+  from a stale page («کس دیگری این را عوض کرده، دوباره باز کنید»); the Phase 1 lists keep "the
+  last save wins", because a change lost in silence costs most where money is counted, while the
+  audit shows a changed name.
+- **Still open:** how in-house workers are given work and counted, asked of the workshop by the
+  developer. Until the answer the proposal stands: their sewing is a work order to the worker
+  with no rate and no pay line, so progress (2.8) shows all sewing. If they turn out to be paid
+  by the piece, O.9 and ADR 0021 change. Whether cutting may be issued to a contractor is decided
+  in 2.2.
 
 - **2.0 Prototypes of the three daily flows (added 1405/09/04).** Issuing work, receiving with
   QC, and a contractor's statement and settlement, drawn as clickable mock-ups in two or three
@@ -792,9 +844,9 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 | # | Question | Blocks |
 |---|---|---|
 | Q.1 | Real stages of making a bag, and which are done outside. **Answered 1405/09/01:** cutting (in-house only), sewing (contractors or in-house day-wage workers), packing; one shared list, no route per model (ADR 0018) | Phase 1 |
-| Q.2 | Contractor pay method and rates; what happens to rejects. **Method answered 1405/09/02:** by the piece, per model and stage (ADR 0021); rejects still open | Phase 2 |
+| Q.2 | Contractor pay method and rates; what happens to rejects. **Method answered 1405/09/02:** by the piece, per model and stage (ADR 0021). **Rejects answered 1405/09/06:** a bad piece goes back to be fixed and only pieces done right are paid; a payment warns while pieces are out for rework, but is not refused | Phase 2 |
 | Q.3 | Stored money unit: Toman or Rial. **Answered 1405/08/24: Rial, everywhere** (stored and shown), ADR 0002. **Added 1405/09/02:** under every Rial amount shown, its Toman equivalent and its words in Toman (ADR 0002 point 9). **Changed 1405/09/04:** only the words in Toman, no Toman figure (ADR 0024) | 0.3 |
-| Q.4 | Do contractors receive raw material or cut pieces | Phase 2 / 6 |
+| Q.4 | Do contractors receive raw material or cut pieces. **Answered 1405/09/06:** cut pieces and the hardware; what is handed over is tracked with stock in Phase 6 | Phase 2 / 6 |
 | Q.5 | Shift hours, grace period, overtime, leave rules | Phase 4 |
 | Q.6 | In-house pay types; legal deductions in scope or not. **Pay type answered 1405/09/02: a day wage**; legal deductions still open | Phase 5 |
 | Q.7 | Wholesale price tiers, credit and return policy | Phase 8 |
@@ -802,5 +854,5 @@ are paid today and how (cash, card transfer); who besides the owner may approve.
 | Q.9 | Where the store is served from for foreign visitors | Phase 11 |
 | Q.10 | Number of models and colours today. **Answered 1405/09/01: many** (no exact count); models have no codes today; a bag is model + fabric + colour + optional size (see Phase 1) | Phase 1 |
 | Q.11 | Registered company or individual; which bank | 12.3 / 15.0 |
-| Q.12 | How often and how contractors are paid today | Phase 2 |
-| Q.13 | Two users saving the same record from two open pages: is "the last save wins" accepted (three office users, every change audited), or does each edit carry the row's version so a save from a stale page is refused? Found by the review of 1.6.4 (ADR 0025) | Before Phase 2 |
+| Q.12 | How often and how contractors are paid today. **Answered 1405/09/06:** advances at the owner's discretion; the settlement after the work is checked; never cash, always to the contractor's IBAN | Phase 2 |
+| Q.13 | Two users saving the same record from two open pages: is "the last save wins" accepted (three office users, every change audited), or does each edit carry the row's version so a save from a stale page is refused? Found by the review of 1.6.4 (ADR 0025). **Answered 1405/09/06:** a record holding counts or money refuses a save from a stale page; the Phase 1 lists keep "the last save wins" | Before Phase 2 |

@@ -162,8 +162,14 @@ ProductionOrder (model, colours, quantity, due date)
   the same start date. The database refuses UPDATE and DELETE on the table.
 - **Rate snapshot.** A work order copies the rate when it is issued. Changing a rate card later
   never changes old work orders. The same rule holds for material cost and selling price.
-- **Rework and rejects** stay on the contractor's record: they drive the quality numbers and can
-  carry a deduction.
+- **Rework and rejects** stay on the contractor's record and drive the quality numbers
+  (answered 1405/09/06): a bad piece goes back to the contractor and is paid once, when it comes
+  back right; while pieces are out for rework, a payment to him warns but is not refused, because
+  holding money back is the owner's call. A piece that cannot be fixed is not paid; a deduction
+  for it is a separate entry with its reason.
+- **Moving work** to another contractor never edits the work order: the unfinished pieces come
+  back from the first, unpaid, and a new work order goes to the second, so where each piece was
+  and at which rate stays clear (1405/09/06). The cut count is recorded on the production order.
 - **Stages are data, one shared list** (ADR 0018, 1405/09/01): cutting (in the workshop only),
   sewing (contractors or in-house day-wage workers), packing; the operator can add more, such as
   a part of a job given out on its own ("sewing the handles"). There is **no route per model**:
