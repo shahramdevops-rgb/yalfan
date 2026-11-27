@@ -106,7 +106,8 @@ Run from the repository root. Keep this section up to date when commands change.
   includes the screenshots). One line per step with the test counts, and for a failure only its errors, grouped; full logs in
   `artifacts/check/` (ADR 0017). Use it instead of the separate build, test, lint and format
   checks below, so long output stays out of the conversation; read a log only when the summary
-  is not enough. It sets up the panel's `subst` drive itself; Docker must be running
+  is not enough. It sets up a `subst` drive itself only when the path contains `#` (ADR 0014);
+  Docker must be running
 - Build: `dotnet build Yalfan.slnx` (warnings are errors; the analyzers and code style rules
   run in it, so it is also the .NET lint; exceptions live in `.editorconfig`, ADR 0015)
 - Format C#: `dotnet format whitespace Yalfan.slnx` fixes; CI runs it with
@@ -135,8 +136,8 @@ Run from the repository root. Keep this section up to date when commands change.
   `/panel/*` to the API on 5080; `YALFAN_API_URL` overrides), `npm test`, `npm run build`,
   `npm run lint` (ESLint, warnings fail it), `npm run format` (Prettier; CI runs
   `npm run format:check`). Run format and lint before every commit (ADR 0015).
-  Vite cannot run from a path containing `#` (ADR 0014): use a `subst` drive until the checkout
-  moves
+  Vite cannot run from a path containing `#` (ADR 0014); the checkout lives in `D:\Yalfan`
+  since 1405/09/06, so `npm run dev` runs as it is. Never move it under a folder with `#`
 - Panel screenshots (from `web/panel`; ADR 0028): `npm run screens` compares the main pages at
   desktop and phone width with the pictures in `screens/__screenshots__`, inside Playwright's
   pinned Docker image (Docker must be running; `check.ps1` runs it too). A failure leaves the

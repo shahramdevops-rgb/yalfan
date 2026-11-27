@@ -85,7 +85,11 @@ decided here.
 - An API change under `/panel` is committed together with the rewritten contract file.
 - Vite and Vitest cannot run from a path that contains `#`. Decided by the developer on
   1405/08/28: the checkout moves out of `c#project`; until then the panel runs from a `subst`
-  drive letter. CI runs on Linux and is not affected.
+  drive letter. CI runs on Linux and is not affected. *Done 1405/09/06:* the checkout moved to
+  `D:\Yalfan` and `npm run dev` runs there as it is (checked: Vite served the page and
+  `src/main.tsx`). It was copied rather than moved, because the open editor holds the old
+  folder; the old copy is deleted once the editor is reopened on the new one. `check.ps1` keeps
+  its `subst` fallback for any checkout whose path contains `#`.
 - Chrome's Auto Dark Mode darkens the light panel for users who turned it on. Left alone on
   purpose (decided 1405/08/28): it is the user's choice and stays readable; a real dark theme
   can come later.
