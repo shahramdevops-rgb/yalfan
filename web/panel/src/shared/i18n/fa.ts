@@ -91,6 +91,8 @@ const messages = {
   'list.sending': 'در حال ثبت…',
   'list.columnName': 'نام',
   'list.columnActive': 'فعال',
+  'list.columnNumber': 'شماره',
+  'list.separator': ' · ',
   'list.inactive': 'غیرفعال',
   'list.renameHint': 'برای تغییر بزنید',
   'list.renameLabel': 'نام تازه به جای «{name}»',
@@ -131,7 +133,6 @@ const messages = {
   'models.empty': 'هنوز مدلی ثبت نشده است. اولین مدل را با «مدل تازه» ثبت کنید.',
   'models.notFound': 'مدلی با «{search}» پیدا نشد.',
   'models.bagCount': '{count} کیف',
-  'models.separator': ' · ',
   'models.pages': 'صفحه‌های فهرست مدل‌ها',
 
   'newModel.title': 'مدل تازه',

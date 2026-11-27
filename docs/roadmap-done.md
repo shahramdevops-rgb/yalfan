@@ -413,7 +413,41 @@ The entry of 1.6 itself stays in the roadmap until its last part is finished.
 
 ### 1.7 Design system
 
-The entry of 1.7 itself stays in the roadmap until its last part (1.7d) is finished.
+- **1.7 Design system (added 1405/09/04, asked by the developer).** Before Phase 2, because
+  Phase 2 is the most screen-heavy phase and is used every day: once forty screens exist, making
+  them consistent costs many times more. Builds on the shared parts 1.6 already made (`Button`,
+  `Card`, `Chip`, `TextField`, `AmountField`, `Money`, `JalaliDateField`, `QueryStates`, …), it
+  does not start over.
+  - **Tokens** in `index.css`: colours (brand, neutral, and status colours for success, warning,
+    danger, info), spacing, type scale, radius, shadow, focus ring. One place to change each.
+  - **Missing parts:** a searchable picker (contractor, model) operable by keyboard, a
+    confirmation dialog, toasts, a data table (sticky header, totals row, paging, empty state),
+    a page header, a status badge (colour **and** text, never colour alone), a form layout.
+  - **Library:** proposed Radix UI primitives with Tailwind (the gym's approach, shadcn/ui
+    pattern), only where a hand-made part would get focus, keyboard and RTL wrong (dialog,
+    popover, picker). Decided in this task's ADR; packages are added the ADR 0014 way.
+  - **Data entry rules:** keyboard-only flow, Enter moves to the next field, the first field
+    focused, today's date by default, the last choices remembered; every money action shows a
+    summary before saving («به … مبلغ … ریال بابت …»), because a mistake can only be reversed.
+  - **Print:** a print stylesheet and an A5/A4 layout for slips and statements (used from 2.9).
+  - **Screenshots:** automated Playwright screenshots of the main pages at desktop and phone
+    width, compared on each change, so an unintended visual change is seen.
+  - **Rules written down** in `docs/design/UI.md`, so every session builds screens the same way.
+  - The 1.6 screens are moved onto the finished parts.
+  *Done when:* every 1.6 screen uses only shared parts; the screenshots exist for both widths;
+  a page can be used start to finish with the keyboard alone; `UI.md` and the ADR are written.
+
+  Split on 1405/09/05 into four tasks, accepted by the developer with every proposal as written,
+  because the eight parts above are far more than one session. **The screenshots come first**,
+  not the tokens: moving about 280 raw colours in some forty files onto tokens is blind without
+  them, and with them every unintended change is seen and every intended one is accepted on
+  purpose. Each task's questions are asked when it starts; noted for them: the library (Radix,
+  and what the picker is built on), whether saving a rate also shows a summary first, whether
+  the panel gets component tests (open since 1.6.4), and the first thing printed.
+  Split again on 1405/09/06 (1.7c into 1.7c and 1.7d; the old 1.7d became 1.7e), and the
+  searchable picker moved to 2.1, both with the developer's answers in the roadmap. Finished
+  with 1.7e on 1405/09/06; the totals row moved to the first screen that adds up a column (2.9 or
+  2.10) and printing to 2.9 (ADR 0032).
 
   - **1.7 Screenshots.** Playwright screenshots of the main pages at desktop (1280) and phone
     (390) width, compared on each run of `scripts/check.ps1` and in CI. Decided with the
@@ -615,3 +649,48 @@ The entry of 1.7 itself stays in the roadmap until its last part (1.7d) is finis
     in an open list reaches the page: either way the list takes the choice) and an iPhone.
     Escape in a date list still does not close its small form, as before.
     Not reviewed by the `reviewer` agent: the developer chose not to run it for this task.
+  - **1.7e The data table.** Planned as «data table and print»: the data table (sticky header,
+    totals row, paging, empty state, rows as cards on a phone); the print stylesheet and the
+    A5/A4 layout. Found while planning: the three searched lists each wrote out the same loading,
+    error, empty, dimmed and pager code; no Phase 1 screen adds up a column; nothing is printed
+    before 2.9, and the office has no printer yet, nor a chosen paper (A4, A5 or an 80 mm roll).
+    Decided with the developer on 1405/09/06, who accepted every proposal of the plan as written
+    (ROADMAP, answers for 1.7e; ADR 0032): the table on the three lists; a model's bags stay a
+    list; the totals row waits for the first screen that adds up a column (2.9 or 2.10); printing
+    waits for 2.9, and the owner is asked for the printer and paper now (O.4).
+    **Done 1405/09/06:** 535 .NET tests and 180 panel tests pass, and 44 Playwright tests in the
+    pinned image: the 28 page pictures, the 12 behaviour tests of 1.7c and 1.7d (holding the
+    other 4 pictures), and 4 new table tests.
+    Build has 0 warnings. ADR 0032; `docs/design/UI.md`, `docs/ARCHITECTURE.md` section 9,
+    `CLAUDE.md` and the roadmap (O.4, 2.9, 2.10) updated.
+    - `shared/ui/DataTable.tsx`: `DataTable`, a `<table>` from `sm` up and a card per row on a
+      phone, both drawn from one list of columns, each with its place on the card (`lead`,
+      `title`, `detail`, `end`); the header sticks to the top of the window; the whole row opens
+      its page, only the name being a link (the row's own click skips the link's, a modifier, a
+      control and a selection of text); an inactive row greyed with «غیرفعال» beside its name.
+      `PagedTable` adds the loading, error and empty states, the dimmed rows of the last page,
+      the page past the last one, and the `Pager`.
+    - The models, contractors and workers lists moved onto `PagedTable`; the separator text is
+      now `list.separator`.
+    - The sample API pages its lists twenty at a time, and the models list has 26 models;
+      `waitUntilLoaded` finds a row's text on its visible copy.
+    - `screens/table.spec.ts`.
+    How it was checked: when the lists moved onto the table, every phone picture stayed equal to
+    the pixel and only the three desktop pictures changed; with 26 models the models' phone
+    picture changed too (twenty cards and the pager, which no picture had shown). All four were
+    looked at. The table tests in Chromium: the header at the window's top after a scroll; one
+    Tab per row and the focused row shaded; the pager reached by Tab, Enter giving `?page=2`;
+    Enter on a name opening the model; a click beside the name opening it as one step of the back
+    button, the name's own click also one step; a text selection in a cell opening nothing; on a
+    phone no table and the card one link. With the sticky header, the link's guard, the focused
+    row's shade, then the selection's guard each switched off, its test failed. Not seen by eye:
+    the real API (no API route changed; the tests use the sample API), Safari, an iPhone held
+    sideways.
+    Reviewed the same day by the `reviewer` agent on Sonnet (the developer's choice): nothing
+    blocking; no colour, side, text, access or data rule broken, nothing of the old lists lost.
+    Its findings, fixed: a table with no `title` column, or two, would have rows with no link or
+    two (it now throws, and the crash page fails the page's screenshot test, tried with the
+    models' name moved to `detail`); the cards' list lost its meaning in Safari (`role="list"`);
+    the rows loading the next page were not marked busy (`aria-busy`); a selection anywhere on
+    the page stopped a row's click (now only one inside the row). Its question whether the phone
+    pictures really stayed equal: they did, in the run made before the models list grew to 26.

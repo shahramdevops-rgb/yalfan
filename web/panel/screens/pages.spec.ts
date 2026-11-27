@@ -19,7 +19,7 @@ interface Screen {
 const screens: Screen[] = [
   { name: 'login', path: '/login', signedIn: false, shows: null },
   { name: 'dashboard', path: '/', shows: sample.owner.fullName },
-  { name: 'models', path: '/models', shows: sample.models.items[2]!.name },
+  { name: 'models', path: '/models', shows: sample.modelList[2]!.name },
   { name: 'model', path: `/models/${sample.model.id}`, shows: sample.model.name },
   // A fabric to tick: the lists of fabrics and colours have loaded.
   { name: 'model-new', path: '/models/new', shows: sample.fabrics[0]!.name },

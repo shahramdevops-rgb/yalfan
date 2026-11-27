@@ -8,8 +8,11 @@ import * as sample from './sample';
  * page that loads none, which waits for its main heading instead.
  */
 export async function waitUntilLoaded(page: Page, shows: string | null) {
+  // A list's rows are drawn twice, as a table and as cards, and the width shows one (ADR 0032).
   const main =
-    shows === null ? page.getByRole('heading', { level: 1 }) : page.getByText(shows, { exact: true }).first();
+    shows === null
+      ? page.getByRole('heading', { level: 1 })
+      : page.getByText(shows, { exact: true }).filter({ visible: true }).first();
   await expect(main).toBeVisible();
   await expect(page.locator('.animate-pulse')).toHaveCount(0);
   await page.waitForLoadState('networkidle');

@@ -358,7 +358,7 @@ function BagRow({ productId, bag, write }: { productId: string; bag: Bag; write:
           {toPersianDigits(bag.sku)}
         </span>
         <span className={`min-w-0 flex-1 text-base ${bag.isActive ? 'text-ink-soft' : 'text-faint'}`}>
-          {parts.join(t('models.separator'))}
+          {parts.join(t('list.separator'))}
         </span>
         {!bag.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
         <Switch

@@ -1,18 +1,28 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router';
 import { toPersianDigits } from '../../shared/format/digits';
 import { t } from '../../shared/i18n/fa';
 import { Card } from '../../shared/ui/Card';
+import { PagedTable, type Column } from '../../shared/ui/DataTable';
 import { PlusIcon } from '../../shared/ui/icons';
 import { ButtonLink } from '../../shared/ui/Links';
-import { pageCount, useListAddress, usePageWithin } from '../../shared/ui/listAddress';
-import { Pager, SearchField } from '../../shared/ui/ListSearch';
+import { useListAddress } from '../../shared/ui/listAddress';
+import { SearchField } from '../../shared/ui/ListSearch';
 import { PageHeader } from '../../shared/ui/PageHeader';
-import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
-import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { productSearchKey, productsApi, type ProductListItem } from './productsApi';
 
 const digits = (value: number) => toPersianDigits(String(value));
+
+/** A model's number, name, category and how many bags it makes; on a phone the last two go under the name. */
+const columns: Column<ProductListItem>[] = [
+  { header: t('list.columnNumber'), place: 'lead', cell: (item) => digits(item.number) },
+  { header: t('list.columnName'), place: 'title', cell: (item) => item.name },
+  { header: t('model.category'), place: 'detail', cell: (item) => item.category?.name },
+  {
+    header: t('model.bags'),
+    place: 'detail',
+    cell: (item) => t('models.bagCount', { count: digits(item.variantCount) }),
+  },
+];
 
 /**
  * The models, newest first, twenty at a time, found by number or part of the name: the workshop
@@ -29,12 +39,6 @@ export function ModelsPage() {
     placeholderData: keepPreviousData,
   });
 
-  const data = results.data;
-  // Data kept from the last search while this one loads belongs to another address: no page is
-  // judged out of range by it.
-  const pages = data && !results.isPlaceholderData ? pageCount(data.totalCount, data.pageSize) : undefined;
-  const outOfRange = usePageWithin(page, pages, list.replacePage);
-
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <PageHeader
@@ -49,53 +53,20 @@ export function ModelsPage() {
 
       <Card gap={4}>
         <SearchField label={t('models.search')} value={list.typed} onChange={list.setTyped} />
-
-        {/* A page past the last one is replaced by the last page; until then it is only loading. */}
-        {(results.isPending || outOfRange) && <ListSkeleton />}
-        {results.isError && <LoadError error={results.error} onRetry={() => void results.refetch()} />}
-        {data && !outOfRange && data.items.length === 0 && (
-          <p className="py-6 text-center text-muted">{search ? t('models.notFound', { search }) : t('models.empty')}</p>
-        )}
-        {data && !outOfRange && data.items.length > 0 && (
-          <ul className={`divide-y divide-line-soft ${results.isPlaceholderData ? 'opacity-60' : ''}`}>
-            {data.items.map((item) => (
-              <ModelRow key={item.id} item={item} />
-            ))}
-          </ul>
-        )}
-
-        {data && !outOfRange && (
-          <Pager
-            page={page}
-            totalCount={data.totalCount}
-            pageSize={data.pageSize}
-            label={t('models.pages')}
-            onGo={list.goToPage}
-          />
-        )}
+        <PagedTable
+          results={results}
+          page={page}
+          onGo={list.goToPage}
+          onReplacePage={list.replacePage}
+          pagesLabel={t('models.pages')}
+          columns={columns}
+          rowKey={(item) => item.id}
+          rowLink={(item) => `/models/${item.id}`}
+          inactive={(item) => !item.isActive}
+          label={t('models.title')}
+          emptyText={search ? t('models.notFound', { search }) : t('models.empty')}
+        />
       </Card>
     </div>
-  );
-}
-
-function ModelRow({ item }: { item: ProductListItem }) {
-  const details = [item.category?.name, t('models.bagCount', { count: digits(item.variantCount) })].filter(Boolean);
-
-  return (
-    <li>
-      <Link
-        to={`/models/${item.id}`}
-        className="-mx-2 flex items-center gap-4 rounded-lg px-2 py-3 hover:bg-subtle focus-visible:outline-2 focus-visible:outline-brand"
-      >
-        <span className={`w-14 shrink-0 text-lg font-bold ${item.isActive ? 'text-brand-strong' : 'text-faint'}`}>
-          {digits(item.number)}
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className={`truncate text-base ${item.isActive ? 'text-ink' : 'text-faint'}`}>{item.name}</span>
-          <span className="truncate text-sm text-muted">{details.join(t('models.separator'))}</span>
-        </span>
-        {!item.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
-      </Link>
-    </li>
   );
 }

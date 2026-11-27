@@ -2,7 +2,8 @@
 
 How screens of the staff panel (`web/panel`) are built, so every session builds them the same way.
 Begun in task 1.7b (ADR 0029); 1.7c added the overlays (ADR 0030), 1.7d the keyboard and data
-entry (ADR 0031); 1.7e adds the data table and printing. Read this before building or changing a screen.
+entry (ADR 0031), 1.7e the data table (ADR 0032). Printing comes with its first use, the work
+order slip (2.9). Read this before building or changing a screen.
 
 Where things are:
 - Colours: `web/panel/src/index.css`, the only place a colour value is written.
@@ -102,6 +103,8 @@ this (only the colours are checked by a test); the review does.
 | `Switch` | On and off, instead of two buttons |
 | `InlineName` | A text edited where it stands: a tap, Enter or leaving saves, Escape puts it back |
 | `NameList`, `SortableList`, `AddNameForm` | The simple lists: a name, a switch, a handle to drag; adding names one after another |
+| `DataTable` | A list with several things to say about each row (a model's number, name, category and bags): a table from `sm` up, whose header stays at the top of the window, and a card per row on a phone. Each column says its `place` on the card (`lead`, `title`, `detail`, `end`), which also sets how it reads in the table. The whole row opens its page, but only the name is a link; an inactive row is greyed and marked (ADR 0032) |
+| `PagedTable` | A searched, paged list in a `DataTable`, with its loading, error and empty states and the `Pager` under it: the models, the contractors, the workers |
 | `SearchField`, `Pager` | A long list's search box and its pages |
 | `ListSkeleton`, `LoadError` | A list still loading; a list that did not load, with «تلاش دوباره» |
 | `ConfirmDialog` | The question before a step its person cannot take back from the panel: removing an IBAN, switching off one's own login number. Says what happens and to which record; its button says what it does; «انصراف» has the focus (ADR 0030) |
@@ -120,6 +123,11 @@ this (only the colours are checked by a test); the review does.
   The summary dialog before a money action («به … مبلغ … ریال بابت …») comes with the first
   payment (2.6); a rate, corrected from its own card, has none, and its form warns of an amount
   five times the one it is measured against, or a fifth of it (ADR 0031).
+- A list with columns is a `DataTable`, never a table or a list of links written in the page; a
+  list edited where it stands (a model's bags: a switch and a refusal per row) stays a list. No
+  sorting by a heading: each list has the workshop's order and a search box. The totals row comes
+  with the first screen that adds up a column (2.9 or 2.10), printing with the work order slip
+  (2.9; ADR 0032).
 
 ## The keyboard and data entry
 
@@ -165,6 +173,8 @@ in the page:
   pictures. The pictures show neither the pointer nor the keyboard's focus.
 - What only a browser shows (the focus, the keyboard, an overlay opening and closing) is tested in
   `screens/*.spec.ts` with Playwright, in the same image and against the same sample API
-  (`screens/overlays.spec.ts`, ADR 0030; `screens/keyboard.spec.ts`, ADR 0031); `npm run screens`
-  runs them with the pictures. A new entry form gets a keyboard test: its fields reached by Enter,
+  (`screens/overlays.spec.ts`, ADR 0030; `screens/keyboard.spec.ts`, ADR 0031;
+  `screens/table.spec.ts`, ADR 0032); `npm run screens` runs them with the pictures. A list's rows
+  are in the page twice (the table and the cards): find one by its role, or filter its text on
+  the visible copy. A new entry form gets a keyboard test: its fields reached by Enter,
   nothing sent before the Enter on its button. Logic without a page stays in Vitest.

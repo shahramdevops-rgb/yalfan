@@ -11,7 +11,13 @@ type Handler = (match: RegExpExecArray, query: URLSearchParams) => Answer;
 /** What the API answers to a record it does not have: a ProblemDetails with its code (ADR 0011). */
 const notFound = (code: string): Answer => ({ status: 404, body: { code } });
 
-const paged = <T>(items: T[]) => ({ items, totalCount: items.length, page: 1, pageSize: 20 });
+const pageSize = 20;
+
+/** One page of a list as the API pages it: twenty rows, the page asked for by `?page=`. */
+const paged = <T>(items: T[], query: URLSearchParams) => {
+  const page = Math.max(1, Number(query.get('page')) || 1);
+  return { items: items.slice((page - 1) * pageSize, page * pageSize), totalCount: items.length, page, pageSize };
+};
 
 /** «isActive=true» is how a list asks for the active people only (ADR 0025). */
 const activeOnly = <T extends { isActive: boolean }>(items: T[], query: URLSearchParams) =>
@@ -29,7 +35,7 @@ function routes(signedIn: boolean): [method: string, path: RegExp, handler: Hand
     ['GET', /^\/panel\/catalog\/categories$/, () => ({ body: sample.categories })],
     ['GET', /^\/panel\/catalog\/fabrics$/, () => ({ body: sample.fabrics })],
     ['GET', /^\/panel\/catalog\/colours$/, () => ({ body: sample.colours })],
-    ['GET', /^\/panel\/catalog\/products$/, () => ({ body: sample.models })],
+    ['GET', /^\/panel\/catalog\/products$/, (_, query) => ({ body: paged(sample.modelList, query) })],
     [
       'GET',
       new RegExp(`^/panel/catalog/products/${uuid}$`),
@@ -41,7 +47,7 @@ function routes(signedIn: boolean): [method: string, path: RegExp, handler: Hand
     [
       'GET',
       /^\/panel\/parties\/contractors$/,
-      (_, query) => ({ body: paged(activeOnly(sample.contractorList, query)) }),
+      (_, query) => ({ body: paged(activeOnly(sample.contractorList, query), query) }),
     ],
     [
       'GET',
@@ -51,7 +57,11 @@ function routes(signedIn: boolean): [method: string, path: RegExp, handler: Hand
           ? { body: sample.contractorDetails }
           : notFound('parties.contractor_not_found'),
     ],
-    ['GET', /^\/panel\/parties\/workers$/, (_, query) => ({ body: paged(activeOnly(sample.workerList, query)) })],
+    [
+      'GET',
+      /^\/panel\/parties\/workers$/,
+      (_, query) => ({ body: paged(activeOnly(sample.workerList, query), query) }),
+    ],
     [
       'GET',
       new RegExp(`^/panel/parties/workers/${uuid}$`),

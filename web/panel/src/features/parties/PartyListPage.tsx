@@ -1,17 +1,31 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router';
 import { formatMobile } from '../../shared/format/mobile';
 import { t } from '../../shared/i18n/fa';
 import { Card } from '../../shared/ui/Card';
+import { PagedTable, type Column } from '../../shared/ui/DataTable';
 import { PlusIcon } from '../../shared/ui/icons';
 import { ButtonLink } from '../../shared/ui/Links';
-import { pageCount, useListAddress, usePageWithin } from '../../shared/ui/listAddress';
-import { Pager, SearchField } from '../../shared/ui/ListSearch';
+import { useListAddress } from '../../shared/ui/listAddress';
+import { SearchField } from '../../shared/ui/ListSearch';
 import { PageHeader } from '../../shared/ui/PageHeader';
-import { ListSkeleton, LoadError } from '../../shared/ui/QueryStates';
-import { StatusBadge } from '../../shared/ui/StatusBadge';
 import { Switch } from '../../shared/ui/Switch';
 import { partiesApi, partySearchKey, type PartyKind, type PartyListItem } from './partiesApi';
+
+/** A person's name, stages and mobile; on a phone the stages go under the name and the mobile at the end. */
+const columns: Column<PartyListItem>[] = [
+  { header: t('list.columnName'), place: 'title', cell: (item) => item.fullName },
+  {
+    header: t('parties.stages'),
+    place: 'detail',
+    cell: (item) => item.stages.map((stage) => stage.name).join(t('list.separator')) || t('parties.noStages'),
+  },
+  {
+    header: t('parties.mobile'),
+    place: 'end',
+    // A mobile number reads left to right, as it is dialled.
+    cell: (item) => <span dir="ltr">{formatMobile(item.mobileNumber)}</span>,
+  },
+];
 
 /**
  * The contractors or the in-house workers, in Persian alphabetical order, twenty at a time, found
@@ -29,11 +43,6 @@ export function PartyListPage({ kind }: { kind: PartyKind }) {
     placeholderData: keepPreviousData,
   });
 
-  const data = results.data;
-  // Data kept from the last search while this one loads belongs to another address: no page is
-  // judged out of range by it.
-  const pages = data && !results.isPlaceholderData ? pageCount(data.totalCount, data.pageSize) : undefined;
-  const outOfRange = usePageWithin(page, pages, list.replacePage);
   const emptyText = search
     ? t(`parties.${kind}.notFound`, { search })
     : withInactive
@@ -61,50 +70,20 @@ export function PartyListPage({ kind }: { kind: PartyKind }) {
           </span>
         </div>
 
-        {/* A page past the last one is replaced by the last page; until then it is only loading. */}
-        {(results.isPending || outOfRange) && <ListSkeleton />}
-        {results.isError && <LoadError error={results.error} onRetry={() => void results.refetch()} />}
-        {data && !outOfRange && data.items.length === 0 && <p className="py-6 text-center text-muted">{emptyText}</p>}
-        {data && !outOfRange && data.items.length > 0 && (
-          <ul className={`divide-y divide-line-soft ${results.isPlaceholderData ? 'opacity-60' : ''}`}>
-            {data.items.map((item) => (
-              <PartyRow key={item.id} kind={kind} item={item} />
-            ))}
-          </ul>
-        )}
-
-        {data && !outOfRange && (
-          <Pager
-            page={page}
-            totalCount={data.totalCount}
-            pageSize={data.pageSize}
-            label={t(`parties.${kind}.pages`)}
-            onGo={list.goToPage}
-          />
-        )}
+        <PagedTable
+          results={results}
+          page={page}
+          onGo={list.goToPage}
+          onReplacePage={list.replacePage}
+          pagesLabel={t(`parties.${kind}.pages`)}
+          columns={columns}
+          rowKey={(item) => item.id}
+          rowLink={(item) => `/${kind}/${item.id}`}
+          inactive={(item) => !item.isActive}
+          label={t(`parties.${kind}.title`)}
+          emptyText={emptyText}
+        />
       </Card>
     </div>
-  );
-}
-
-function PartyRow({ kind, item }: { kind: PartyKind; item: PartyListItem }) {
-  const stages = item.stages.map((stage) => stage.name).join(t('models.separator')) || t('parties.noStages');
-
-  return (
-    <li>
-      <Link
-        to={`/${kind}/${item.id}`}
-        className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 hover:bg-subtle focus-visible:outline-2 focus-visible:outline-brand"
-      >
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className={`truncate text-base ${item.isActive ? 'text-ink' : 'text-faint'}`}>{item.fullName}</span>
-          <span className="truncate text-sm text-muted">{stages}</span>
-        </span>
-        <span dir="ltr" className={`shrink-0 text-sm ${item.isActive ? 'text-body' : 'text-faint'}`}>
-          {formatMobile(item.mobileNumber)}
-        </span>
-        {!item.isActive && <StatusBadge>{t('list.inactive')}</StatusBadge>}
-      </Link>
-    </li>
   );
 }

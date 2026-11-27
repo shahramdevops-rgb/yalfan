@@ -1,8 +1,8 @@
 # Yalfan — Roadmap
 
-Status: **Phase 1 in progress.** Planned on 1405/08/24 (2026-11-15). Next: 1.7e (the data table
-and print; the design system was split into 1.7 to 1.7e, and 1.7 to 1.7d are done). Read `docs/ARCHITECTURE.md` first. Still open from finished tasks: the check of 1.6
-(waits for the developer, who does the operator's work for now).
+Status: **Phase 1 finished** on 1405/09/06, except the check of 1.6 (waits for the developer,
+who does the operator's work for now). Planned on 1405/08/24 (2026-11-15). Next: Phase 2, its
+open questions first, then 2.0 (the prototypes). Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session, and each runs in a new one.
@@ -46,7 +46,7 @@ developer runs and maintains it. Phases wait for these.
 | O.1 | Register `yalfan.ir` (IRNIC handle in the owner's name) and `yalfan.com`. Both are free today and anyone can take them | Now |
 | O.2 | Write down the real production stages and which contractors do which stage. **Stages answered 1405/09/01** (cutting, sewing, packing; ADR 0018). Which contractor does which stage is ticked per contractor by the operator (1.3, ADR 0019); the owner gives the list when the contractors are entered | Phase 1 |
 | O.3 | Decide how contractors are paid (per bag, per stage, mixed) and list today's rates. **How, answered 1405/09/02:** by the piece (کنترات), per model and stage (ADR 0021). Today's rates are still to be listed; the operator enters them in the 1.6 screens | Phase 2 |
-| O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator. **1405/09/04:** until then the developer does the operator's work himself, including the check of 1.6 | Phase 3 |
+| O.4 | Buy a simple laptop or PC for the office operator; hire or name the operator. **1405/09/04:** until then the developer does the operator's work himself, including the check of 1.6. **Added 1405/09/06 (ADR 0032):** and a printer for the office: which one, and which paper, A4, A5 or an 80 mm receipt roll; needed before 2.9, whose work order slip is laid out for that paper | Phase 3 (the printer before 2.9) |
 | O.5 | Collect from the paper books: each contractor's balance, work still out with contractors | Phase 3 |
 | O.6 | Buy a server (ParsPack or another provider) in the developer's name: Iranian VPS, 2 cores, 4 GB, ~80 GB SSD, upgradable to 4 cores and 8 GB for Phase 11. Criteria in docs/ARCHITECTURE.md 13.1; confirmed in task 3.1 | Phase 3 |
 | O.7 | Buy the attendance device **only after** task 4.0 names the model | Phase 4 |
@@ -310,6 +310,12 @@ accepted as written):
   raise entered stage after stage on one date; the rest (the last contractor, stage, date of a
   work order) comes with 2.2, where the repetition is.
 
+Accepted by the developer on 1405/09/06, for 1.7e (ADR 0032): the plan as written. **The data
+table is built on the three lists** (models, contractors, workers); a model's bags stay a list,
+since each row is edited where it stands. **The totals row waits for the first screen that adds
+up a column** (2.9 or 2.10) and **printing for 2.9**, because nothing in Phase 1 sums or prints,
+and the slip's layout depends on the paper, now asked of the owner (O.4).
+
 - **1.1 Catalog core.** Done 1405/09/01 (ADR 0006, ADR 0016).
 - **1.2 Stages.** Done 1405/09/01 (ADR 0018).
 - **1.3 Contractors.** Done 1405/09/02 (ADR 0019).
@@ -336,50 +342,20 @@ accepted as written):
   - **1.6.5b Housekeeping.** Done 1405/09/05 (rules in CLAUDE.md and `.claude/agents/reviewer.md`).
   - **1.6.6 Change history.** Done 1405/09/05 (ADR 0027); an IBAN now reads set, replaced or
     removed (ADR 0013 updated).
-- **1.7 Design system (added 1405/09/04, asked by the developer).** Before Phase 2, because
-  Phase 2 is the most screen-heavy phase and is used every day: once forty screens exist, making
-  them consistent costs many times more. Builds on the shared parts 1.6 already made (`Button`,
-  `Card`, `Chip`, `TextField`, `AmountField`, `Money`, `JalaliDateField`, `QueryStates`, …), it
-  does not start over.
-  - **Tokens** in `index.css`: colours (brand, neutral, and status colours for success, warning,
-    danger, info), spacing, type scale, radius, shadow, focus ring. One place to change each.
-  - **Missing parts:** a searchable picker (contractor, model) operable by keyboard, a
-    confirmation dialog, toasts, a data table (sticky header, totals row, paging, empty state),
-    a page header, a status badge (colour **and** text, never colour alone), a form layout.
-  - **Library:** proposed Radix UI primitives with Tailwind (the gym's approach, shadcn/ui
-    pattern), only where a hand-made part would get focus, keyboard and RTL wrong (dialog,
-    popover, picker). Decided in this task's ADR; packages are added the ADR 0014 way.
-  - **Data entry rules:** keyboard-only flow, Enter moves to the next field, the first field
-    focused, today's date by default, the last choices remembered; every money action shows a
-    summary before saving («به … مبلغ … ریال بابت …»), because a mistake can only be reversed.
-  - **Print:** a print stylesheet and an A5/A4 layout for slips and statements (used from 2.9).
-  - **Screenshots:** automated Playwright screenshots of the main pages at desktop and phone
-    width, compared on each change, so an unintended visual change is seen.
-  - **Rules written down** in `docs/design/UI.md`, so every session builds screens the same way.
-  - The 1.6 screens are moved onto the finished parts.
-  *Done when:* every 1.6 screen uses only shared parts; the screenshots exist for both widths;
-  a page can be used start to finish with the keyboard alone; `UI.md` and the ADR are written.
-
-  Split on 1405/09/05 into four tasks, accepted by the developer with every proposal as written,
-  because the eight parts above are far more than one session. **The screenshots come first**,
-  not the tokens: moving about 280 raw colours in some forty files onto tokens is blind without
-  them, and with them every unintended change is seen and every intended one is accepted on
-  purpose. Each task's questions are asked when it starts; noted for them: the library (Radix,
-  and what the picker is built on), whether saving a rate also shows a summary first, whether
-  the panel gets component tests (open since 1.6.4), and the first thing printed.
+- **1.7 Design system.** Done 1405/09/06 in five tasks (ADR 0028 to ADR 0032,
+  `docs/design/UI.md`). Moved to their first use: the searchable picker (2.1), the totals row (the
+  first screen that adds up a column, 2.9 or 2.10), printing (2.9).
   - **1.7 Screenshots.** Done 1405/09/06 (ADR 0028); 28 pictures, one changed pixel fails.
   - **1.7b Tokens and the simple parts.** Done 1405/09/06 (ADR 0029, `docs/design/UI.md`);
     the panel took the olive green and cream of the workshop's logo. Left open: the logo's own
     file (O.12b); the pointer and focus states were not seen by eye.
-  Split again on 1405/09/06 (1.7c into 1.7c and 1.7d; the old 1.7d is now 1.7e), and the
-  searchable picker moved to 2.1, both with the developer's answers above.
-  - **1.7c Overlays.** Done 1405/09/06 (ADR 0030). Left open: the focus after an IBAN is saved
-    or removed, and on an iPhone after any dialog (1.7d); the Android back gesture, not tried.
+  - **1.7c Overlays.** Done 1405/09/06 (ADR 0030). Left open: the Android back gesture, not
+    tried.
   - **1.7d The keyboard and data entry.** Done 1405/09/06 (ADR 0031). Left open: not tried by
     hand on an iPhone, nor Enter in an open list of Chrome on Windows; Escape in a date list
     still does not close its small form.
-  - **1.7e Data table and print.** The data table (sticky header, totals row, paging, empty
-    state, rows as cards on a phone); the print stylesheet and the A5/A4 layout.
+  - **1.7e The data table.** Done 1405/09/06 (ADR 0032). Left open: Safari, and an iPhone held
+    sideways (where the table shows), not tried.
 
 ## Phase 2 — Contractor work and accounts
 
@@ -420,8 +396,12 @@ the system refuse to issue cutting to a contractor (decided in 2.2).
   *Done when:* the "300 ordered, 220 sewn, 180 ready" view comes from one query.
 - **2.9 Panel screens: work orders.** Issue, receive, QC in as few clicks as possible; printable
   work order slip. *Done when:* the operator issues and receives a work order in under a minute.
+  Builds the panel's printing with the slip (moved from 1.7e on 1405/09/06, ADR 0032): the print
+  stylesheet and the slip's layout for the paper the owner chooses in O.4.
 - **2.10 Panel screens: contractor account.** Statement, balance, payments, settlement, printable
-  receipt. *Done when:* a contractor's full statement prints on one page.
+  receipt. *Done when:* a contractor's full statement prints on one page. The data table's totals
+  row is built by the first screen that adds up a column, this one or one of 2.9 (moved from
+  1.7e on 1405/09/06, ADR 0032): a `<tfoot>` in `DataTable`.
 - **2.11 Contractor reports.** Owed per contractor, work not returned and overdue, reject and
   rework rate. *Done when:* each report matches hand-calculated test data.
 

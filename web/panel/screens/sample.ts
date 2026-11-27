@@ -99,19 +99,38 @@ const listedModel = (
   isActive,
 });
 
-export const models: Schemas['PagedListOfProductListItem'] = {
-  items: [
-    listedModel(101, model.name, backpacks, model.variants.length),
-    listedModel(102, 'کیف مدرسه‌ای دو زیپ', schoolBags, 8),
-    listedModel(103, 'کیف لپ‌تاپ اداری', laptopBags, 3),
-    listedModel(104, 'کیف دستی زنانه', handbags, 10),
-    listedModel(105, 'ساک ورزشی', null, 4),
-    listedModel(106, 'کوله کوهنوردی', backpacks, 0, false),
-  ],
-  totalCount: 6,
-  page: 1,
-  pageSize: 20,
-};
+/**
+ * The models list: 26, so it has a second page and its pager is in the picture (1.7e); the API
+ * sample hands them out twenty at a time, as the API does.
+ */
+export const modelList: Schemas['ProductListItem'][] = [
+  listedModel(101, model.name, backpacks, model.variants.length),
+  listedModel(102, 'کیف مدرسه‌ای دو زیپ', schoolBags, 8),
+  listedModel(103, 'کیف لپ‌تاپ اداری', laptopBags, 3),
+  listedModel(104, 'کیف دستی زنانه', handbags, 10),
+  listedModel(105, 'ساک ورزشی', null, 4),
+  listedModel(106, 'کوله کوهنوردی', backpacks, 0, false),
+  listedModel(107, 'کیف پول مردانه', null, 2),
+  listedModel(108, 'کیف آرایشی', handbags, 6),
+  listedModel(109, 'کوله مدرسه دخترانه', schoolBags, 12),
+  listedModel(110, 'کیف کمری', null, 3),
+  listedModel(111, 'ساک دستی سفری', null, 4),
+  listedModel(112, 'کیف دوشی چرمی', handbags, 5),
+  listedModel(113, 'کیف مدارک', laptopBags, 2),
+  listedModel(114, 'کوله لپ‌تاپ', laptopBags, 6),
+  listedModel(115, 'کیف دستی مجلسی', handbags, 4),
+  listedModel(116, 'ساک خرید', null, 3),
+  listedModel(117, 'کیف کودک', schoolBags, 9),
+  listedModel(118, 'کوله ورزشی', backpacks, 6),
+  listedModel(119, 'کیف پاسپورتی', null, 2, false),
+  listedModel(120, 'کیف دوربین', null, 2),
+  listedModel(121, 'کیف ابزار', null, 1),
+  listedModel(122, 'جامدادی زیپی', schoolBags, 8),
+  listedModel(123, 'کیف ناهار', null, 4),
+  listedModel(124, 'کوله سفری بزرگ', backpacks, 3),
+  listedModel(125, 'کیف رودوشی کتان', handbags, 6),
+  listedModel(126, 'کیف لپ‌تاپ باریک', laptopBags, 4),
+];
 
 export const rateCard: Schemas['RateCardDetails'] = {
   productId: model.id,

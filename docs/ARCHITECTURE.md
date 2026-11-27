@@ -351,7 +351,10 @@ Decisions:
   only before a step its person cannot take back, a toast only for what the page does not show.
   In a form Enter goes forward, from field to field and from the last one to its button, a
   refusal puts the focus on the wrong field, and a small form gives the focus back to the line
-  that opened it (1.7d, ADR 0031).
+  that opened it (1.7d, ADR 0031). A list with columns is one shared data table: a table whose
+  header stays in view on a wide screen, a card per row on a phone, the whole row opening its
+  page (1.7e, ADR 0032). Printing comes with the work order slip (2.9), the totals row with the
+  first screen that adds up a column.
 - `web/shared` is created with the second app (Phase 10), not before.
 
 ## 10. Three languages
@@ -604,3 +607,4 @@ server in the developer's.
 | 0029 | The panel's colours by role, Tailwind's palette off, and the shared page parts | 1.7b (written) |
 | 0030 | The panel's overlays on the browser's own dialog; toasts; behaviour tests in Playwright | 1.7c (written) |
 | 0031 | The panel's keyboard and data entry: Enter goes forward, the focus on a refusal and after a small form, typed dates, a rate's warning | 1.7d (written) |
+| 0032 | The panel's data table: a table and a phone's cards from one list of columns; the totals row and printing wait for their first use | 1.7e (written) |
