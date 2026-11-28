@@ -11,6 +11,8 @@ Where things are:
 - The colour check: `web/panel/checks/colours.test.ts` (part of `npm test`).
 - The screenshots of the main pages and the behaviour tests: `web/panel/screens/` (ADR 0028,
   ADR 0030).
+- The prototypes of Phase 2's daily flows, and the owner's choice among them: `docs/design/flows.md`
+  (task 2.0).
 
 ## Who it is for
 

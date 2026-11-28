@@ -2,8 +2,9 @@
 
 Status: **Phase 1 finished** on 1405/09/06, except the check of 1.6 (waits for the developer,
 who does the operator's work for now). Planned on 1405/08/24 (2026-11-15). Phase 2's open
-questions were answered on 1405/09/06, except how in-house workers are counted. Next: 2.0 (the
-prototypes). Read `docs/ARCHITECTURE.md` first.
+questions were answered on 1405/09/06, except how in-house workers are counted. 2.0's prototypes
+were built on 1405/09/07 and wait for the owner's choice (`docs/design/flows.md`); 2.1 starts
+after it. Read `docs/ARCHITECTURE.md` first.
 
 How to use this file:
 - Each task (for example `2.3`) is sized for one working session, and each runs in a new one.
@@ -424,6 +425,13 @@ the proposal as written, marked "proposal"):
   variants each, before any code, and shown to the owner (and the operator once there is one).
   Why: changing a drawing takes minutes, changing a built screen takes hours. *Done when:* one
   variant of each flow is chosen and saved in `docs/design/`.
+  **Built 1405/09/07, waiting for the owner's choice.** All variants are in one offline page,
+  `docs/design/prototypes/flows.html` (3 + 3 + 2 variants), sent to the owner's phone; the
+  variants, the questions to ask him and what was found are in `docs/design/flows.md`. Taken as
+  proposals: one slip carries several bags of one model, a row per bag; no reviewer run, since
+  nothing in it is product code. When he has chosen: record each choice with its reason in
+  `flows.md`, delete the rejected variants from the page, and move this entry to
+  `docs/roadmap-done.md`.
 - **2.1 Production orders.** Model, colours and quantities, due date, status. *Done when:* an order
   can be opened, changed while unstarted, and closed. Builds the shared searchable picker
   (moved from 1.7c on 1405/09/06), as 2.0's chosen prototype shows it, operable by keyboard and
